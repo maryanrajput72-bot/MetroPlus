@@ -146,6 +146,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Har foreground pe 5s check ka trigger (cold open + background se wapas, dono).
+        ForegroundTicker.resumeCount.value++
         // Unknown sources on karke wapas aaye to pending update foran install ho.
         UpdateManager.pendingInstallFile?.let { file ->
             if (UpdateManager.canInstall(this)) {
@@ -160,10 +162,12 @@ class MainActivity : ComponentActivity() {
 fun MetroPlusApp() {
     val context = LocalContext.current
     // Sticky rule: har app open pe 5 second baad update check.
-    // Update mile to app ke andar dialog aata hai; download bhi app ke andar
-    // hoti hai (koi notification download nahi), progress dialog me dikhta hai.
+    // Update mile to khud download shuru, progress upar pill me, 100% pe khud install
+    // screen — app ke andar koi dialog, koi button nahi (trial 63 ka silent system).
     var downloadProgress by remember { mutableStateOf<Int?>(null) }
     fun startDownload(apkUrl: String) {
+        // Double download se bacho (do check ek sath mile to bhi ek hi download).
+        if (downloadProgress != null) return
         downloadProgress = 0
         UpdateManager.downloadUpdate(
             context.applicationContext, apkUrl,
@@ -191,13 +195,20 @@ fun MetroPlusApp() {
             }
         )
     }
-    LaunchedEffect(Unit) {
+    // Har foreground (cold open + background se wapas) ke 5 second baad check.
+    // Resume ke dauran dobara foreground aaye to pichhla timer cancel hoke naya
+    // 5s timer shuru hota hai — check hamesha aakhri foreground ke 5s baad hota hai.
+    val resumeTick = ForegroundTicker.resumeCount.value
+    LaunchedEffect(resumeTick) {
+        if (resumeTick == 0) return@LaunchedEffect
         kotlinx.coroutines.delay(5000)
-        UpdateManager.checkForUpdate(
-            context.applicationContext,
-            // Update mile to BINA button dabaye khud download shuru (purana silent system).
-            onUpdate = { versionName, apkUrl -> startDownload(apkUrl) }
-        )
+        if (downloadProgress == null) {
+            UpdateManager.checkForUpdate(
+                context.applicationContext,
+                // Update mile to BINA button dabaye khud download shuru (purana silent system).
+                onUpdate = { versionName, apkUrl -> startDownload(apkUrl) }
+            )
+        }
     }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -509,7 +520,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.36", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.37", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

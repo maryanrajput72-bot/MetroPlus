@@ -6,12 +6,21 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.FileProvider
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+
+// Har baar app foreground me aaye (cold open ho ya background se wapas),
+// ye counter barhta hai — MetroPlusApp is pe 5 second baad update check chalata hai.
+// Sirf pehli composition pe check karna kafi nahi tha: background se wapas aane pe
+// LaunchedEffect(Unit) dobara nahi chalta tha, is liye update kabhi nahi aati thi.
+object ForegroundTicker {
+    val resumeCount = mutableStateOf(0)
+}
 
 // In-app updater: app open ke 5 second baad check, aur search ke sath wale
 // refresh circle se manual check. DownloadManager BILKUL NAHI — download
@@ -24,7 +33,7 @@ import java.net.URL
 // Format: {"versionCode": 12, "versionName": "1.11", "apkUrl": "https://.../MetroPlus-v1.11.apk"}
 object UpdateManager {
     const val MANIFEST_URL = "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-app-version.json"
-    const val CURRENT_VERSION_CODE = 37
+    const val CURRENT_VERSION_CODE = 38
 
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile private var cancelled = false

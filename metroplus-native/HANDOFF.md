@@ -1,19 +1,28 @@
-# Metro+ Native App — Handoff (v1.36 / versionCode 37)
+# Metro+ Native App — Handoff (v1.37 / versionCode 38)
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
 > Store password `android`, alias `androiddebugkey`, key password `android`.
 > Cert SHA-256: `b13501ef91dd30d621c645ea596010d57446a26e2aa5ce26215cc7dc28019302`.
 
-## v1.36 change (30 Oct 2026)
-- Opening menu tiles: height now FIXED 86dp (trial 2.1.63 `.op-tile` exact) on both
-  PlainTile and FancyTile — v1.35's content-driven height could still grow uneven on
-  phones with a large system font size; fixed height locks all 4 tiles equal on any
-  font scale. Orange hero NOT touched.
-- Closing screen gaps to trial 2.1.63 (`.cl-body` gap 12, `.cl-sec` margins, `.cl-claim`
-  margin-top 12): section tops 22/23→18dp, section bottom 13→10dp, card gaps 16/17→12dp,
-  Card Claim inner gap 26→12dp (card total 154→140dp), bottom gap 16→12dp. Card sizes
-  themselves (padding 14, icon 52, WA 48, arrow 32) already matched trial and are unchanged.
+## v1.37 change (30 Oct 2026)
+- Closing cards (user verdict: v1.36 fixed Opening but Closing was unchanged): row cards
+  now FIXED 80dp and Card Claim card FIXED 140dp (trial 2.1.63 `.cl-card` exact —
+  v1.36 only changed gaps, card heights were still font-size dependent and grew on
+  phones with a large system font, while trial WebView text does not scale). Card
+  sub capped to 2 lines (ellipsis). Gaps corrected to trial's EFFECTIVE values
+  (`.ct-body` gap 16 wins over `.cl-body` gap 12 in the cascade; `.cl-body`
+  padding 16 !important wins): section tops 22dp, section bottom 14dp, card gaps
+  16dp, bottom gap 16dp. Card Claim inner gap stays 12dp (trial `.cl-claim`).
+  Opening tiles NOT touched (user confirmed fixed).
+- Updater, trial-63 silent system (user order): the 5s check previously ran only on
+  first composition — returning from background skipped it. Now every foreground
+  (cold open + background return) triggers the 5s check via ForegroundTicker
+  (MainActivity.onResume increments it; MetroPlusApp LaunchedEffect on it).
+  Everything else unchanged: auto download, top "Updating…%" pill, 100% for 900ms,
+  then install screen auto-opens; unknown-sources grant is per-app and one-time
+  (old trial app's grant does NOT cover com.metroplus.app); system Install screen
+  tap is Android's own rule for any normal app.
 
 ## What this is
 - Native rebuild of the old Metro+ WebView staff app. Package `com.metroplus.app` (never change).
@@ -64,4 +73,4 @@ to the updater manifest (`maryanrajput72-bot/MetroPlus/metroplus-app-version.jso
 
 ## Folder
 - `app/` source + resources, `gradle/` + `gradlew*` wrapper, `keystore/` signing key,
-  `apk/MetroPlus-v1.36-release.apk` last built release.
+  `apk/MetroPlus-v1.37-release.apk` last built release.

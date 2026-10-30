@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -116,23 +117,24 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     }
                 }
             }
-            ClSection("SHIFT CLOSINGS", top = 18.dp)
+            ClSection("SHIFT CLOSINGS", top = 22.dp)
             ClCard(watermark = 125.dp) {
                 ClIconTile(Icons.Filled.ConfirmationNumber, Color(0xFFD93C44), Color(0xFFA32228))
                 ClText("TOM · TKM · POS", "Ticket machines, TKM & POS closing", Modifier.weight(1f))
                 ClWa { onGuiNote("TOM · TKM · POS") }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             ClCard(watermark = 122.dp) {
                 ClIconTile(Icons.Filled.DirectionsBus, Color(0xFFFFC04D), Color(0xFFF08C00))
                 ClText("RMBS Closing", "Red line station closing format", Modifier.weight(1f))
                 ClWa { onGuiNote("RMBS Closing") }
             }
-            ClSection("CLAIMS & REPORTS", top = 18.dp)
+            ClSection("CLAIMS & REPORTS", top = 22.dp)
             // Card Claim: upar icon + text, neeche −/count/+ (green) aur chaura Share.
+            // Height FIXED 140dp (trial jaisi — 14 + 52 + 12 + 48 + 14).
             val shape = RoundedCornerShape(22.dp)
             Box(
-                modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
+                modifier = Modifier.fillMaxWidth().height(140.dp).cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
                     .background(Color.White).border(1.dp, ClInk.copy(alpha = 0.06f), shape)
             ) {
                 Watermark(219.dp, x = 200.dp, y = (-32).dp, alpha = 0.075f)
@@ -162,7 +164,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             ClCard(watermark = 122.dp, onClick = { onGuiNote("PMBS Complaint") }) {
                 ClIconTile(Icons.Filled.EditNote, Color(0xFFFF7A7A), Color(0xFFE53935))
                 ClText("PMBS Complaint", "Write an incident complaint letter", Modifier.weight(1f))
@@ -170,7 +172,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF5B6B57), modifier = Modifier.size(18.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -178,15 +180,16 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
 @Composable
 private fun ClSection(title: String, top: Dp) {
     Text(title, fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF8A929C), letterSpacing = 1.sp,
-        modifier = Modifier.padding(start = 4.dp, top = top, bottom = 10.dp))
+        modifier = Modifier.padding(start = 4.dp, top = top, bottom = 14.dp))
 }
 
-// White card: kona 22, padding 14, halki border + saya, watermark daein.
+// White card: kona 22, padding 14, halki border + saya, watermark daein,
+// height FIXED 80dp (trial .cl-card jaisi — icon 52 + padding 28, har font size pe barabar).
 @Composable
 private fun ClCard(watermark: Dp, onClick: (() -> Unit)? = null, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
+        modifier = Modifier.fillMaxWidth().height(80.dp).cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
             .background(Color.White).border(1.dp, ClInk.copy(alpha = 0.06f), shape)
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
     ) {
@@ -209,7 +212,7 @@ private fun ClText(title: String, sub: String, modifier: Modifier) {
     Column(modifier = modifier.padding(start = 14.dp, end = 10.dp)) {
         Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = ClInk)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(sub, fontSize = 12.5.sp, color = ClMuted, lineHeight = 15.5.sp)
+        Text(sub, fontSize = 12.5.sp, color = ClMuted, lineHeight = 15.5.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
