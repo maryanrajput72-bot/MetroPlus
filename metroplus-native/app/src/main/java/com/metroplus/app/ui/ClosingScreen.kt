@@ -1,6 +1,8 @@
 package com.metroplus.app.ui
 
 import androidx.activity.compose.BackHandler
+import com.metroplus.app.R
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.DirectionsBus
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -157,7 +159,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                                 .clickable { onGuiNote("Card Claim Share") },
                             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Filled.Chat, contentDescription = null, tint = Color.White, modifier = Modifier.size(19.dp))
+                            Image(painterResource(id = R.drawable.img_icon_whatsapp), contentDescription = null, modifier = Modifier.size(22.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Share", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                         }
@@ -216,14 +218,14 @@ private fun ClText(title: String, sub: String, modifier: Modifier) {
     }
 }
 
-// 48dp green WhatsApp square (kona 16).
+// 48dp green WhatsApp square (kona 16) — asli WhatsApp logo (message bubble nahi).
 @Composable
 private fun ClWa(onClick: () -> Unit) {
     Box(
         modifier = Modifier.size(48.dp).cssShadow(8.dp, RoundedCornerShape(16.dp), Color(0xFF128C7E).copy(alpha = 0.3f))
             .clip(RoundedCornerShape(16.dp)).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E))).clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) { Icon(Icons.Filled.Chat, contentDescription = "WhatsApp", tint = Color.White, modifier = Modifier.size(23.dp)) }
+    ) { Image(painterResource(id = R.drawable.img_icon_whatsapp), contentDescription = "WhatsApp", modifier = Modifier.size(30.dp)) }
 }
 
 @Composable

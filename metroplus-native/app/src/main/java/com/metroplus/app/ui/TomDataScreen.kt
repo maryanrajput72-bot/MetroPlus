@@ -110,7 +110,7 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         }
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             StationHero(closing, onGuiNote)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ModeSwitch(closing) { closing = it }
             Spacer(modifier = Modifier.height(16.dp))
             if (closing) ClosingMode(vm, onGuiNote) else OpeningMode(vm, onGuiNote)
@@ -127,15 +127,15 @@ private fun TdCircle(icon: ImageVector, desc: String, onClick: () -> Unit) {
     ) { Icon(icon, contentDescription = desc, tint = TdInk, modifier = Modifier.size(19.dp)) }
 }
 
-// Station hero: 125° gradient (Opening neela→purple, Closing peela→orange), kona 24, watermark,
+// Station hero: 125° gradient (Opening neela, Closing laal), kona 24, watermark,
 // bus avatar + "Daily Shift Register", save/WhatsApp chhote gol buttons, shift + date chips, revenue.
 @Composable
 private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
     val shape = RoundedCornerShape(24.dp)
-    val stops = if (closing) arrayOf(0f to Color(0xFFFFF4C7), 0.55f to Color(0xFFFFD99A), 1f to Color(0xFFFFBF85))
-    else arrayOf(0f to Color(0xFFDCECFF), 0.55f to Color(0xFFE2DCFF), 1f to Color(0xFFD3C6FF))
-    val shadow = if (closing) Color(0xFFE6821E).copy(alpha = 0.16f) else Color(0xFF5A50C8).copy(alpha = 0.14f)
-    val border = if (closing) Color(0xFFE6821E).copy(alpha = 0.25f) else Color(0xFF6E5ADC).copy(alpha = 0.22f)
+    val stops = if (closing) arrayOf(0f to Color(0xFFF2BDC0), 0.55f to Color(0xFFE69A9E), 1f to Color(0xFFE69A9E))
+    else arrayOf(0f to Color(0xFFDCECFF), 0.55f to Color(0xFFB9D4FB), 1f to Color(0xFFB9D4FB))
+    val shadow = if (closing) Color(0xFF9E1F25).copy(alpha = 0.16f) else Color(0xFF2563EB).copy(alpha = 0.14f)
+    val border = if (closing) Color(0xFF9E1F25).copy(alpha = 0.3f) else Color(0xFF2563EB).copy(alpha = 0.22f)
     val shift = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift"
     Box(
         modifier = Modifier.fillMaxWidth().cssShadow(8.dp, shape, shadow).clip(shape).background(cssLinear(125f, *stops)).border(1.dp, border, shape)
@@ -197,7 +197,7 @@ private fun HeroMini(image: Int, bg: Color, border: Color, onClick: () -> Unit) 
     ) { Image(painterResource(id = image), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(28.dp).clip(CircleShape)) }
 }
 
-// Opening / Closing switch: white card (kona 18), active button gradient (Opening cyan, Closing laal).
+// Opening / Closing switch: white card (kona 18), active button gradient (Opening neela, Closing laal).
 @Composable
 private fun ModeSwitch(closing: Boolean, onChange: (Boolean) -> Unit) {
     val shape = RoundedCornerShape(18.dp)
@@ -206,7 +206,7 @@ private fun ModeSwitch(closing: Boolean, onChange: (Boolean) -> Unit) {
             .border(1.3.dp, TdInk.copy(alpha = 0.1f), shape).padding(5.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        SwitchButton("Opening Data", Icons.Filled.MeetingRoom, !closing, listOf(Color(0xFF06B6D4), Color(0xFF0284C7)), Color.White) { onChange(false) }
+        SwitchButton("Opening Data", Icons.Filled.MeetingRoom, !closing, listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), Color.White) { onChange(false) }
         SwitchButton("Closing Data", Icons.Filled.DoorFront, closing, listOf(Color(0xFFE6353E), Color(0xFFA30D14)), Color(0xFF230607)) { onChange(true) }
     }
 }
@@ -244,7 +244,7 @@ private val RedB = Badge(Color(0xFF78040A), Color(0xFFB91018))
 
 @Composable
 private fun TomCard(style: CardStyle, icon: Int, title: String, badge: String, badgeStyle: Badge, badgeIcon: ImageVector? = null, content: @Composable () -> Unit) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(22.dp)
     Box(modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, TdInk.copy(alpha = 0.08f)).clip(shape).background(cssLinear(120f, *style.stops)).border(1.dp, style.border, shape)) {
         Watermark(219.dp, x = 200.dp, y = (-33).dp, alpha = 0.075f)
         Column(modifier = Modifier.padding(16.dp)) {
@@ -342,11 +342,11 @@ private fun OpeningMode(vm: TomDataViewModel, onGuiNote: (String) -> Unit) {
     TomCard(P1, R.drawable.img_icon_roll, "Roll Opening Counts", "Auto Opening", Cyan, Icons.Filled.AutoFixHigh) {
         FieldRow(vm, listOf(Field("op_bop", "BOP Roll Opening", Color(0xFFC084FC)), Field("op_tom", "TOM Roll Opening", Color(0xFFB02A31)), Field("op_tkm", "TKM Roll Opening", Color(0xFFB91018))))
     }
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     TomCard(P2, R.drawable.img_icon_lcd, "TOM Opening Balances", "Machine Opening", Amber) {
         FieldRow(vm, listOf(Field("op_tom1", "TOM 01 Opening", Color(0xFF38BDF8)), Field("op_tom2", "TOM 02 Opening", Color(0xFFFBBF24))))
     }
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         TdButton("Send to WhatsApp", Icons.Filled.Chat, "whatsapp", Modifier.weight(1f)) { onGuiNote("Send to WhatsApp") }
         Spacer(modifier = Modifier.weight(1f))
@@ -377,19 +377,19 @@ private fun ClosingMode(vm: TomDataViewModel, onGuiNote: (String) -> Unit) {
         Spacer(modifier = Modifier.height(11.dp))
         FieldRow(vm, listOf(Field("bop_cards", "Card Count"), Field("bop_slip", "Sale Slip"), Field("bop_amt", "Sale Amount (×30)", readOnly = true)))
     }
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     TomCard(P4, R.drawable.img_icon_roll, "TOM Roll", "Used: 0", Orange) {
         FieldRow(vm, listOf(Field("tom_open", "Opening"), Field("tom_recv", "Received"), Field("tom_dist", "Distribute"), Field("tom_close", "Closing")))
     }
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     TomCard(P1, R.drawable.img_icon_roll, "TKM Roll", "Used: 0", RedB) {
         FieldRow(vm, listOf(Field("tkm_open", "Opening"), Field("tkm_recv", "Received"), Field("tkm_dist", "Distribution"), Field("tkm_close", "Closing")))
     }
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     MachineCard(vm, P2, "TOM A", "Machine 01", Amber, "a", Color(0xFFFBBF24))
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     MachineCard(vm, P3, "TOM B", "Machine 02", Cyan, "b", Color(0xFF00C6FF))
-    Spacer(modifier = Modifier.height(28.dp))
+    Spacer(modifier = Modifier.height(14.dp))
     GrandSummary()
     Spacer(modifier = Modifier.height(30.dp))
     TdButton("Save & Lock Daily Register", Icons.Filled.Save, "primary") { onGuiNote("Save & Lock Daily Register") }
@@ -428,7 +428,7 @@ private fun MachineCard(vm: TomDataViewModel, style: CardStyle, title: String, b
 // Daily Grand Summary: gulabi card, "METRO SHIFT" kala badge, 2 + 3 white stat boxes.
 @Composable
 private fun GrandSummary() {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(22.dp)
     Column(
         modifier = Modifier.fillMaxWidth().cssShadow(10.dp, shape, Color(0xFFFF6B2B).copy(alpha = 0.18f)).clip(shape)
             .background(cssLinear(120f, *P1.stops)).border(1.dp, Color(0xFF9E1F25).copy(alpha = 0.3f), shape)

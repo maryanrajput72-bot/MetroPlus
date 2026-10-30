@@ -1,28 +1,30 @@
-# Metro+ Native App — Handoff (v1.37 / versionCode 38)
+# Metro+ Native App — Handoff (v1.38 / versionCode 39) — DEBUG build
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
 > Store password `android`, alias `androiddebugkey`, key password `android`.
 > Cert SHA-256: `b13501ef91dd30d621c645ea596010d57446a26e2aa5ce26215cc7dc28019302`.
 
-## v1.37 change (30 Oct 2026)
-- Closing cards (user verdict: v1.36 fixed Opening but Closing was unchanged): row cards
-  now FIXED 80dp and Card Claim card FIXED 140dp (trial 2.1.63 `.cl-card` exact —
-  v1.36 only changed gaps, card heights were still font-size dependent and grew on
-  phones with a large system font, while trial WebView text does not scale). Card
-  sub capped to 2 lines (ellipsis). Gaps corrected to trial's EFFECTIVE values
-  (`.ct-body` gap 16 wins over `.cl-body` gap 12 in the cascade; `.cl-body`
-  padding 16 !important wins): section tops 22dp, section bottom 14dp, card gaps
-  16dp, bottom gap 16dp. Card Claim inner gap stays 12dp (trial `.cl-claim`).
-  Opening tiles NOT touched (user confirmed fixed).
-- Updater, trial-63 silent system (user order): the 5s check previously ran only on
-  first composition — returning from background skipped it. Now every foreground
-  (cold open + background return) triggers the 5s check via ForegroundTicker
-  (MainActivity.onResume increments it; MetroPlusApp LaunchedEffect on it).
-  Everything else unchanged: auto download, top "Updating…%" pill, 100% for 900ms,
-  then install screen auto-opens; unknown-sources grant is per-app and one-time
-  (old trial app's grant does NOT cover com.metroplus.app); system Install screen
-  tap is Android's own rule for any normal app.
+## Build rule change (30 Oct 2026, user's order)
+- Iteration builds are now DEBUG (`assembleDebug`, no R8) — R8 compression runs
+  ONLY at the final public stage. Debug and release share the SAME project keystore
+  (`keystore/debug.keystore`), so debug builds update in place over release builds
+  and vice versa (same cert, versionCode keeps increasing). Updater manifest chain
+  stays common for both.
+
+## v1.38 change (30 Oct 2026) — DEBUG build, no R8
+- TOM Data Register cards: card-to-card gaps 28→14dp (trial opening-view gap),
+  card radius 24→22dp, hero→switch gap 16→12dp (trial switch margin-top 12).
+  Card padding/inputs unchanged (already trial-close).
+- Mode colors (user's rule: Closing = red, Opening = blue, in both places):
+  switch active Opening gradient cyan→pure blue (#4CB4FF→#1A6FD8), Closing stays
+  red (#E6353E→#A30D14); hero Opening light blue (#DCECFF→#B9D4FB), hero Closing
+  light red/pink (#F2BDC0→#E69A9E, trial easypaisa hero tones) with matching
+  shadow/border tints. Dark hero text kept (readable on light gradients).
+- Closing screen: all 3 green WhatsApp buttons now show the real WhatsApp logo
+  (`img_icon_whatsapp.webp`, 30dp on the 48dp squares, 22dp on the wide Share
+  button) instead of the message-bubble icon. GUI phase only — taps still show
+  the GUI-phase note; no WhatsApp function wired yet.
 
 ## What this is
 - Native rebuild of the old Metro+ WebView staff app. Package `com.metroplus.app` (never change).
@@ -73,4 +75,4 @@ to the updater manifest (`maryanrajput72-bot/MetroPlus/metroplus-app-version.jso
 
 ## Folder
 - `app/` source + resources, `gradle/` + `gradlew*` wrapper, `keystore/` signing key,
-  `apk/MetroPlus-v1.37-release.apk` last built release.
+  `apk/MetroPlus-v1.38-debug.apk` last built (DEBUG) build.
