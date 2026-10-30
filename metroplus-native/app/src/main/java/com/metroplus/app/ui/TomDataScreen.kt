@@ -90,10 +90,16 @@ class TomDataViewModel : ViewModel() {
 
 @Composable
 fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
-    BackHandler { onBack() }
+    // History page (trial 63 ka Shift History) — Tom Data ke upar slide hoke aata hai.
+    var historyOpen by remember { mutableStateOf(false) }
+    BackHandler {
+        if (historyOpen) historyOpen = false
+        else onBack()
+    }
     val vm: TomDataViewModel = viewModel()
     var closing by vm.closingMode
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // Header: back | laal invoice icon + "Tom Data Register" | history.
         Row(
             modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding().padding(horizontal = 20.dp, vertical = 16.dp),
@@ -105,7 +111,7 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Tom Data Register", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TdInk)
             }
-            TdCircle(Icons.Filled.History, "History") { onGuiNote("Register History") }
+            TdCircle(Icons.Filled.History, "History") { historyOpen = true }
         }
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             StationHero(closing, onGuiNote)
@@ -115,6 +121,8 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             if (closing) ClosingMode(vm, onGuiNote) else OpeningMode(vm, onGuiNote)
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+    TomHistoryOverlay(visible = historyOpen, onBack = { historyOpen = false }, onGuiNote = onGuiNote)
     }
 }
 
