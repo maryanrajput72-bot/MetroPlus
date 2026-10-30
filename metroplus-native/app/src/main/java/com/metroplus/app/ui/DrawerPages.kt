@@ -186,6 +186,8 @@ fun EditProfileScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var name by remember { mutableStateOf("Aryan") }
     var phone by remember { mutableStateOf("") }
     var empId by remember { mutableStateOf("") }
+    var station by remember { mutableStateOf("Shaheed-e-Millat") }
+    var stationOpen by remember { mutableStateOf(false) }
     var shift by remember { mutableStateOf("Morning") }
     var role by remember { mutableStateOf("Operator") }
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
@@ -204,10 +206,10 @@ fun EditProfileScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFFF6F2F2)).border(1.dp, DpInk.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
-                        .clickable { onGuiNote("Station Picker") }.padding(horizontal = 12.dp, vertical = 12.dp),
+                        .clickable { stationOpen = true }.padding(horizontal = 12.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Shaheed-e-Millat", fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = DpInk, modifier = Modifier.weight(1f))
+                    Text(station, fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = DpInk, modifier = Modifier.weight(1f))
                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(18.dp))
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -246,6 +248,7 @@ fun EditProfileScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
+        if (stationOpen) StationPickerSheet(station, { station = it }, { stationOpen = false })
     }
 }
 

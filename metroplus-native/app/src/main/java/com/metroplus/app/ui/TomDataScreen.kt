@@ -139,6 +139,8 @@ private fun TdCircle(icon: ImageVector, desc: String, onClick: () -> Unit) {
 // chhote gol buttons, shift + date chips, revenue.
 @Composable
 private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
+    var tomDmy by remember { mutableStateOf(SimpleDateFormat("dd-MM-yyyy", Locale.US).format(Date())) }
+    var tomDateOpen by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(24.dp)
     // Pehle wala card DONO modes me dark (uska order): Closing halka pink
     // #F2BDC0→#E69A9E tha, Opening halka neela #DCECFF→#B9D4FB tha.
@@ -182,16 +184,17 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
                 }
                 Row(
                     modifier = Modifier.clip(RoundedCornerShape(18.dp)).background(TdInk.copy(alpha = 0.05f))
-                        .border(1.dp, TdInk.copy(alpha = 0.1f), RoundedCornerShape(18.dp)).clickable { onGuiNote("Date Picker") }
+                        .border(1.dp, TdInk.copy(alpha = 0.1f), RoundedCornerShape(18.dp)).clickable { tomDateOpen = true }
                         .padding(horizontal = 12.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Filled.Today, contentDescription = null, tint = Color(0xFFE6353E), modifier = Modifier.size(12.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH).format(Date()), fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = TdInk)
+                    Text(dmyToDisplay(tomDmy, "MMM d, yyyy"), fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = TdInk)
                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = TdInk.copy(alpha = 0.7f), modifier = Modifier.size(14.dp))
                 }
             }
+            if (tomDateOpen) DatePickerSheet(tomDmy, { tomDmy = it }, { tomDateOpen = false })
             Spacer(modifier = Modifier.height(10.dp))
             Text("Total Shift Revenue", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = TdMuted, letterSpacing = 0.3.sp)
             Text("Rs. 0", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = TdInk, letterSpacing = (-0.8).sp)
