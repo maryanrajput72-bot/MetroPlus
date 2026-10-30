@@ -159,9 +159,9 @@ fun MoneyCalculatorScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ActionBtn(1f, Icons.Filled.Delete, "Clear All", Color(0xFFFF5E5E), Color(0xFFFF5E5E), FontWeight.SemiBold,
-                        Modifier.background(Color(0xFFEF4444).copy(alpha = 0.12f)), Color(0xFFEF4444).copy(alpha = 0.3f)) { counts = emptyMap() }
+                        Modifier.background(Color(0xFFEF4444).copy(alpha = 0.12f), RoundedCornerShape(18.dp)), Color(0xFFEF4444).copy(alpha = 0.3f)) { counts = emptyMap() }
                     ActionBtn(1f, Icons.Filled.ContentCopy, "Copy", Color.White, Color(0xFFFF4D55), FontWeight.Bold,
-                        Modifier.background(cssLinear(135f, 0f to Color(0xFF2A2A2E), 1f to Color(0xFF121214))), Color(0xFFE11D2A).copy(alpha = 0.55f)) { onGuiNote("Copy") }
+                        Modifier.background(cssLinear(135f, 0f to Color(0xFF2A2A2E), 1f to Color(0xFF121214)), RoundedCornerShape(18.dp)), Color(0xFFE11D2A).copy(alpha = 0.55f)) { onGuiNote("Copy") }
                     ActionBtn(1.3f, Icons.Filled.Chat, "WhatsApp", Color.White, Color.White, FontWeight.Bold,
                         Modifier.cssShadow(6.dp, RoundedCornerShape(18.dp), Color(0xFF25D366).copy(alpha = 0.35f)).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E)), RoundedCornerShape(18.dp)),
                         null) { onGuiNote("WhatsApp") }
@@ -196,8 +196,13 @@ private fun TotalCard(totalNotes: Int, total: Long) {
         modifier = Modifier.fillMaxWidth().cssShadow(16.dp, shape, Color(0xFF6E50FF).copy(alpha = 0.35f)).clip(shape)
             .background(cssLinear(135f, 0f to Color(0xFF5B6CFF), 0.55f to Color(0xFF7A4DFF), 1f to Color(0xFFA855F7)))
     ) {
-        Glow(160.dp, x = 40.dp, y = (-50).dp, alpha = 0.35f, align = Alignment.TopEnd)
-        Watermark(189.dp, x = 235.dp, y = (-32).dp, alpha = 0.2f)
+        // Trial ka ::after glow/watermark ABSOLUTE hota hai (layout pe asar nahi) —
+        // is liye dono ko matchParentSize box me rakha hai taake card sirf
+        // content jitna uncha ho (pehle 189dp watermark card ko phula raha tha).
+        Box(modifier = Modifier.matchParentSize()) {
+            Glow(160.dp, x = 40.dp, y = (-50).dp, alpha = 0.35f, align = Alignment.TopEnd)
+            Watermark(189.dp, x = 235.dp, y = (-32).dp, alpha = 0.2f)
+        }
         Row(modifier = Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -252,7 +257,6 @@ private fun TomClosingCard() {
         modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF3C1416).copy(alpha = 0.08f)).clip(shape)
             .background(cssLinear(160f, 0f to Color.White, 1f to Color(0xFFFBF2F2))).border(1.dp, Color(0xFF9E1F25).copy(alpha = 0.18f), shape)
     ) {
-        Watermark(212.dp, x = 218.dp, y = (-35).dp, alpha = 0.075f)
         Column(modifier = Modifier.padding(14.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
