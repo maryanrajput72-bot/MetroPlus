@@ -31,8 +31,6 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PointOfSale
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -140,7 +138,8 @@ fun MoneyCalculatorScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     val total = counts.entries.sumOf { (v, c) -> v.toLong() * c }
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
-        // Header: white 94%, 44dp gol buttons (halki border): back | "Cash Denominations" | sliders + laal reset.
+        // Header: white 94%, 44dp gol button: back | "Cash Denominations"
+        // (upar wale Settings + Refresh buttons khatam — uska order).
         Row(
             modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding().padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -148,9 +147,6 @@ fun MoneyCalculatorScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             McCircle(Icons.Filled.ArrowBack, McInk, "Back", onBack)
             Text("Cash Denominations", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = McInk, letterSpacing = (-0.3).sp,
                 textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
-            McCircle(Icons.Filled.Tune, McInk, "Manage Denominations") { onGuiNote("Denomination Settings") }
-            Spacer(modifier = Modifier.width(8.dp))
-            McCircle(Icons.Filled.Refresh, Color(0xFFFF5757), "Reset All") { counts = emptyMap() }
         }
         LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp)) {
             item { Spacer(modifier = Modifier.height(16.dp)) }

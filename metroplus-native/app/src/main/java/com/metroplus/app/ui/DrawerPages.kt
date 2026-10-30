@@ -28,11 +28,12 @@ import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Schedule
@@ -53,6 +54,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -114,7 +117,7 @@ private fun DpCard(title: String?, content: @Composable ColumnScope.() -> Unit) 
 }
 
 @Composable
-private fun DpField(label: String, icon: ImageVector, value: String, onValue: (String) -> Unit, placeholder: String) {
+private fun DpField(label: String, icon: ImageVector, value: String, onValue: (String) -> Unit, placeholder: String, password: Boolean = false) {
     val shape = RoundedCornerShape(12.dp)
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp, bottom = 6.dp)) {
         Icon(icon, contentDescription = null, tint = Color(0xFFC6434A), modifier = Modifier.size(15.dp))
@@ -124,6 +127,7 @@ private fun DpField(label: String, icon: ImageVector, value: String, onValue: (S
     }
     BasicTextField(
         value = value, onValueChange = onValue, singleLine = true,
+        visualTransformation = if (password) PasswordVisualTransformation() else VisualTransformation.None,
         textStyle = TextStyle(fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = DpInk),
         modifier = Modifier.fillMaxWidth(),
         decorationBox = { inner ->
@@ -286,7 +290,7 @@ fun CalculatorSettingsScreen(onBack: () -> Unit) {
 // ---------------- Gps setting ----------------
 
 @Composable
-fun GpsSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenMoney: () -> Unit) {
+fun GpsSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     BackHandler { onBack() }
     var showStation by remember { mutableStateOf(true) }
     var mapType by remember { mutableStateOf("Satellite") }
@@ -309,9 +313,8 @@ fun GpsSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenMon
                         Spacer(modifier = Modifier.width(6.dp))
                         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = DpGray, modifier = Modifier.size(16.dp))
                     } }, onClick = { mapType = if (mapType == "Satellite") "Streets" else "Satellite" })
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(DpInk.copy(alpha = 0.06f)))
-                DpSetRow(Icons.Filled.MonetizationOn, Color(0xFFFFAA00), "Money Calculator Setting", "Notes & coins denominations",
-                    { Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = DpGray, modifier = Modifier.size(16.dp)) }, onClick = onOpenMoney)
+                // Money Calculator Setting row khatam (uska order) — denomination
+                // setting sirf drawer ki "Calculator setting" se khulti hai.
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -323,23 +326,29 @@ fun GpsSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenMon
 @Composable
 fun TlRpSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     BackHandler { onBack() }
-    var currentPin by remember { mutableStateOf("") }
-    var newPin by remember { mutableStateOf("") }
+    var gmail by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
         DpHeader("Tl/Rp access setting", onBack)
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            DpCard("TL PIN CHANGE") {
-                Text("TL 5-digit PIN yahan se badla jata hai (ek dafa login ke baad logout tak rehta hai).", fontSize = 12.5.sp, color = DpGray)
-                Spacer(modifier = Modifier.height(12.dp))
-                DpField("Current PIN", Icons.Filled.Badge, currentPin, { currentPin = it.filter { c -> c.isDigit() }.take(5) }, "Current 5-digit PIN")
+            // Sab se upar: jinke paas Gmail/password nahi, unke liye admin note.
+            DpCard(null) {
+                Text("Contact to admin for access", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = DpRed)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("Agar aap ke paas TL Gmail ya password nahi hai to admin se rabta karein — access sirf admin de sakta hai.", fontSize = 12.5.sp, color = DpGray, lineHeight = 18.sp)
+            }
+            // TL login (Gmail + password) — Password Change option khatam (uska
+            // order): password sirf admin de/bad sakta hai, app se nahi.
+            DpCard("TL LOGIN") {
+                DpField("Gmail", Icons.Filled.Email, gmail, { gmail = it }, "TL Gmail")
                 Spacer(modifier = Modifier.height(10.dp))
-                DpField("New PIN", Icons.Filled.Badge, newPin, { newPin = it.filter { c -> c.isDigit() }.take(5) }, "New 5-digit PIN")
+                DpField("Password", Icons.Filled.Lock, password, { password = it }, "TL password", password = true)
                 Spacer(modifier = Modifier.height(12.dp))
                 Box(
                     modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), DpRed.copy(alpha = 0.25f))
-                        .clip(RoundedCornerShape(14.dp)).background(DpRed).clickable { onGuiNote("TL PIN Change") },
+                        .clip(RoundedCornerShape(14.dp)).background(DpRed).clickable { onGuiNote("TL Login") },
                     contentAlignment = Alignment.Center
-                ) { Text("Change PIN", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                ) { Text("Login", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             }
             DpCard("ROLE ACCESS") {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 6.dp)) {
