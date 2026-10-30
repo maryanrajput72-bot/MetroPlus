@@ -96,7 +96,12 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.rememberDrawerState
 import com.metroplus.app.ui.ClosingScreen
+import com.metroplus.app.ui.ComplaintScreen
+import com.metroplus.app.ui.CalculatorSettingsScreen
+import com.metroplus.app.ui.EditProfileScreen
 import com.metroplus.app.ui.GpsCameraScreen
+import com.metroplus.app.ui.GpsSettingsScreen
+import com.metroplus.app.ui.TlRpSettingsScreen
 import com.metroplus.app.ui.MoneyCalculatorScreen
 import com.metroplus.app.ui.OpeningScreen
 import androidx.compose.runtime.Composable
@@ -135,7 +140,7 @@ import kotlinx.coroutines.launch
 enum class NavTab { SETTINGS, OPENING, HOME, CLOSING, PORTAL }
 
 // Sub-screens: HOME se aage jo bhi page khulega, right se left slide hoke aayega.
-enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM }
+enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -248,10 +253,14 @@ fun MetroPlusApp() {
             ) {
                 ProfileDrawer(
                     onClose = { closeDrawer() },
-                    onEdit = { closeDrawer(); notYet("Edit Profile") },
+                    onEdit = { closeDrawer(); screen = AppScreen.EDIT_PROFILE },
                     onMenu = { name ->
                         closeDrawer()
-                        if (name == "app Setting") { activeNav = NavTab.SETTINGS; screen = AppScreen.SETTINGS } else notYet(name)
+                        if (name == "app Setting") { activeNav = NavTab.SETTINGS; screen = AppScreen.SETTINGS }
+                        else if (name == "Calculator setting") screen = AppScreen.CALC_SETTINGS
+                        else if (name == "Gps setting") screen = AppScreen.GPS_SETTINGS
+                        else if (name == "Tl/Rp access setting") screen = AppScreen.TLRP_SETTINGS
+                        else notYet(name)
                     },
                     onCheckUpdate = { closeDrawer(); manualCheck() },
                     onLogout = { closeDrawer(); toast("GUI phase: logout ka feature baad me") }
@@ -271,28 +280,10 @@ fun MetroPlusApp() {
                     else if (it == "GPS Camera") { cameraFrom = AppScreen.HOME; screen = AppScreen.CAMERA }
                     else if (it == "Settings") { activeNav = NavTab.SETTINGS; screen = AppScreen.SETTINGS }
                     else if (it == "Tom Data") screen = AppScreen.TOM
+                    else if (it == "Complaints") screen = AppScreen.COMPLAINTS
                     else notYet(it)
                 }
             )
-            // Download progress: upar patli line (progress ke % ke barabar bharti hai) + sirf
-            // "Updating…%" text ke neeche background pill; baqi jagah transparent taake neeche
-            // page bhi nazar aaye. Cancel NAHI hai (uske order pe hata diya); 100% par install
-            // screen khud khul jati hai, dobara koi button nahi dabana parta.
-            downloadProgress?.let { pct ->
-                Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().statusBarsPadding()) {
-                    if (pct >= 0) LinearProgressIndicator(progress = { pct / 100f }, modifier = Modifier.fillMaxWidth().height(3.dp), color = Color(0xFF9E1F25), trackColor = Color(0xFFB02A31).copy(alpha = 0.25f))
-                    else LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(3.dp), color = Color(0xFF9E1F25), trackColor = Color(0xFFB02A31).copy(alpha = 0.25f))
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Surface(shape = RoundedCornerShape(999.dp), color = Color.White.copy(alpha = 0.94f), shadowElevation = 4.dp) {
-                            Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = if (pct >= 0) "Updating\u2026 $pct%" else "Updating\u2026",
-                                    fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9E1F25)
-                                )                            }
-                        }
-                    }
-                }
-            }
         }
     }
         // Sub-screen overlay: page right se left smooth slide hoke aata hai (350ms),
@@ -315,6 +306,11 @@ fun MetroPlusApp() {
                     AppScreen.CAMERA -> GpsCameraScreen(onBack = { if (cameraFrom == AppScreen.OPENING) screen = AppScreen.OPENING else backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.SETTINGS -> SettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.TOM -> TomDataScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.COMPLAINTS -> ComplaintScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.EDIT_PROFILE -> EditProfileScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { backHome() })
+                    AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenMoney = { screen = AppScreen.MONEY })
+                    AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.HOME -> Unit
                 }
             }
@@ -339,6 +335,27 @@ fun MetroPlusApp() {
                     }
                 }
             )
+        }
+        // Item 6 (updater fix): progress UI SAB SE UPAR — pehle ye home layer ke
+        // andar tha, is liye koi page khula hota to sub-screen overlay isay chhupa
+        // deta tha aur download nazar aaye baghair installer khul jata tha.
+        // Ab: upar patli line (% ke barabar bharti hai) + "Updating…%" pill,
+        // 100% par install screen khud khul jati hai, app ka koi button nahi.
+        downloadProgress?.let { pct ->
+            Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().statusBarsPadding()) {
+                if (pct >= 0) LinearProgressIndicator(progress = { pct / 100f }, modifier = Modifier.fillMaxWidth().height(3.dp), color = Color(0xFF9E1F25), trackColor = Color(0xFFB02A31).copy(alpha = 0.25f))
+                else LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(3.dp), color = Color(0xFF9E1F25), trackColor = Color(0xFFB02A31).copy(alpha = 0.25f))
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Surface(shape = RoundedCornerShape(999.dp), color = Color.White.copy(alpha = 0.94f), shadowElevation = 4.dp) {
+                        Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = if (pct >= 0) "Updating\u2026 $pct%" else "Updating\u2026",
+                                fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9E1F25)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -520,7 +537,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.40", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.41", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
