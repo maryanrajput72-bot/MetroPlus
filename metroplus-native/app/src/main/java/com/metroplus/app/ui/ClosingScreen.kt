@@ -1,6 +1,13 @@
 package com.metroplus.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import com.metroplus.app.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,12 +76,15 @@ class ClosingViewModel : ViewModel() {
 
 @Composable
 fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
-    BackHandler { onBack() }
+    // Item 6: PMBS Complaint form (Item 3 wala form, type PMBS) — Closing ke upar slide hoke aata hai.
+    var pmbsOpen by remember { mutableStateOf(false) }
+    BackHandler { if (pmbsOpen) pmbsOpen = false else onBack() }
     val vm: ClosingViewModel = viewModel()
     var cardCount by vm.cardCount
     val today = SimpleDateFormat("EEE, d MMM yyyy", Locale.ENGLISH).format(Date())
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // Header: white 94%, padding 14/16, 38dp gol back + "Closing Time" 18sp (baein).
         Row(
             modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding().padding(horizontal = 16.dp, vertical = 14.dp),
@@ -87,13 +98,17 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             Text("Closing Time", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = ClInk, letterSpacing = (-0.3).sp)
         }
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-            // Hero: 145° #8B6CF6→#6A4FD8→#4B32B0, kona 26, padding 18, andar REPORT DATE button.
+            // Hero: 145° #211647→#6A4FD8→#4B32B0 (easypaisa), kona 26, padding 18, andar REPORT DATE button.
             val heroShape = RoundedCornerShape(26.dp)
             Box(
                 modifier = Modifier.fillMaxWidth().cssShadow(14.dp, heroShape, Color(0xFF4B32B0).copy(alpha = 0.3f)).clip(heroShape)
-                    .background(cssLinear(145f, 0f to Color(0xFF8B6CF6), 0.55f to Color(0xFF6A4FD8), 1f to Color(0xFF4B32B0)))
+                    .background(cssLinear(145f, 0f to Color(0xFF211647), 0.55f to Color(0xFF6A4FD8), 1f to Color(0xFF4B32B0)))
             ) {
-                Watermark(219.dp, x = 201.dp, y = (-16).dp, alpha = 0.2f)
+                // Item 6: trial .cl-hero::after glow (190px, daein -50, upar -60, halka .08).
+                // matchParentSize me — pehle 219dp logo watermark card ko zabardasti lamba karta tha.
+                Box(Modifier.matchParentSize()) {
+                    Glow(190.dp, x = 50.dp, y = (-60).dp, alpha = 0.08f, align = Alignment.TopEnd)
+                }
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text("END OF SHIFT", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color.White.copy(alpha = 0.9f), letterSpacing = 1.2.sp)
                     Spacer(modifier = Modifier.height(4.dp))
@@ -167,7 +182,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            ClCard(watermark = 122.dp, onClick = { onGuiNote("PMBS Complaint") }) {
+            ClCard(watermark = 122.dp, onClick = { pmbsOpen = true }) {
                 ClIconTile(Icons.Filled.EditNote, Color(0xFFFF7A7A), Color(0xFFE53935))
                 ClText("PMBS Complaint", "Write an incident complaint letter", Modifier.weight(1f))
                 Box(modifier = Modifier.size(32.dp).background(Color(0xFFF5F1F1), CircleShape), contentAlignment = Alignment.Center) {
@@ -175,6 +190,15 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+        }
+        AnimatedVisibility(
+            visible = pmbsOpen,
+            enter = slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { it } + fadeIn(animationSpec = tween(350)),
+            exit = slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { it } + fadeOut(animationSpec = tween(350)),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            ComplaintFormScreen(type = CmpType.PMBS, onBack = { pmbsOpen = false }, onGuiNote = onGuiNote)
         }
     }
 }

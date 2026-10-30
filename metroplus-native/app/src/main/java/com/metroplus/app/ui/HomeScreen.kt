@@ -544,7 +544,9 @@ private fun ColorBanner(b: Banner, height: Dp, titleSize: TextUnit, onClick: () 
 private fun MiniTile(m: MiniCard, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(20.dp)
     Box(
-        modifier = modifier.defaultMinSize(minHeight = 160.dp)
+        // Item 3: chaaron dabbe barabar — fixed height (pehle sirf minHeight
+        // 160dp tha, sub-text 2 line hone par tile lambi ho jati thi).
+        modifier = modifier.height(184.dp)
             .cssShadow(12.dp, shape, m.shadow).clip(shape)
             .background(cssLinear(135f, *m.stops))
             .clickable { onClick() }
