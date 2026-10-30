@@ -246,7 +246,6 @@ private val RedB = Badge(Color(0xFF78040A), Color(0xFFB91018))
 private fun TomCard(style: CardStyle, icon: Int, title: String, badge: String, badgeStyle: Badge, badgeIcon: ImageVector? = null, content: @Composable () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, TdInk.copy(alpha = 0.08f)).clip(shape).background(cssLinear(120f, *style.stops)).border(1.dp, style.border, shape)) {
-        Watermark(219.dp, x = 200.dp, y = (-33).dp, alpha = 0.075f)
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(modifier = Modifier.size(32.dp).cssShadow(2.dp, RoundedCornerShape(10.dp), Color.Black.copy(alpha = 0.3f)).clip(RoundedCornerShape(10.dp))) {

@@ -159,7 +159,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                                 .clickable { onGuiNote("Card Claim Share") },
                             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(painterResource(id = R.drawable.img_icon_whatsapp), contentDescription = null, modifier = Modifier.size(22.dp))
+                            Image(painterResource(id = R.drawable.img_icon_whatsapp_clean), contentDescription = null, modifier = Modifier.size(26.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Share", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                         }
@@ -218,14 +218,15 @@ private fun ClText(title: String, sub: String, modifier: Modifier) {
     }
 }
 
-// 48dp green WhatsApp square (kona 16) — asli WhatsApp logo (message bubble nahi).
+// 48dp green WhatsApp square (kona 16) — asli WhatsApp logo, white background ke baghair,
+// green button ke upar seedha (clean asset: background flood-fill se transparent).
 @Composable
 private fun ClWa(onClick: () -> Unit) {
     Box(
         modifier = Modifier.size(48.dp).cssShadow(8.dp, RoundedCornerShape(16.dp), Color(0xFF128C7E).copy(alpha = 0.3f))
             .clip(RoundedCornerShape(16.dp)).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E))).clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) { Image(painterResource(id = R.drawable.img_icon_whatsapp), contentDescription = "WhatsApp", modifier = Modifier.size(30.dp)) }
+    ) { Image(painterResource(id = R.drawable.img_icon_whatsapp_clean), contentDescription = "WhatsApp", modifier = Modifier.size(36.dp)) }
 }
 
 @Composable
