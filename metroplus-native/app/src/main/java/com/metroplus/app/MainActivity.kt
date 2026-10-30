@@ -61,7 +61,6 @@ import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -104,6 +103,7 @@ import com.metroplus.app.ui.GpsSettingsScreen
 import com.metroplus.app.ui.TlRpSettingsScreen
 import com.metroplus.app.ui.MoneyCalculatorScreen
 import com.metroplus.app.ui.OpeningScreen
+import com.metroplus.app.ui.PortalScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -140,7 +140,7 @@ import kotlinx.coroutines.launch
 enum class NavTab { SETTINGS, OPENING, HOME, CLOSING, PORTAL }
 
 // Sub-screens: HOME se aage jo bhi page khulega, right se left slide hoke aayega.
-enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS }
+enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -291,6 +291,7 @@ fun MetroPlusApp() {
                     else if (it == "Settings") { activeNav = NavTab.SETTINGS; screen = AppScreen.SETTINGS }
                     else if (it == "Tom Data") screen = AppScreen.TOM
                     else if (it == "Complaints") screen = AppScreen.COMPLAINTS
+                    else if (it == "Online Portal") { activeNav = NavTab.PORTAL; screen = AppScreen.PORTAL }
                     else notYet(it)
                 }
             )
@@ -323,8 +324,9 @@ fun MetroPlusApp() {
                     AppScreen.COMPLAINTS -> ComplaintScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.EDIT_PROFILE -> EditProfileScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { backHome() })
-                    AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenMoney = { screen = AppScreen.MONEY })
+                    AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.PORTAL -> PortalScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.HOME -> Unit
                 }
             }
@@ -345,7 +347,7 @@ fun MetroPlusApp() {
                         NavTab.SETTINGS -> screen = AppScreen.SETTINGS
                         NavTab.OPENING -> screen = AppScreen.OPENING
                         NavTab.CLOSING -> screen = AppScreen.CLOSING
-                        NavTab.PORTAL -> notYet("GCS Portal")
+                        NavTab.PORTAL -> screen = AppScreen.PORTAL
                     }
                 }
             )
@@ -556,7 +558,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.51", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.52", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
