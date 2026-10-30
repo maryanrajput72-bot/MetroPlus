@@ -521,13 +521,14 @@ private fun ProfileDrawer(
         }
         DrawerSection("SETTINGS")
         DrawerCard {
-            // Dark fix (v1.46): pichhli dafa wala dark itna halka tha ke
-            // screen pe nazar hi nahi aaya — is dafa waazeh gehra step.
-            DrawerMenuRow(icon = Icons.Filled.Calculate, label = "Calculator setting", colors = listOf(Color(0xFFE89B0C), Color(0xFFB45309)), onClick = { onMenu("Calculator setting") })
+            // Dark step 2 (v1.47): pichhla step bhi uski nazar me halka tha —
+            // is dafa waazeh gehra (icons pe safed icon hai, is liye gehra
+            // theek rahega).
+            DrawerMenuRow(icon = Icons.Filled.Calculate, label = "Calculator setting", colors = listOf(Color(0xFFD97706), Color(0xFF92400E)), onClick = { onMenu("Calculator setting") })
             DrawerDivider()
-            DrawerMenuRow(icon = Icons.Filled.GpsFixed, label = "Gps setting", colors = listOf(Color(0xFF3B82F6), Color(0xFF1E40AF)), onClick = { onMenu("Gps setting") })
+            DrawerMenuRow(icon = Icons.Filled.GpsFixed, label = "Gps setting", colors = listOf(Color(0xFF2563EB), Color(0xFF1E3A8A)), onClick = { onMenu("Gps setting") })
             DrawerDivider()
-            DrawerMenuRow(icon = Icons.Filled.AdminPanelSettings, label = "Tl/Rp access setting", colors = listOf(Color(0xFF7C3AED), Color(0xFF5B21B6)), onClick = { onMenu("Tl/Rp access setting") })
+            DrawerMenuRow(icon = Icons.Filled.AdminPanelSettings, label = "Tl/Rp access setting", colors = listOf(Color(0xFF6D28D9), Color(0xFF4C1D95)), onClick = { onMenu("Tl/Rp access setting") })
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Neeche: version pill + laal "Check update" button.
@@ -539,7 +540,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.46", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.47", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

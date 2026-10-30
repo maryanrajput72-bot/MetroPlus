@@ -209,10 +209,10 @@ fun HomeScreen(
     }
 // More with Metro tiles ke liye thore dark stops (uska order) — upar wale
 // banners inhi purane stops pe rahenge, sirf 4 tiles dark hui hain.
-val MiniBlueStops = arrayOf(0f to Color(0xFFC9DFFF), 0.6f to Color(0xFFA9C4FF), 1f to Color(0xFF7FA8FF))
-val MiniYellowStops = arrayOf(0f to Color(0xFFFFE9A3), 0.6f to Color(0xFFFFD166), 1f to Color(0xFFFFB830))
-val MiniPurpleStops = arrayOf(0f to Color(0xFFDDC9FF), 0.6f to Color(0xFFBE9FFF), 1f to Color(0xFF9D7BFF))
-val MiniPeachStops = arrayOf(0f to Color(0xFFFFD9B8), 0.6f to Color(0xFFFFB57E), 1f to Color(0xFFFF9A52))
+val MiniBlueStops = arrayOf(0f to Color(0xFFB7D2FF), 0.6f to Color(0xFF8FB6FF), 1f to Color(0xFF6B9BF5))
+val MiniYellowStops = arrayOf(0f to Color(0xFFFFE9A3), 0.6f to Color(0xFFFFC93D), 1f to Color(0xFFFFB020))
+val MiniPurpleStops = arrayOf(0f to Color(0xFFCDB4FF), 0.6f to Color(0xFFA78BFA), 1f to Color(0xFF8B5CF6))
+val MiniPeachStops = arrayOf(0f to Color(0xFFFFD2A8), 0.6f to Color(0xFFFFAB6B), 1f to Color(0xFFFB923C))
     val minis = remember {
         listOf(
             MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, MiniBlueStops, BlueShadow),
