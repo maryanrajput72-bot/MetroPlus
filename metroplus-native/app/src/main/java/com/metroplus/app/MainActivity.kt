@@ -52,7 +52,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.AccessTime
@@ -256,8 +255,7 @@ fun MetroPlusApp() {
                     onEdit = { closeDrawer(); screen = AppScreen.EDIT_PROFILE },
                     onMenu = { name ->
                         closeDrawer()
-                        if (name == "app Setting") { activeNav = NavTab.SETTINGS; screen = AppScreen.SETTINGS }
-                        else if (name == "Calculator setting") screen = AppScreen.CALC_SETTINGS
+                        if (name == "Calculator setting") screen = AppScreen.CALC_SETTINGS
                         else if (name == "Gps setting") screen = AppScreen.GPS_SETTINGS
                         else if (name == "Tl/Rp access setting") screen = AppScreen.TLRP_SETTINGS
                         else notYet(name)
@@ -523,13 +521,14 @@ private fun ProfileDrawer(
         }
         DrawerSection("SETTINGS")
         DrawerCard {
-            DrawerMenuRow(icon = Icons.Filled.Calculate, label = "Calculator setting", colors = listOf(Color(0xFFFFC04D), Color(0xFFF08C00)), onClick = { onMenu("Calculator setting") })
+            // Neeche wali "app Setting" row khatam (uska order) — Settings ab
+            // sirf neeche dock ke Settings tab se khulengi. Baaki 3 rows ke
+            // icon gradients thore dark (pehle zyada light lagte the).
+            DrawerMenuRow(icon = Icons.Filled.Calculate, label = "Calculator setting", colors = listOf(Color(0xFFF5B03D), Color(0xFFDE7E00)), onClick = { onMenu("Calculator setting") })
             DrawerDivider()
-            DrawerMenuRow(icon = Icons.Filled.GpsFixed, label = "Gps setting", colors = listOf(Color(0xFF5AB0FF), Color(0xFF1A6FD8)), onClick = { onMenu("Gps setting") })
+            DrawerMenuRow(icon = Icons.Filled.GpsFixed, label = "Gps setting", colors = listOf(Color(0xFF4A9CF0), Color(0xFF1663C4)), onClick = { onMenu("Gps setting") })
             DrawerDivider()
-            DrawerMenuRow(icon = Icons.Filled.AdminPanelSettings, label = "Tl/Rp access setting", colors = listOf(Color(0xFFA78BFA), Color(0xFF5B3FD0)), onClick = { onMenu("Tl/Rp access setting") })
-            DrawerDivider()
-            DrawerMenuRow(icon = Icons.Filled.Settings, label = "app Setting", colors = listOf(Color(0xFFFF7EB0), Color(0xFFE91E63)), onClick = { onMenu("app Setting") })
+            DrawerMenuRow(icon = Icons.Filled.AdminPanelSettings, label = "Tl/Rp access setting", colors = listOf(Color(0xFF9670F0), Color(0xFF4E34C2)), onClick = { onMenu("Tl/Rp access setting") })
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Neeche: version pill + laal "Check update" button.
@@ -541,7 +540,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.43", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.44", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

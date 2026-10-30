@@ -207,12 +207,18 @@ fun HomeScreen(
             Banner("ONLINE PORTAL", "Online Portal", "Tap to open portal", R.drawable.img_portal, PurpleStops, PurpleShadow)
         )
     }
+// More with Metro tiles ke liye thore dark stops (uska order) — upar wale
+// banners inhi purane stops pe rahenge, sirf 4 tiles dark hui hain.
+val MiniBlueStops = arrayOf(0f to Color(0xFFDCE9FF), 0.6f to Color(0xFFBFD2FF), 1f to Color(0xFF9CBCFF))
+val MiniYellowStops = arrayOf(0f to Color(0xFFFFF0B8), 0.6f to Color(0xFFFFDD7D), 1f to Color(0xFFFFCC4D))
+val MiniPurpleStops = arrayOf(0f to Color(0xFFEADFFF), 0.6f to Color(0xFFD0BAFF), 1f to Color(0xFFB898FF))
+val MiniPeachStops = arrayOf(0f to Color(0xFFFFE7D0), 0.6f to Color(0xFFFFC9A0), 1f to Color(0xFFFFB07C))
     val minis = remember {
         listOf(
-            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, BlueStops, BlueShadow),
-            MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, YellowStops, YellowShadow),
-            MiniCard("REPORTS", "Complaints", "Tap to open complaints", "complaints tom agm tkm reports", R.drawable.img_complaint, PurpleStops, PurpleShadow),
-            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, PeachStops, PeachShadow)
+            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, MiniBlueStops, BlueShadow),
+            MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, MiniYellowStops, YellowShadow),
+            MiniCard("REPORTS", "Complaints", "Tap to open complaints", "complaints tom agm tkm reports", R.drawable.img_complaint, MiniPurpleStops, PurpleShadow),
+            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, MiniPeachStops, PeachShadow)
         )
     }
     val hubs = remember {
