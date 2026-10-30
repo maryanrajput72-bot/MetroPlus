@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.DoorFront
-import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MeetingRoom
@@ -127,13 +126,16 @@ private fun TdCircle(icon: ImageVector, desc: String, onClick: () -> Unit) {
     ) { Icon(icon, contentDescription = desc, tint = TdInk, modifier = Modifier.size(19.dp)) }
 }
 
-// Station hero: 125° gradient (Opening neela, Closing laal), kona 24, watermark,
-// bus avatar + "Daily Shift Register", save/WhatsApp chhote gol buttons, shift + date chips, revenue.
+// Station hero: 125° gradient (Opening gehra neela, Closing gehra laal-gulabi),
+// kona 24, watermark, bus avatar + "Daily Shift Register", save/WhatsApp
+// chhote gol buttons, shift + date chips, revenue.
 @Composable
 private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
     val shape = RoundedCornerShape(24.dp)
-    val stops = if (closing) arrayOf(0f to Color(0xFFF2BDC0), 0.55f to Color(0xFFE69A9E), 1f to Color(0xFFE69A9E))
-    else arrayOf(0f to Color(0xFFDCECFF), 0.55f to Color(0xFFB9D4FB), 1f to Color(0xFFB9D4FB))
+    // Pehle wala card DONO modes me dark (uska order): Closing halka pink
+    // #F2BDC0→#E69A9E tha, Opening halka neela #DCECFF→#B9D4FB tha.
+    val stops = if (closing) arrayOf(0f to Color(0xFFE88F97), 0.55f to Color(0xFFD46970), 1f to Color(0xFFD46970))
+    else arrayOf(0f to Color(0xFFA9C7F7), 0.55f to Color(0xFF86A9EF), 1f to Color(0xFF86A9EF))
     val shadow = if (closing) Color(0xFF9E1F25).copy(alpha = 0.16f) else Color(0xFF2563EB).copy(alpha = 0.14f)
     val border = if (closing) Color(0xFF9E1F25).copy(alpha = 0.3f) else Color(0xFF2563EB).copy(alpha = 0.22f)
     val shift = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift"
@@ -359,18 +361,7 @@ private fun OpeningMode(vm: TomDataViewModel, onGuiNote: (String) -> Unit) {
 // ---------------- CLOSING MODE ----------------
 @Composable
 private fun ClosingMode(vm: TomDataViewModel, onGuiNote: (String) -> Unit) {
-    val shape = RoundedCornerShape(18.dp)
-    Row(
-        modifier = Modifier.height(47.dp).cssShadow(5.dp, shape, Color(0xFFB02A31).copy(alpha = 0.32f)).clip(shape)
-            .background(cssLinear(135f, 0f to Color(0xFFD33941), 1f to Color(0xFF9E1F25))).clickable { onGuiNote("Enter Data (Closing Shift)") }
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(Icons.Filled.EditNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Enter Data (Closing Shift)", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-    }
-    Spacer(modifier = Modifier.height(14.dp))
+    // Enter Data button hata diya (uska order) — data cards seedha dikhte hain.
     TomCard(P3, R.drawable.img_icon_roll, "BOP Roll", "Used: 0", Purple) {
         FieldRow(vm, listOf(Field("bop_open", "Opening"), Field("bop_recv", "Received"), Field("bop_dist", "Distribute"), Field("bop_close", "Closing")))
         Spacer(modifier = Modifier.height(11.dp))
