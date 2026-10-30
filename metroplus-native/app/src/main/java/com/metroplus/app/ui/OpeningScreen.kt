@@ -66,6 +66,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -210,7 +211,7 @@ private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: 
             Column(modifier = Modifier.weight(1f).padding(start = 14.dp, end = 10.dp)) {
                 Text(title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = OpInk)
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(sub, fontSize = 12.5.sp, color = OpMuted, lineHeight = 15.sp)
+                Text(sub, fontSize = 12.5.sp, color = OpMuted, lineHeight = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             Box(modifier = Modifier.size(32.dp).background(Color(0xFFF5F1F1), CircleShape), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF5B6B57), modifier = Modifier.size(18.dp))
@@ -219,25 +220,26 @@ private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: 
     }
 }
 
-// Staff / Leave tile: white→#FFF7FC, kona 24, padding 16, 3D image tile, 18sp heavy title, 38dp white arrow.
+// Staff / Leave tile: trial .op-tile jaisa — white, kona 22, padding 14, 3D image tile,
+// 18sp heavy title, 38dp white arrow; sub 1 line (is se sab tiles ki height barabar 86dp rehti hai).
 @Composable
 private fun FancyTile(title: String, sub: String, iconBg: List<Color>, image: Int, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().cssShadow(9.dp, shape, Color(0xFF442850).copy(alpha = 0.10f)).clip(shape)
-            .background(cssLinear(135f, 0f to Color.White, 1f to Color(0xFFFFF7FC))).border(1.dp, Color.White.copy(alpha = 0.9f), shape)
+        modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
+            .background(Color.White).border(1.dp, OpInk.copy(alpha = 0.06f), shape)
             .clickable { onClick() }
     ) {
         Watermark(138.dp, x = 228.dp, y = (-23).dp, alpha = 0.075f)
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier.size(58.dp).cssShadow(8.dp, RoundedCornerShape(18.dp), Color(0xFF281437).copy(alpha = 0.18f))
                     .background(cssLinear(145f, 0f to iconBg[0], 1f to iconBg[1]), RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp))
             ) { Image(painterResource(id = image), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize()) }
-            Column(modifier = Modifier.weight(1f).padding(start = 15.dp, end = 10.dp)) {
+            Column(modifier = Modifier.weight(1f).padding(start = 14.dp, end = 10.dp)) {
                 Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF20152B))
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(sub, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF716878), lineHeight = 18.sp)
+                Text(sub, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF716878), lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Box(
                 modifier = Modifier.size(38.dp).cssShadow(3.dp, CircleShape, Color(0xFF2D143C).copy(alpha = 0.10f)).background(Color.White, CircleShape),
