@@ -1,4 +1,4 @@
-# Metro+ Native App — Handoff (v1.39 / versionCode 40) — DEBUG build
+# Metro+ Native App — Handoff (v1.40 / versionCode 41) — DEBUG build
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
@@ -12,24 +12,34 @@
   and vice versa (same cert, versionCode keeps increasing). Updater manifest chain
   stays common for both.
 
+## Dictation series (30 Oct 2026, user's order)
+- Zabii ne 7 items dictate kiye (PENDING-ITEMS.md me poori tafseel);
+  15:55 PKT allow mila: har item DETAIL se, EK EK KARKE banana hai —
+  ek item ki DEBUG version updater pe, phone check ke baad agla item.
+
+## v1.40 change (30 Oct 2026) — Item 1 ONLY, DEBUG build, no R8
+- Home header greeting "Hey There 👋" → **"Hi Aryan 👋"** (demo naam Aryan;
+  signup se naam aana future kaam hai, signup banega tab).
+- Welcome card: date chip ab **shift chip ke NEECHE apni row me** (pehle
+  dono ek row me barabar me the); date format poora: **"Friday,
+  30 October"** ("EEEE, d MMMM"; pehle "Fri, Oct 30" tha). Card height
+  182dp me naya layout fit hai (content ~163dp).
+- DEAR Aryan / Shaheed-e-Millat / Welcome to the Metro + app / Operator
+  badge — pehle se theek the, inko haath nahi lagaya.
+
 ## v1.39 change (30 Oct 2026) — DEBUG build, no R8
-- TOM Data Register cards, REAL fix (user verdict: v1.38 gaps/radius were not
-  enough, cards still big): TomCard's 219dp Watermark image forced every card to
-  at least 219dp tall (Box wraps to its largest child; offset does not shrink
-  layout size) — far above content (~128dp for a 1-row card). Watermark REMOVED
-  from TomCard (trial .tom-card has none), so cards are now exactly content-fit
-  ("jitna usme hai utna hi") in BOTH Opening and Closing modes (TomCard is
-  shared; MachineCard uses it too). StationHero watermark kept (hero was not
-  the complaint). Colors NOT touched (user: perfect).
-- Closing WhatsApp buttons: old `img_icon_whatsapp.webp` is opaque RGB (light-grey
-  square background, zero transparent pixels) — that grey/white box showed on the
-  green buttons. New asset `img_icon_whatsapp_clean.webp`: same logo, background
-  + soft shadow removed by edge flood-fill through low-saturation pixels
-  (white phone survives: it is enclosed by green, flood fill cannot reach it).
-  Verified on a green-gradient preview: logo sits directly on green, no white.
-  Sizes up (user: bigger so it is visible): 30→36dp on the 48dp squares,
-  22→26dp on the wide Share button. GUI phase only — taps still show the
-  GUI-phase note.
+- TOM Data Register cards, REAL fix: TomCard's 219dp Watermark image forced
+  every card to at least 219dp tall (Box wraps to its largest child; offset
+  does not shrink layout size) — far above content (~128dp for a 1-row card).
+  Watermark REMOVED from TomCard (trial .tom-card has none), so cards are now
+  exactly content-fit in BOTH Opening and Closing modes. Colors NOT touched.
+- Closing WhatsApp buttons: old `img_icon_whatsapp.webp` is opaque RGB
+  (light-grey square background, zero transparent pixels). New asset
+  `img_icon_whatsapp_clean.webp`: background + soft shadow removed by edge
+  flood-fill through low-saturation pixels (white phone survives: enclosed
+  by green). Verified on green-gradient preview, no white. Sizes up:
+  30→36dp on the 48dp squares, 22→26dp on the wide Share button. GUI phase
+  only — taps still show the GUI-phase note.
 - NOTE on the clean logo asset: GitHub MCP tools are text-only, so the binary
   `img_icon_whatsapp_clean.webp` is stored in the repo as base64 text at
   `app/src/main/res/drawable-nodpi/img_icon_whatsapp_clean.webp.b64`
@@ -85,4 +95,4 @@ to the updater manifest (`maryanrajput72-bot/MetroPlus/metroplus-app-version.jso
 
 ## Folder
 - `app/` source + resources, `gradle/` + `gradlew*` wrapper, `keystore/` signing key,
-  `apk/MetroPlus-v1.39-debug.apk` last built (DEBUG) build.
+  `apk/MetroPlus-v1.40-debug.apk` last built (DEBUG) build.

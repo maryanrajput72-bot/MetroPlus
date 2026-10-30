@@ -33,7 +33,7 @@ object ForegroundTicker {
 // Format: {"versionCode": 12, "versionName": "1.11", "apkUrl": "https://.../MetroPlus-v1.11.apk"}
 object UpdateManager {
     const val MANIFEST_URL = "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-app-version.json"
-    const val CURRENT_VERSION_CODE = 40
+    const val CURRENT_VERSION_CODE = 41
 
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile private var cancelled = false
