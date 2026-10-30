@@ -1,6 +1,13 @@
 package com.metroplus.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -89,7 +96,7 @@ internal enum class OpTab { MENU, DATA, STAFF, LEAVE, GPS }
 private val OpInk = Color(0xFF14181C)
 private val OpMuted = Color(0xFF6B7280)
 
-private val demoStaff = listOf("Ahsan" to "1994", "Shehryar" to "3552", "Tahir" to "2022", "Shahid" to "2884", "Usman" to "3212")
+internal val demoStaff = listOf("Ahsan" to "1994", "Shehryar" to "3552", "Tahir" to "2022", "Shahid" to "2884", "Usman" to "3212")
 
 // Trial ke 5 staff status (pill + menu option ke rang).
 internal enum class StaffStatus(val label: String, val pill: List<Color>, val pillBorder: Color, val opt: List<Color>, val optText: Color, val optBorder: Color) {
@@ -118,6 +125,7 @@ internal class OpeningViewModel : ViewModel() {
     val otShift = mutableStateOf(leaveShift.value)
     val otName = mutableStateOf("")
     val otId = mutableStateOf("")
+    val otPicked = mutableStateOf<String?>(null)
 }
 
 private fun demoShift(): String = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning" else "Evening"
@@ -126,7 +134,13 @@ private fun demoShift(): String = if (Calendar.getInstance().get(Calendar.HOUR_O
 fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit) {
     val vm: OpeningViewModel = viewModel()
     var tab by vm.tab
-    BackHandler { if (tab != OpTab.MENU) tab = OpTab.MENU else onBack() }
+    // Item 4: Staff Edit page (trial staffEditScreen) — Staff tab ke upar slide hoke aata hai.
+    var staffEditOpen by remember { mutableStateOf(false) }
+    BackHandler {
+        if (staffEditOpen) staffEditOpen = false
+        else if (tab != OpTab.MENU) tab = OpTab.MENU
+        else onBack()
+    }
 
     val (titleIcon, titleTint, title) = when (tab) {
         OpTab.MENU -> Triple(Icons.Filled.WbSunny, Color(0xFFF59E0B), "Opening")
@@ -135,7 +149,8 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
         OpTab.LEAVE -> Triple(Icons.Filled.CalendarMonth, Color(0xFF0F766E), "Leave Form")
         OpTab.GPS -> Triple(Icons.Filled.PhotoCamera, Color(0xFF1A6FD8), "GPS Picture")
     }
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // Header: white 94%, padding 16/20, 44dp gol back (halki border), beech me icon + 17sp title.
         Row(
             modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding()
@@ -158,10 +173,19 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
             when (tab) {
                 OpTab.MENU -> OpeningMenu { tab = it }
                 OpTab.DATA -> OpeningDataTab(vm, onGuiNote)
-                OpTab.STAFF -> OpeningStaffTab(vm, onGuiNote)
+                OpTab.STAFF -> OpeningStaffTab(vm, onGuiNote) { staffEditOpen = true }
                 OpTab.LEAVE -> OpeningLeaveTab(vm, onGuiNote)
                 OpTab.GPS -> OpeningGpsTab(onGuiNote, onOpenCamera)
             }
+        }
+        }
+        AnimatedVisibility(
+            visible = staffEditOpen,
+            enter = slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { it } + fadeIn(animationSpec = tween(350)),
+            exit = slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { it } + fadeOut(animationSpec = tween(350)),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            StaffEditScreen(onBack = { staffEditOpen = false }, onGuiNote = onGuiNote)
         }
     }
 }
@@ -275,11 +299,14 @@ private fun OpeningDataTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
             }
         }
         Spacer(modifier = Modifier.height(18.dp))
-        BigButton("Send to WhatsApp", Icons.Filled.Chat, listOf(Color(0xFF25D366), Color(0xFF128C7E)), Color.White) { onGuiNote("Send to WhatsApp") }
-        Spacer(modifier = Modifier.height(10.dp))
         BigButton("Save Opening", Icons.Filled.Save, listOf(Color(0xFFF59E0B), Color(0xFFD97706)), Color.White) { onGuiNote("Save Opening") }
         Spacer(modifier = Modifier.height(10.dp))
-        BigButton("Copy Opening Report", Icons.Filled.ContentCopy, null, Color(0xFF333333)) { onGuiNote("Copy Opening Report") }
+        // Item 4: Save pehle apni line me; uske neeche ek hi line me
+        // chhota WhatsApp + Copy (sirf "WhatsApp" / "Copy" labels).
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            SmallButton("WhatsApp", Icons.Filled.Chat, listOf(Color(0xFF25D366), Color(0xFF128C7E)), Color.White, Modifier.weight(1f)) { onGuiNote("WhatsApp") }
+            SmallButton("Copy", Icons.Filled.ContentCopy, null, Color(0xFF333333), Modifier.weight(1f)) { onGuiNote("Copy") }
+        }
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -356,6 +383,23 @@ private fun BigButton(label: String, icon: ImageVector, gradient: List<Color>?, 
 }
 
 // ---------------- STAFF ATTENDANCE ----------------
+
+// Chhota button (WhatsApp | Copy row ke liye): 48dp uncha, kona 13,
+// icon 15, text 14sp ExtraBold — BigButton (54dp) se chhota.
+@Composable
+private fun SmallButton(label: String, icon: ImageVector, gradient: List<Color>?, fg: Color, modifier: Modifier, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(13.dp)
+    Row(
+        modifier = modifier.height(48.dp).clip(shape)
+            .then(if (gradient != null) Modifier.background(cssLinear(135f, 0f to gradient[0], 1f to gradient[1])) else Modifier.background(Color.White).border(1.dp, Color(0xFFDDDDDD), shape))
+            .clickable { onClick() },
+        horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(15.dp))
+        Spacer(modifier = Modifier.width(7.dp))
+        Text(label, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = fg)
+    }
+}
 private val OperatorAccents = listOf(
     Triple(Color(0xFFE31837), Color(0xFFFFE4E7), listOf(Color(0xFFFF455C), Color(0xFFC81036))),
     Triple(Color(0xFF8B24E8), Color(0xFFF0E2FF), listOf(Color(0xFFA43AF0), Color(0xFF701BC6))),
@@ -366,7 +410,7 @@ private val OperatorAccents = listOf(
 )
 
 @Composable
-private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
+private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, onOpenStaffEdit: () -> Unit) {
     val total = demoStaff.size
     val onDuty = vm.status.count { it == StaffStatus.ON_DUTY }
     val off = vm.status.count { it == StaffStatus.OFF }
@@ -430,7 +474,7 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
             Row(
                 modifier = Modifier.height(44.dp).cssShadow(5.dp, RoundedCornerShape(13.dp), Color(0xFF8B24E8).copy(alpha = 0.24f))
                     .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 1f to Color(0xFFD82EDC)), RoundedCornerShape(13.dp))
-                    .clip(RoundedCornerShape(13.dp)).clickable { onGuiNote("Edit Staff List") }.padding(horizontal = 17.dp),
+                    .clip(RoundedCornerShape(13.dp)).clickable { onOpenStaffEdit() }.padding(horizontal = 17.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Filled.EditNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
@@ -590,7 +634,7 @@ private fun OpeningLeaveTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
             FormLabel("Date"); DateBox(today) { onGuiNote("Date Picker") }
             FormGap(); FormLabel("Station"); StationBox("Shaheed-e-Millat") { onGuiNote("Station Picker") }
             FormGap(); FormLabel("Shift"); ShiftPick(shift) { shift = it }
-            FormGap(); FormLabel("Name"); TextBox(name, "Type name or pick below") { name = it }
+            FormGap(); FormLabel("Name"); TextBox(name, "Type name or pick below") { name = it; if (it.isEmpty()) picked = null }
             Spacer(modifier = Modifier.height(8.dp))
             StaffPicker(picked) { n, id -> picked = n; name = n; empId = id }
             FormGap(); FormLabel("Employee ID"); TextBox(empId, "Employee ID", orange = true) { empId = it }
@@ -599,25 +643,42 @@ private fun OpeningLeaveTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
         var otShift by vm.otShift
         var otName by vm.otName
         var otId by vm.otId
+        var otPicked by vm.otPicked
         FormCard("Overtime Detail") {
             FormLabel("Date"); DateBox(today) { onGuiNote("Date Picker") }
-            FormGap(); FormLabel("Station"); StationBox("Select station") { onGuiNote("Station Picker") }
+            // Item 5: Overtime Leave Form wala station + wahi staff chips use karta hai.
+            FormGap(); FormLabel("Station"); StationBox("Shaheed-e-Millat") { onGuiNote("Station Picker") }
             FormGap(); FormLabel("Shift"); ShiftPick(otShift) { otShift = it }
-            FormGap(); FormLabel("Name"); TextBox(otName, "Type name or pick below") { otName = it }
+            FormGap(); FormLabel("Name"); TextBox(otName, "Type name or pick below") { otName = it; if (it.isEmpty()) otPicked = null }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("No staff saved for this station", fontSize = 12.sp, color = Color(0xFF9AA1AB), modifier = Modifier.padding(vertical = 8.dp))
+            StaffPicker(otPicked) { n, id -> otPicked = n; otName = n; otId = id }
             FormGap(); FormLabel("Employee ID"); TextBox(otId, "Employee ID", orange = true) { otId = it }
         }
         Spacer(modifier = Modifier.height(16.dp))
+        // Item 5: Generate dabane par generated detail NEECHE dikhta hai
+        // (pehle sirf GUI note aata tha).
+        var generated by remember { mutableStateOf(false) }
         Row(
             modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), Color(0xFF8B24E8).copy(alpha = 0.25f))
                 .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 1f to Color(0xFFD82EDC)), RoundedCornerShape(14.dp))
-                .clip(RoundedCornerShape(14.dp)).clickable { onGuiNote("Generate Note") },
+                .clip(RoundedCornerShape(14.dp)).clickable { generated = true },
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.Filled.EditNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text("Generate Note", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+        }
+        if (generated) {
+            Spacer(modifier = Modifier.height(16.dp))
+            FormCard("Generated Detail") {
+                GenRow("Date", today); GenRow("Station", "Shaheed-e-Millat"); GenRow("Shift", shift)
+                GenRow("Name", name.ifEmpty { "—" }); GenRow("Employee ID", empId.ifEmpty { "—" })
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("Overtime", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = OpInk)
+                Spacer(modifier = Modifier.height(4.dp))
+                GenRow("Date", today); GenRow("Station", "Shaheed-e-Millat"); GenRow("Shift", otShift)
+                GenRow("Name", otName.ifEmpty { "—" }); GenRow("Employee ID", otId.ifEmpty { "—" })
+            }
         }
         Spacer(modifier = Modifier.height(24.dp))
     }
@@ -637,6 +698,14 @@ private fun FormCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable private fun FormGap() = Spacer(modifier = Modifier.height(12.dp))
+
+@Composable
+private fun GenRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, fontSize = 13.sp, color = Color(0xFF5B6470), modifier = Modifier.weight(1f))
+        Text(value, fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = OpInk)
+    }
+}
 
 @Composable
 private fun FormLabel(text: String) {
@@ -716,6 +785,9 @@ private fun TextBox(value: String, placeholder: String, orange: Boolean = false,
 private fun StaffPicker(picked: String?, onPick: (String, String) -> Unit) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
         demoStaff.forEachIndexed { i, (name, id) ->
+            // Item 5: chuna hua naam list se GAYAB ho jata hai (pehle laal
+            // border ke sath rehta tha). Naam clear karo to wapas aa jata hai.
+            if (name == picked) return@forEachIndexed
             val c = PickColors[i % PickColors.size]
             val shape = RoundedCornerShape(16.dp)
             Row(
