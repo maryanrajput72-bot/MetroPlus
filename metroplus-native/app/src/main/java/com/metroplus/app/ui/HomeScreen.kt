@@ -196,7 +196,7 @@ fun HomeScreen(
     }
     val now = Calendar.getInstance()
     val shift = if (now.get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift"
-    val dateText = SimpleDateFormat("EEE, MMM d", Locale.ENGLISH).format(now.time)
+    val dateText = SimpleDateFormat("EEEE, d MMMM", Locale.ENGLISH).format(now.time)
 
     val banners = remember {
         listOf(
@@ -258,7 +258,7 @@ fun HomeScreen(
                             modifier = Modifier.size(46.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("Hey There 👋", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Ink, letterSpacing = (-0.2).sp)
+                        Text("Hi Aryan 👋", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Ink, letterSpacing = (-0.2).sp)
                     }
                     // Trial: LIVE #00E065 / OFFLINE #D43D2A — bg = rang 11%, border = rang 28%.
                     val live = if (isOnline) Color(0xFF00E065) else Color(0xFFD43D2A)
@@ -468,7 +468,9 @@ private fun WelcomeBanner(shift: String, dateText: String, shadowColor: Color, h
                 Text("Shaheed-e-Millat", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, maxLines = 1, softWrap = false, letterSpacing = (-0.3).sp)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            // Item 1 (30 Oct 2026): shift chip upar, date chip uske NEECHE apni row me
+            // (pehle dono ek hi row me barabar me the).
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 WelcomeChip(shift)
                 WelcomeChip(dateText)
             }
