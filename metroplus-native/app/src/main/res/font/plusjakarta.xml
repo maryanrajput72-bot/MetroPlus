@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Trial app ka font (PlusJakartaSans) — poori app me yahi font chalega. -->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font android:fontStyle="normal" android:fontWeight="400" android:font="@font/plusjakarta_400" />
+    <font android:fontStyle="normal" android:fontWeight="500" android:font="@font/plusjakarta_500" />
+    <font android:fontStyle="normal" android:fontWeight="600" android:font="@font/plusjakarta_600" />
+    <font android:fontStyle="normal" android:fontWeight="700" android:font="@font/plusjakarta_700" />
+    <font android:fontStyle="normal" android:fontWeight="800" android:font="@font/plusjakarta_800" />
+</font-family>

@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="64dp" android:height="64dp"
+    android:viewportWidth="64" android:viewportHeight="64">
+    <path android:pathData="M 14,59 a 18,3.2 0 1,0 36,0 a 18,3.2 0 1,0 -36,0" android:fillColor="#000" android:fillAlpha=".18"></path>
+    <path android:pathData="M 8,33 a 24,24 0 1,0 48,0 a 24,24 0 1,0 -48,0" android:fillColor="#164f9e"></path>
+    <path android:pathData="M 8,31 a 24,24 0 1,0 48,0 a 24,24 0 1,0 -48,0"><aapt:attr name="android:fillColor"><gradient android:type="radial" android:centerX=".35" android:centerY=".3" android:gradientRadius=".8"><item android:offset="0" android:color="#9fdcff"/><item android:offset="0.55" android:color="#3c9cf0"/><item android:offset="1" android:color="#1a5fc0"/></gradient></aapt:attr></path>
+    <group>
+        <clip-path android:pathData="M 8,31 a 24,24 0 1,0 48,0 a 24,24 0 1,0 -48,0"/>
+        <path android:pathData="M14 17 q8-4 13 1 q3 5-2 8 q-5 1-6 6 q-1 5-7 4 q-6-6 2-19z"><aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="0" android:startY="0" android:endX="0" android:endY="1"><item android:offset="0" android:color="#8ef07e"/><item android:offset="1" android:color="#2fae3c"/></gradient></aapt:attr></path>
+        <path android:pathData="M36 22 q7-3 12 2 q5 4 1 9 q-4 2-6 7 q-2 6-7 4 q-3-5 0-10 q-5-6 0-12z"><aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="0" android:startY="0" android:endX="0" android:endY="1"><item android:offset="0" android:color="#8ef07e"/><item android:offset="1" android:color="#2fae3c"/></gradient></aapt:attr></path>
+        <path android:pathData="M22 46 q5-2 9 2 q-1 6-8 6 q-4-3-1-8z"><aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="0" android:startY="0" android:endX="0" android:endY="1"><item android:offset="0" android:color="#8ef07e"/><item android:offset="1" android:color="#2fae3c"/></gradient></aapt:attr></path>
+    </group>
+    <group>
+        <clip-path android:pathData="M 8,31 a 24,24 0 1,0 48,0 a 24,24 0 1,0 -48,0"/>
+        <path android:pathData="M 21,31 a 11,24 0 1,0 22,0 a 11,24 0 1,0 -22,0" android:fillColor="#00000000" android:strokeColor="#fff" android:strokeWidth="1.6" android:strokeAlpha=".35"></path>
+        <path android:pathData="M8 31h48M11 19h42M11 43h42" android:fillColor="#00000000" android:strokeColor="#fff" android:strokeWidth="1.6" android:strokeAlpha=".35"></path>
+    </group>
+    <group android:rotation="-30" android:pivotX="23" android:pivotY="19">
+        <path android:pathData="M 15,19 a 8,4.5 0 1,0 16,0 a 8,4.5 0 1,0 -16,0" android:fillColor="#fff" android:fillAlpha=".45"></path>
+    </group>
+</vector>
