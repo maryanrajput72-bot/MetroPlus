@@ -51,7 +51,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -553,20 +552,13 @@ private fun OperatorCard(vm: OpeningViewModel, i: Int, name: String, id: String)
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(13.dp))
                     }
-                    // Trial ka status menu: 192dp, peach gradient, 5 rangeen options.
-                    DropdownMenu(
-                        expanded = menuOpen, onDismissRequest = { menuOpen = false },
-                        modifier = Modifier.width(192.dp).background(cssLinear(160f, 0f to Color(0xFFFFF7F1), 1f to Color(0xFFFDEBF0))).padding(horizontal = 8.dp)
-                    ) {
-                        StaffStatus.values().forEach { s ->
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).clip(RoundedCornerShape(12.dp))
-                                    .background(cssLinear(135f, 0f to s.opt[0], 1f to s.opt[1])).border(1.dp, s.optBorder, RoundedCornerShape(12.dp))
-                                    .clickable { vm.status[i] = s; menuOpen = false }.padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) { Text(s.label, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = s.optText) }
-                        }
-                    }
+                    // 63 style: dropdown ki jagah option cards wali sheet (rang/label wahi).
+                    if (menuOpen) OptionPickerSheet(
+                        "Select Status",
+                        StaffStatus.values().map { PickerOption(it.label, it.opt, it.optBorder, it.optText) },
+                        { opt -> vm.status[i] = StaffStatus.values().first { it.label == opt.label }; menuOpen = false },
+                        { menuOpen = false }
+                    )
                 }
             }
             if (status == StaffStatus.ON_DUTY) {
@@ -600,12 +592,20 @@ private fun TimeStep(label: String, onClick: () -> Unit) {
 private val PickColors = listOf(
     listOf(Color(0xFFF7D7D9), Color(0xFFEFB1B4)), listOf(Color(0xFFFFF3C2), Color(0xFFFFE38A)),
     listOf(Color(0xFFD1FAE5), Color(0xFFA7F3D0)), listOf(Color(0xFFDBEAFE), Color(0xFFBFDBFE)),
-    listOf(Color(0xFFEDE9FE), Color(0xFFDDD6FE))
+    listOf(Color(0xFFEDE9FE), Color(0xFFDDD6FE)), listOf(Color(0xFFFFEDD5), Color(0xFFFED7AA))
 )
 
 @Composable
 private fun OpeningLeaveTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
     val today = SimpleDateFormat("dd-MM-yyyy", Locale.US).format(Date())
+    var leaveDate by remember { mutableStateOf(today) }
+    var leaveStation by remember { mutableStateOf("Shaheed-e-Millat") }
+    var leaveDateOpen by remember { mutableStateOf(false) }
+    var leaveStationOpen by remember { mutableStateOf(false) }
+    var otDate by remember { mutableStateOf(today) }
+    var otStation by remember { mutableStateOf("Shaheed-e-Millat") }
+    var otDateOpen by remember { mutableStateOf(false) }
+    var otStationOpen by remember { mutableStateOf(false) }
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         // Purple header: 135° #9B35F2→#7B20D4→#D82EDC, kona 22, 64dp logo tile.
         val hShape = RoundedCornerShape(22.dp)
@@ -631,29 +631,33 @@ private fun OpeningLeaveTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
         var empId by vm.leaveId
         var picked by vm.picked
         FormCard("Leave Form") {
-            FormLabel("Date"); DateBox(today) { onGuiNote("Date Picker") }
-            FormGap(); FormLabel("Station"); StationBox("Shaheed-e-Millat") { onGuiNote("Station Picker") }
+            FormLabel("Date"); DateBox(leaveDate) { leaveDateOpen = true }
+            FormGap(); FormLabel("Station"); StationBox(leaveStation) { leaveStationOpen = true }
             FormGap(); FormLabel("Shift"); ShiftPick(shift) { shift = it }
             FormGap(); FormLabel("Name"); TextBox(name, "Type name or pick below") { name = it; if (it.isEmpty()) picked = null }
             Spacer(modifier = Modifier.height(8.dp))
             StaffPicker(picked) { n, id -> picked = n; name = n; empId = id }
             FormGap(); FormLabel("Employee ID"); TextBox(empId, "Employee ID", orange = true) { empId = it }
         }
+        if (leaveDateOpen) DatePickerSheet(leaveDate, { leaveDate = it }, { leaveDateOpen = false })
+        if (leaveStationOpen) StationPickerSheet(leaveStation, { leaveStation = it }, { leaveStationOpen = false })
         Spacer(modifier = Modifier.height(30.dp))
         var otShift by vm.otShift
         var otName by vm.otName
         var otId by vm.otId
         var otPicked by vm.otPicked
         FormCard("Overtime Detail") {
-            FormLabel("Date"); DateBox(today) { onGuiNote("Date Picker") }
+            FormLabel("Date"); DateBox(otDate) { otDateOpen = true }
             // Item 5: Overtime Leave Form wala station + wahi staff chips use karta hai.
-            FormGap(); FormLabel("Station"); StationBox("Shaheed-e-Millat") { onGuiNote("Station Picker") }
+            FormGap(); FormLabel("Station"); StationBox(otStation) { otStationOpen = true }
             FormGap(); FormLabel("Shift"); ShiftPick(otShift) { otShift = it }
             FormGap(); FormLabel("Name"); TextBox(otName, "Type name or pick below") { otName = it; if (it.isEmpty()) otPicked = null }
             Spacer(modifier = Modifier.height(8.dp))
             StaffPicker(otPicked) { n, id -> otPicked = n; otName = n; otId = id }
             FormGap(); FormLabel("Employee ID"); TextBox(otId, "Employee ID", orange = true) { otId = it }
         }
+        if (otDateOpen) DatePickerSheet(otDate, { otDate = it }, { otDateOpen = false })
+        if (otStationOpen) StationPickerSheet(otStation, { otStation = it }, { otStationOpen = false })
         Spacer(modifier = Modifier.height(16.dp))
         // Item 5: Generate dabane par generated detail NEECHE dikhta hai
         // (pehle sirf GUI note aata tha).
@@ -791,7 +795,8 @@ private fun StaffPicker(picked: String?, onPick: (String, String) -> Unit) {
             val c = PickColors[i % PickColors.size]
             val shape = RoundedCornerShape(16.dp)
             Row(
-                modifier = Modifier.weight(1f).height(54.dp).cssShadow(2.dp, shape, OpInk.copy(alpha = 0.05f)).clip(shape)
+                // 63 jaisa: lamba naam (12+) poori line (lo-wide), chhota aadhi.
+                modifier = Modifier.then(if (name.length >= 12) Modifier.fillMaxWidth() else Modifier.weight(1f)).height(54.dp).cssShadow(2.dp, shape, OpInk.copy(alpha = 0.05f)).clip(shape)
                     .background(cssLinear(120f, 0f to c[0], 1f to c[1]))
                     .border(if (picked == name) 2.dp else 1.3.dp, if (picked == name) Color(0xFFE11D2E) else Color(0xFFE9EDF0), shape)
                     .clickable { onPick(name, id) }.padding(horizontal = 16.dp),
