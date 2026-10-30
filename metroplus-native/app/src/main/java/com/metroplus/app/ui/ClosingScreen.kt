@@ -116,19 +116,19 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     }
                 }
             }
-            ClSection("SHIFT CLOSINGS", top = 22.dp)
+            ClSection("SHIFT CLOSINGS", top = 18.dp)
             ClCard(watermark = 125.dp) {
                 ClIconTile(Icons.Filled.ConfirmationNumber, Color(0xFFD93C44), Color(0xFFA32228))
                 ClText("TOM · TKM · POS", "Ticket machines, TKM & POS closing", Modifier.weight(1f))
                 ClWa { onGuiNote("TOM · TKM · POS") }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ClCard(watermark = 122.dp) {
                 ClIconTile(Icons.Filled.DirectionsBus, Color(0xFFFFC04D), Color(0xFFF08C00))
                 ClText("RMBS Closing", "Red line station closing format", Modifier.weight(1f))
                 ClWa { onGuiNote("RMBS Closing") }
             }
-            ClSection("CLAIMS & REPORTS", top = 23.dp)
+            ClSection("CLAIMS & REPORTS", top = 18.dp)
             // Card Claim: upar icon + text, neeche −/count/+ (green) aur chaura Share.
             val shape = RoundedCornerShape(22.dp)
             Box(
@@ -141,7 +141,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         ClIconTile(Icons.Filled.Badge, Color(0xFFD42D35), Color(0xFF0F8F80))
                         ClText("Card Claim", "How many cards to claim?", Modifier.weight(1f))
                     }
-                    Spacer(modifier = Modifier.height(26.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ClStep("−") { cardCount = (cardCount - 1).coerceAtLeast(0) }
                         Box(
@@ -162,7 +162,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(17.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             ClCard(watermark = 122.dp, onClick = { onGuiNote("PMBS Complaint") }) {
                 ClIconTile(Icons.Filled.EditNote, Color(0xFFFF7A7A), Color(0xFFE53935))
                 ClText("PMBS Complaint", "Write an incident complaint letter", Modifier.weight(1f))
@@ -170,7 +170,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF5B6B57), modifier = Modifier.size(18.dp))
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -178,7 +178,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
 @Composable
 private fun ClSection(title: String, top: Dp) {
     Text(title, fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF8A929C), letterSpacing = 1.sp,
-        modifier = Modifier.padding(start = 4.dp, top = top, bottom = 13.dp))
+        modifier = Modifier.padding(start = 4.dp, top = top, bottom = 10.dp))
 }
 
 // White card: kona 22, padding 14, halki border + saya, watermark daein.

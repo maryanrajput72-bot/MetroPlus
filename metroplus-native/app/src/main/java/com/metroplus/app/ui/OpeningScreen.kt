@@ -197,12 +197,13 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
     }
 }
 
-// Opening Data / GPS tile: white, kona 22, padding 14, 58dp gradient icon, 16sp title, 32dp grey arrow.
+// Opening Data / GPS tile: white, kona 22, padding 14, 58dp gradient icon, 16sp title, 32dp grey arrow,
+// height FIXED 86dp (trial .op-tile jaisi — har font size pe chaaron tiles barabar).
 @Composable
 private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: () -> Unit, icon: @Composable () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
+        modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
             .background(Color.White).border(1.dp, OpInk.copy(alpha = 0.06f), shape).clickable { onClick() }
     ) {
         Watermark(132.dp, x = 232.dp, y = (-22).dp, alpha = 0.075f)
@@ -221,12 +222,12 @@ private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: 
 }
 
 // Staff / Leave tile: trial .op-tile jaisa — white, kona 22, padding 14, 3D image tile,
-// 18sp heavy title, 38dp white arrow; sub 1 line (is se sab tiles ki height barabar 86dp rehti hai).
+// 18sp heavy title, 38dp white arrow, height FIXED 86dp (har font size pe barabar).
 @Composable
 private fun FancyTile(title: String, sub: String, iconBg: List<Color>, image: Int, onClick: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
+        modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
             .background(Color.White).border(1.dp, OpInk.copy(alpha = 0.06f), shape)
             .clickable { onClick() }
     ) {
