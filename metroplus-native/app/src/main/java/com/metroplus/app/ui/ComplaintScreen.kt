@@ -11,6 +11,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -250,7 +251,11 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
     var incCasualties by remember { mutableStateOf("") }
     var incStatus by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // FIX (v1.42): form ka apna poora opaque background + click-consumer —
+    // pehle background nahi tha, is liye list peeche se nazar aati thi aur
+    // khaali jagah ke tap list tak pahunch jate the.
+    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
+        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
         CmpHeader(type.title, onBack)
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             CmpCard("Report Info", "AUTO DETAILS") {

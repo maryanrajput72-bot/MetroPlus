@@ -298,7 +298,11 @@ fun MetroPlusApp() {
             // Dock har page pe samne rehta hai — is liye page ka content dock ke upar khatam hota hai
             // (camera full-screen hai, wahan dock nahi).
             val dockSpace = if (shown == AppScreen.CAMERA) Modifier else Modifier.navigationBarsPadding().padding(bottom = 76.dp)
-            Box(modifier = Modifier.fillMaxSize().background(HomeBackground).then(dockSpace)) {
+            // FIX (v1.42): overlay ke khaali area ke tap Home tak na pahunchein —
+            // pehle overlay ki background tap nahi rokti thi, is liye khula page
+            // ke neeche wale home tiles bhi dab jate the.
+            Box(modifier = Modifier.fillMaxSize().background(HomeBackground).then(dockSpace)
+                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
                 when (shown) {
                     AppScreen.MONEY -> MoneyCalculatorScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.OPENING -> OpeningScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; screen = AppScreen.CAMERA })
@@ -537,7 +541,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.41", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.42", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +58,9 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var err by remember { mutableStateOf("") }
     val ink = Color(0xFF14181C)
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
+        // FIX (v1.42): khaali jagah ke tap Opening tab tak na pahunchein.
+        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             // Hero: purple gradient, back + pen tile + title + sub.
             val hShape = RoundedCornerShape(22.dp)
