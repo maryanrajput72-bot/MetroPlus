@@ -1,4 +1,4 @@
-# Metro+ Native App — Handoff (v1.53 / versionCode 54) — DEBUG build
+# Metro+ Native App — Handoff (v1.54 / versionCode 55) — DEBUG build
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
