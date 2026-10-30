@@ -145,6 +145,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // 63 jaisa: upar status bar + neeche nav bar 63 ke theme-color
+        // #B02A31 (gehra laal) me — edge-to-edge pe warna dono strips
+        // be-rang nazar aati thin (user ne red se mark ki thin). Icons
+        // safed rakhe hain taake gehre laal pe nazar aayen.
+        window.statusBarColor = android.graphics.Color.parseColor("#B02A31")
+        window.navigationBarColor = android.graphics.Color.parseColor("#B02A31")
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
         setContent { MetroPlusTheme { MetroPlusApp() } }
     }
 
@@ -540,7 +550,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.47", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.48", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

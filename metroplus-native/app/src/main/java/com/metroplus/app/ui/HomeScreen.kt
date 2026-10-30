@@ -223,14 +223,14 @@ val MiniPeachStops = arrayOf(0f to Color(0xFFFFD2A8), 0.6f to Color(0xFFFFAB6B),
     }
     val hubs = remember {
         listOf(
+            // Settings hub khatam (uska order) — sirf pehle 3 hubs rahenge.
+            // Baaki 3 ke colors waazeh dark (halka step nazar nahi aata tha).
             Hub("START SHIFT", Color(0xFFD9650F), "Opening", "Opening data, staff & GPS", R.drawable.ic_dock_opening,
-                arrayOf(0f to Color(0xFFFFF4E3), 0.6f to Color(0xFFFFE2BD), 1f to Color(0xFFFFD29E))),
+                arrayOf(0f to Color(0xFFFFEFC9), 0.6f to Color(0xFFFFD694), 1f to Color(0xFFFFBE78))),
             Hub("END SHIFT", Color(0xFF5B3FD0), "Closing", "End-of-shift reports", R.drawable.ic_dock_closing,
-                arrayOf(0f to Color(0xFFF4F0FF), 0.6f to Color(0xFFE4DBFF), 1f to Color(0xFFD5C8FF))),
+                arrayOf(0f to Color(0xFFE9DEFF), 0.6f to Color(0xFFCDB4FF), 1f to Color(0xFFAC8FFF))),
             Hub("ONLINE", Color(0xFF1C6FD1), "Online Portal", "Central online portal", R.drawable.ic_dock_portal,
-                arrayOf(0f to Color(0xFFEAF6FF), 0.6f to Color(0xFFD3EBFF), 1f to Color(0xFFBFE0FF))),
-            Hub("APP", Color(0xFFC1121F), "Settings", "Preferences & profile", R.drawable.ic_dock_settings,
-                arrayOf(0f to Color(0xFFFFF0F1), 0.6f to Color(0xFFFFDFE2), 1f to Color(0xFFFFCDD2)))
+                arrayOf(0f to Color(0xFFD6EBFF), 0.6f to Color(0xFFA9D2FF), 1f to Color(0xFF7FB9FF)))
         )
     }
     val pagerState = rememberPagerState(pageCount = { banners.size })
