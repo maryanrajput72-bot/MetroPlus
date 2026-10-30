@@ -325,7 +325,9 @@ fun HomeScreen(
                 }
             }
         }
-        // Banner carousel (trial CSS): card = (screen - 40) ka 88%, gap 12, center snap; side cards 0.92 + 75% opacity.
+        // Banner carousel (trial CSS): card = (screen - 40) ka 88%, gap 12; pehla card trial
+        // jaisa left se 20dp (deewar ke saath) — centered padding se pehla card 39dp andar
+        // ho jata tha, is liye contentPadding 20dp hai; side cards 0.92 + 75% opacity.
         // Unchai trial jaisi: sab cards sab se lambe card jitne (2-line "Money Calculator"), kam se kam 182 —
         // fixed 192 se "Open" button kat jata tha.
         item {
@@ -345,7 +347,7 @@ fun HomeScreen(
                 HorizontalPager(
                     state = pagerState,
                     pageSize = PageSize.Fixed(pageWidth),
-                    contentPadding = PaddingValues(horizontal = (maxWidth - pageWidth) / 2, vertical = 0.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
                     pageSpacing = 12.dp,
                     modifier = Modifier.padding(top = 6.dp, bottom = 18.dp)
                 ) { page ->

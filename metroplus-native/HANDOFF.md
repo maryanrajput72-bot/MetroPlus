@@ -1,9 +1,16 @@
-# Metro+ Native App — Handoff (v1.33 / versionCode 34)
+# Metro+ Native App — Handoff (v1.34 / versionCode 35)
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
 > Store password `android`, alias `androiddebugkey`, key password `android`.
 > Cert SHA-256: `b13501ef91dd30d621c645ea596010d57446a26e2aa5ce26215cc7dc28019302`.
+
+## v1.34 change (30 Oct 2026)
+- Home banner carousel: first card now sits 20dp from the left edge, exactly like trial
+  2.1.63 (was centered, so the first card sat ~39dp in on a 360dp screen). Only the
+  pager's `contentPadding` changed (`HorizontalPager` in `ui/HomeScreen.kt`) — card
+  contents, logos, art and text were NOT touched. Card width formula unchanged:
+  `(screen - 40dp) * 0.88`, gap 12dp.
 
 ## What this is
 - Native rebuild of the old Metro+ WebView staff app. Package `com.metroplus.app` (never change).
@@ -54,4 +61,4 @@ to the updater manifest (`maryanrajput72-bot/MetroPlus/metroplus-app-version.jso
 
 ## Folder
 - `app/` source + resources, `gradle/` + `gradlew*` wrapper, `keystore/` signing key,
-  `apk/MetroPlus-v1.33-release.apk` last built release.
+  `apk/MetroPlus-v1.34-release.apk` last built release.
