@@ -57,6 +57,8 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var newName by remember { mutableStateOf("") }
     var err by remember { mutableStateOf("") }
     val ink = Color(0xFF14181C)
+    var station by remember { mutableStateOf("Shaheed-e-Millat") }
+    var stationOpen by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
         // FIX (v1.42): khaali jagah ke tap Opening tab tak na pahunchein.
@@ -97,12 +99,12 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 Row(
                     modifier = Modifier.fillMaxWidth().height(37.dp).clip(RoundedCornerShape(10.dp))
                         .background(cssLinear(135f, 0f to Color(0xFFDCFCE7), 1f to Color(0xFFBBF7D0))).border(1.dp, Color(0xFFBBF7D0), RoundedCornerShape(10.dp))
-                        .clickable { onGuiNote("Station Picker") }.padding(horizontal = 10.dp),
+                        .clickable { stationOpen = true }.padding(horizontal = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Filled.LocationOn, contentDescription = null, tint = Color(0xFF9E1F25), modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Shaheed-e-Millat", fontSize = 13.5.sp, color = ink, modifier = Modifier.weight(1f))
+                    Text(station, fontSize = 13.5.sp, color = ink, modifier = Modifier.weight(1f))
                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(18.dp))
                 }
             }
@@ -165,6 +167,7 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             ) { Text("Save Changes", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             Spacer(modifier = Modifier.height(8.dp))
         }
+        if (stationOpen) StationPickerSheet(station, { station = it }, { stationOpen = false })
     }
 }
 

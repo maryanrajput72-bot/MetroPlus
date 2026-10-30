@@ -78,10 +78,11 @@ class ClosingViewModel : ViewModel() {
 fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     // Item 6: PMBS Complaint form (Item 3 wala form, type PMBS) — Closing ke upar slide hoke aata hai.
     var pmbsOpen by remember { mutableStateOf(false) }
-    BackHandler { if (pmbsOpen) pmbsOpen = false else onBack() }
+    var reportDmy by remember { mutableStateOf(SimpleDateFormat("dd-MM-yyyy", Locale.US).format(Date())) }
+    var reportDateOpen by remember { mutableStateOf(false) }
+    BackHandler { if (reportDateOpen) reportDateOpen = false else if (pmbsOpen) pmbsOpen = false else onBack() }
     val vm: ClosingViewModel = viewModel()
     var cardCount by vm.cardCount
-    val today = SimpleDateFormat("EEE, d MMM yyyy", Locale.ENGLISH).format(Date())
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -119,7 +120,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth().cssShadow(6.dp, RoundedCornerShape(16.dp), Color.Black.copy(alpha = 0.12f))
-                            .clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.96f)).clickable { onGuiNote("Date Picker") }
+                            .clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.96f)).clickable { reportDateOpen = true }
                             .padding(horizontal = 14.dp, vertical = 11.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -128,7 +129,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         }
                         Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                             Text("REPORT DATE", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF8A7FB5), letterSpacing = 1.sp)
-                            Text(today, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = ClInk)
+                            Text(dmyToDisplay(reportDmy, "EEE, d MMM yyyy"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = ClInk)
                         }
                         Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF8A7FB5), modifier = Modifier.size(20.dp))
                     }
@@ -200,6 +201,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         ) {
             ComplaintFormScreen(type = CmpType.PMBS, onBack = { pmbsOpen = false }, onGuiNote = onGuiNote)
         }
+        if (reportDateOpen) DatePickerSheet(reportDmy, { reportDmy = it }, { reportDateOpen = false })
     }
 }
 
