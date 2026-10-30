@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -84,7 +85,10 @@ fun HistoryScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}
     ) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        // Header status bar ke neeche nahi jayega — baaki pages ki tarah
+        // statusBarsPadding (pehle ye missing tha, is liye upar ka header
+        // laal strip ke andar kat raha tha).
+        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp)) {
             // Header: 44dp amber tile + title + sub + close (trial .th-head).
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -205,7 +209,8 @@ private fun HistItem(d: HistDay, onGuiNote: (String) -> Unit) {
             }
         }
         Spacer(modifier = Modifier.width(12.dp))
-        // Actions (trial .th-acts): View laal + Delete halka laal.
+        // Actions: View + Delete — dono View jaisi pill (icon + text),
+        // Delete ka rang halka laal hi rakha hai taake pehchana jaye.
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(
                 modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(HistRed).clickable { onGuiNote("View record") }
@@ -216,11 +221,15 @@ private fun HistItem(d: HistDay, onGuiNote: (String) -> Unit) {
                 Spacer(modifier = Modifier.width(5.dp))
                 Text("View", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             }
-            Box(
+            Row(
                 modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color(0xFFFDECEE)).clickable { onGuiNote("Delete record") }
                     .padding(horizontal = 10.dp, vertical = 7.dp),
-                contentAlignment = Alignment.Center
-            ) { Icon(Icons.Filled.DeleteOutline, contentDescription = null, tint = Color(0xFFE53935), modifier = Modifier.size(15.dp)) }
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.DeleteOutline, contentDescription = null, tint = Color(0xFFE53935), modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.width(5.dp))
+                Text("Delete", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFE53935))
+            }
         }
     }
 }
