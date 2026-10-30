@@ -1,9 +1,42 @@
-# Metro+ Native App — Handoff (v1.52 / versionCode 53) — DEBUG build
+# Metro+ Native App — Handoff (v1.53 / versionCode 54) — DEBUG build
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
 > Store password `android`, alias `androiddebugkey`, key password `android`.
 > Cert SHA-256: `b13501ef91dd30d621c645ea596010d57446a26e2aa5ce26215cc7dc28019302`.
+
+## v1.53 change (30 Oct 2026) — 63 ke picker poori app me, DEBUG build, no R8
+- Uska order: station selection wali har jagah pe 63 APK jaisa interface
+  lagao — date pe click karo to date aayen, cards aayen, station card me
+  aaye, operator ke naam pyare cards me aayen, aur jahan dropdown hai wo
+  bhi usi me aaye; poori app me dekho aur 63 jaisa same lagao.
+- Tehqiq (63, 96-profile-v2.js pv-picker + 98-opening-staff.js loDateSheet
+  + lo staff cards): station picker = centered sheet, "Select Station" +
+  24 pastel cards (naam + 201-224 number chip), chuna hua laal border +
+  ring; date picker = month grid sheet (Su-Sa header, day cards, aaj laal
+  border, chuna hua purple gradient, Today/Close buttons, DD-MM-YYYY);
+  staff cards = pv-st-card, 6 pastel gradients, naam center + ID chip,
+  lamba naam (12+) poori line; koi native dropdown nahi (pv-picker ne
+  sab <select> replace kiye).
+- Nayi shared file ui/Pickers.kt: StationPickerSheet (63 ke 24 stations,
+  tarteeb + number wahi; pastel cycle %4 pink/yellow/green/blue),
+  DatePickerSheet (63 ka month grid wahi: Sunday-start, aaj laal, select
+  purple, Today/Close), OptionPickerSheet (kisi bhi dropdown ki jagah).
+  Helpers: formatDmy + dmyToDisplay.
+- Wiring (saare "Station Picker"/"Date Picker" GUI notes khatam, koi
+  DropdownMenu nahi bacha): Edit Profile station row, Staff Edit station
+  card, Leave Form date + station, Overtime Detail date + station,
+  Closing REPORT DATE card, Tom Data hero date chip — sab apni sheet
+  kholte hain aur chuni hui value wahi dikhate hain (GUI phase: save
+  wiring baad me). Staff status menu (pehle DropdownMenu) ab
+  OptionPickerSheet se khulta hai (5 options, rang/label wahi).
+  StaffPicker: 6th pastel (orange) add + lamba naam poori line (63 ka
+  lo-wide); chuna hua naam gayab rehne wala Item 5 rule wahi hai.
+- Verify: vc54/1.53, DEBUG, cert b13501ef, SHA a2a55848, 17,612,776
+  bytes; dex me "Select Station", "Select Status", "Pak Secretariat",
+  "Version 1.53" maujood; "Station Picker"/"Date Picker" notes ghaib.
+  GitHub code push + manifest live verify; KOI LINK NAHI BHEJA.
+
 
 ## v1.52 change (30 Oct 2026) — Portal screen (63 se) + drawer/settings safai, DEBUG build, no R8
 - Uska order: (1) Portal ka interface 63 APK ko dekh ke banao, uske andar
