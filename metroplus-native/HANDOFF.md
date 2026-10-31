@@ -1,4 +1,41 @@
-# Metro+ Native App — Handoff (v1.79 / versionCode 80) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.80 / versionCode 81) — DEBUG build (non-debuggable)
+
+## v1.80 change (31 Oct 2026) — Portal WebView + overlay menus + full blue theme (uska order, DEBUG)
+- WEBVIEW (uska wazeh order — STRICT RULE #1 ka Portal-only exception):
+  WebView SIRF PortalScreen ke neeche wale area me hai (link bar ke
+  neeche, weight 1f) — poori app me nahi, kisi aur screen me nahi.
+  AndroidView factory me banता hai, onRelease par stopLoading +
+  destroy (Portal band = WebView band). Settings: JS on, DOM storage
+  on, cookies + third-party cookies on (login session ke liye).
+  WebViewClient: links andar hi khulte hain (shouldOverride = false);
+  onPageStarted/Finished par URL bar ka link + loading bar update.
+  Back: menus/sheets, phir WebView history (canGoBack), phir page.
+  Session: cookies WebView sambhalta hai — ek dafa login to phir laga
+  rahega (site logout ya data clear tak). Preview card + Open in
+  Browser button hata diye (ab zaroorat nahi).
+- BAR: link thoda lamba (weight 2f + spacer 1f — pehle 1f/1f tha);
+  container blue gradient (#0B5BD3 -> #38BDF8) + safed pill; three-dot
+  gehra neela button. GCS tab nahi hai (pehle se).
+- DROPDOWN OVERLAY (v1.79 wali shikayat fix): panel ab content ko
+  neeche NAHI dhakelta — header ki naapi hui height (onSizeChanged)
+  ke neeche float karta hai, baahar tap par band. Grid: row 1 me 3
+  cards (Auto Fill, TOM A, TOM B), row 2 me darmiyan me 2 (TKM,
+  ASKARI) — sab sirf neelay gradients me. Tap par action note + panel
+  band.
+- THREE-DOT PRETTY CARD: DropdownMenu ki jagah 230dp safed card
+  (18dp, shadow): icon circle + label rows — Open Portal Login
+  (sheet), Settings (PORTAL wali — sirf note, main Settings NAHI
+  khulti; uska content wo baad me batayega), Reload (WebView reload).
+  Fill Today's Data, Open in Browser, Copy Link options KHATAM (uska
+  order; Fill sheet ka code file me hai, entry nahi).
+- BLUE THEME: Portal ka sara interface sirf neelay gradients me —
+  PoInk gehra neela #0B2A5B, PoGray neela grey #3D5A80, page/field bg
+  halka neela #EAF2FE, header gradient, quick cards neelay; aur koi
+  rang nahi (safed surfaces ke ilawa). Login sheet note badla (cookies
+  wali baat).
+- GitHub APK RULE: is release me v1.80 upload + v1.78 delete (1.79 +
+  1.80 rahengi); manifest apkUrl = GitHub raw v1.80.
+- Verify: TODO build ke baad.
 
 ## v1.79 change (31 Oct 2026) — Portal ek-line bar + nav reset + roster tweaks (uska order, DEBUG)
 - PORTAL: header ab EK pill line hai (halka neela #E3EEFD bg + blue
@@ -32,7 +69,13 @@
   order par agle update me content area WebView hoga, header wahi.
 - GitHub APK RULE: is release me v1.79 upload + v1.77 delete (1.78 +
   1.79 rahengi); manifest apkUrl = GitHub raw v1.79.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~23:16 PKT): APK 12,561,203 bytes, SHA 9b3d540f;
+  cert apksigner se b13501ef MATCH; dex "Version 1.79" + "Staff
+  Attendance" + "Open Portal Login" + "QUICK FILL", 1.78 gayab.
+  GitHub code push commit 6ad1365a; APK GitHub par (browser upload,
+  commit bae9817, size exact verify); v1.77 delete (apk folder me
+  sirf 1.78 + 1.79 = latest 2); MANIFEST LIVE vc80 JSON verify —
+  apkUrl GitHub raw v1.79.
 
 ## v1.78 change (31 Oct 2026) — Roster COLORFUL + Portal browser header (uska order, DEBUG)
 - ROSTER COLORFUL (structure v1.77 wahi, sirf rang badle): page bg
