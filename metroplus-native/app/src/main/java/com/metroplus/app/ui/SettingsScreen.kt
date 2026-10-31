@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sms
@@ -85,7 +86,7 @@ class SettingsViewModel : ViewModel() {
 }
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenPage: (String) -> Unit = {}) {
     BackHandler { onBack() }
     val vm: SettingsViewModel = viewModel()
     var dark by vm.darkMode
@@ -125,7 +126,7 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             GroupTitle("PREMIUM ACCESS")
             SetList {
                 SetRow(null, Color(0xFFF6EFDF), Color.Unspecified, "TL / RP Login", "Log in for premium access", divider = false,
-                    onClick = { onGuiNote("TL / RP Login") }, image = R.drawable.img_tl_padlock) { Chevron() }
+                    onClick = { onOpenPage("TL / RP Login") }, image = R.drawable.img_tl_padlock) { Chevron() }
             }
             // Batch item 9b: General Preference — dropdown wala section (tap karo to khule).
             var genExpanded by remember { mutableStateOf(false) }
@@ -155,10 +156,17 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             }
             GroupTitle("APP")
             SetList {
+                // v1.62: 63 wali rows wapas — System & Storage aur WhatsApp Format
+                // ke pages ban gaye hain, is liye inke raste chahiye (v1.54 ki "bas"
+                // wali katoti sirf in dono rows tak khatam hoti hai).
                 SetRow(Icons.Filled.Sms, Color(0xFFE2F7EA), Color(0xFF22C55E), "Chat Settings", "Bubble size, colors, background",
-                    onClick = { onGuiNote("Chat Settings") }) { Chevron() }
+                    onClick = { onOpenPage("Chat Settings") }) { Chevron() }
+                SetRow(Icons.Filled.Storage, Color(0xFFE0E1E3), Color(0xFF334155), "System & Storage", "Sync, cache and data",
+                    onClick = { onOpenPage("System & Storage") }) { Chevron() }
+                SetRow(Icons.Filled.Message, Color(0xFFE2F7EA), Color(0xFF16A34A), "WhatsApp Report Format", "Opening and closing formats",
+                    onClick = { onOpenPage("WhatsApp Report Format") }) { Chevron() }
                 SetRow(Icons.Filled.Info, Color(0xFFF2E2E3), Color(0xFF2563EB), "App Info", "Version, about", divider = false,
-                    onClick = { onGuiNote("App Info") }) { Chevron() }
+                    onClick = { onOpenPage("App Info") }) { Chevron() }
             }
             Spacer(modifier = Modifier.height(18.dp))
             // Logout: white, laal halki border (#FDE0E0), kona 18, laal icon + 15sp text beech me.

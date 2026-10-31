@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -60,6 +61,7 @@ import java.util.Locale
 fun GpsCameraScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var zoom2x by remember { mutableStateOf(false) }
     var torchOn by remember { mutableStateOf(false) }
+    var attOpen by remember { mutableStateOf(false) }
     BackHandler { onBack() }
 
     // Dart file ke default demo values (live values features ke sath ayenge).
@@ -97,6 +99,15 @@ fun GpsCameraScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 GpsHeaderIconButton(icon = Icons.Filled.FlipCameraIos, onClick = { onGuiNote("Flip Camera") })
             }
         }
+
+        // v1.62: Attendance popup ka button (63 ke gpsAttendancePopup ki GUI).
+        Box(
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 92.dp)
+                .clip(RoundedCornerShape(20.dp)).background(Color.Black.copy(alpha = 0.6f))
+                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+                .clickable { attOpen = true }.padding(horizontal = 16.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) { Text("View Attendance", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White) }
 
         // 3. Shutter button, stamp card se 150dp upar, center me.
         Box(modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 150.dp)) {
@@ -192,6 +203,8 @@ fun GpsCameraScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
             }
         }
+        // Attendance popup sab se upar (stamp card ke baad, warna dab jata).
+        if (attOpen) AttendancePopup(onClose = { attOpen = false }, onGuiNote = onGuiNote)
     }
 }
 
