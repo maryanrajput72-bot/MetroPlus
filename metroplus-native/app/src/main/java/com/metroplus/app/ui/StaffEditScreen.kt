@@ -63,18 +63,17 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var station by pageState("staffEdit_station", "Shaheed-e-Millat")
     var stationOpen by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF6F8FC))
+    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
         // FIX (v1.42): khaali jagah ke tap Opening tab tak na pahunchein.
         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
         // v1.72: status bar ke neeche se shuru (pehle hero status bar ke
         // upar/andar ja raha tha) + neeche gesture bar ke upar khatam.
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).statusBarsPadding().navigationBarsPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            // v1.77 RECREATE: hero ab dark obsidian + gold (naye roster
-            // design se match) — back + gold pen tile + title + sub.
+            // v1.78 COLORFUL: hero wapas jamni gradient + jamni pen tile.
             val hShape = RoundedCornerShape(22.dp)
             Row(
-                modifier = Modifier.fillMaxWidth().cssShadow(10.dp, hShape, Color.Black.copy(alpha = 0.25f)).clip(hShape)
-                    .background(Color(0xFF12141D)).border(1.dp, Color(0xFFD4AF37).copy(alpha = 0.3f), hShape).padding(16.dp),
+                modifier = Modifier.fillMaxWidth().cssShadow(10.dp, hShape, Color(0xFF7B20D4).copy(alpha = 0.25f)).clip(hShape)
+                    .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 0.55f to Color(0xFF7B20D4), 1f to Color(0xFFD82EDC))).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -83,10 +82,10 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 ) { Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = ink, modifier = Modifier.size(18.dp)) }
                 Spacer(modifier = Modifier.width(13.dp))
                 Box(
-                    modifier = Modifier.size(44.dp).cssShadow(7.dp, RoundedCornerShape(14.dp), Color.Black.copy(alpha = 0.3f))
-                        .background(cssLinear(145f, 0f to Color(0xFFE5C158), 1f to Color(0xFFC59B27)), RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)),
+                    modifier = Modifier.size(44.dp).cssShadow(7.dp, RoundedCornerShape(14.dp), Color(0xFF3C006E).copy(alpha = 0.3f))
+                        .background(cssLinear(145f, 0f to Color(0xFFD8A5FF), 1f to Color(0xFF7B20D4)), RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
-                ) { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color(0xFF12141D), modifier = Modifier.size(20.dp)) }
+                ) { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                 Spacer(modifier = Modifier.width(13.dp))
                 Column {
                     Text("Edit Staff List", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = (-0.4).sp)

@@ -1,7 +1,11 @@
 package com.metroplus.app.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,13 +34,17 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +61,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -170,32 +179,77 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
     ) {
+        var tabMenuOpen by remember { mutableStateOf(false) }
+        var dotMenuOpen by remember { mutableStateOf(false) }
+        fun copyLink() {
+            try {
+                val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("Portal link", PORTAL_URL))
+                Toast.makeText(ctx, "Link copied", Toast.LENGTH_SHORT).show()
+            } catch (_: Exception) { }
+        }
         Column(modifier = Modifier.fillMaxSize()) {
-            // 63 jaisa header: back | Online Portal | Fill + Key + Reload.
-            Row(
-                modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding().padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PoHeaderBtn({ Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = PoInk, modifier = Modifier.size(18.dp)) }, onBack)
-                Spacer(modifier = Modifier.width(12.dp))
-                // Batch item 1: 63 ke portal header jaisa — portal logo + title.
-                Image(
-                    painterResource(id = R.drawable.img_portal), contentDescription = "Portal logo",
-                    contentScale = ContentScale.Fit, modifier = Modifier.size(34.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text("Online Portal", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, letterSpacing = (-0.3).sp, modifier = Modifier.weight(1f))
-                PoHeaderBtn({ Icon(Icons.Filled.List, contentDescription = "Fill today's data", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showFill = true }
-                Spacer(modifier = Modifier.width(8.dp))
-                PoHeaderBtn({ Icon(Icons.Filled.Key, contentDescription = "Saved login", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showLogin = true }
-                Spacer(modifier = Modifier.width(8.dp))
-                PoHeaderBtn({ Icon(Icons.Filled.Refresh, contentDescription = "Reload", tint = PoInk, modifier = Modifier.size(18.dp)) }) { openBrowser() }
+            // v1.78 BROWSER header (uska order): sab se upar URL bar (link
+            // nazar aaye), uske neeche header row — left chhota link tab,
+            // right dropdown + three-dot, aur KUCH NAHI. Pehle wale header
+            // buttons (Fill/Key/Reload) menus me chale gaye. NOTE: page ko
+            // app ke andar load karna WebView mangta hai (uska sakht rule)
+            // — is liye link abhi bhi browser me khulta hai; andar wala
+            // page uske jawab ke baad lagayenge.
+            Column(modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding()) {
+                // URL bar (sab se upar): lock + poora link.
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                        .clip(RoundedCornerShape(999.dp)).background(Color(0xFFF6F2F2))
+                        .border(1.dp, PoInk.copy(alpha = 0.08f), RoundedCornerShape(999.dp))
+                        .padding(horizontal = 12.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFF128C7E), modifier = Modifier.size(13.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(PORTAL_URL, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PoGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                }
+                // Header row: chhota link tab (left) + dropdown + three-dot (right).
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Color(0xFFF6F2F2))
+                            .border(1.dp, PoInk.copy(alpha = 0.08f), RoundedCornerShape(999.dp))
+                            .clickable { openBrowser() }.padding(horizontal = 12.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Filled.Language, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("GCS Portal", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PoInk)
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Box {
+                        PoHeaderBtn({ Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Tabs", tint = PoInk, modifier = Modifier.size(18.dp)) }) { tabMenuOpen = true }
+                        DropdownMenu(expanded = tabMenuOpen, onDismissRequest = { tabMenuOpen = false }) {
+                            DropdownMenuItem(text = { Text("GCS Portal") }, onClick = { tabMenuOpen = false; openBrowser() })
+                            DropdownMenuItem(text = { Text("Fill Today's Data") }, onClick = { tabMenuOpen = false; showFill = true })
+                            DropdownMenuItem(text = { Text("Saved Login") }, onClick = { tabMenuOpen = false; showLogin = true })
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box {
+                        PoHeaderBtn({ Icon(Icons.Filled.MoreVert, contentDescription = "More", tint = PoInk, modifier = Modifier.size(18.dp)) }) { dotMenuOpen = true }
+                        DropdownMenu(expanded = dotMenuOpen, onDismissRequest = { dotMenuOpen = false }) {
+                            DropdownMenuItem(text = { Text("Reload") }, onClick = { dotMenuOpen = false; openBrowser() })
+                            DropdownMenuItem(text = { Text("Copy Link") }, onClick = { dotMenuOpen = false; copyLink() })
+                            DropdownMenuItem(text = { Text("Open in Browser") }, onClick = { dotMenuOpen = false; openBrowser() })
+                        }
+                    }
+                }
             }
             Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                // Batch item 1: 63 me yahan website (iframe) khulti thi. Native me
-                // WebView band hai — is liye yahan portal site ka DUMMY preview hai
-                // (us site ke login page jaisa, logos ke sath); asli link baad me
-                // dalenge. Neeche wala button site ko browser me kholta hai.
+                // v1.78: 63 me yahan website (iframe) khulti thi. Native me
+                // WebView band hai (uska rule) — is liye yahan portal site ka
+                // DUMMY preview hai (login page jaisa); asli link upar URL bar
+                // me hai, aur site browser me khulti hai (andar wala page
+                // uske WebView wale jawab ke baad).
                 PoCard("GCS PORTAL") {
                     // Dummy browser frame: top strip + andar site ka login page jaisa preview.
                     Column(
@@ -224,7 +278,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text("GCS Portal", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = PoInk)
-                            Text("Preview only — live site link will be added later", fontSize = 11.5.sp, color = PoGray)
+                            Text("Preview — live site link is in the address bar above", fontSize = 11.5.sp, color = PoGray)
                             Spacer(modifier = Modifier.height(14.dp))
                             Box(
                                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color(0xFFF6F2F2))

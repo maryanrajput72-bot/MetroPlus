@@ -1,4 +1,31 @@
-# Metro+ Native App — Handoff (v1.77 / versionCode 78) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.78 / versionCode 79) — DEBUG build (non-debuggable)
+
+## v1.78 change (31 Oct 2026) — Roster COLORFUL + Portal browser header (uska order, DEBUG)
+- ROSTER COLORFUL (structure v1.77 wahi, sirf rang badle): page bg
+  wapas #FDF1F3; hero wapas laal gradient + safed stats bar (HeroStat
+  wapas; RosterStat ab unused); shift pill safed; week strip aaj wala
+  laal gradient + safed badge; header "Station Crew" #1E1430, "N
+  Members" laal, Edit button wapas jamni gradient; RosterCard har
+  bande ke apne accent me (tint->safed gradient, accent border, ON
+  DUTY par 1.5dp accent border; avatar accent gradient + luminance
+  wali text color; naam kaala; stepper bar safed + accent border,
+  minus tint, plus accent gradient). Edit screen hero wapas jamni.
+- PORTAL BROWSER HEADER (uska order): sab se upar URL bar (lock +
+  poora shababulmohsinapp.ai.studio link, ellipsis); uske neeche header
+  row — left chhota "GCS Portal" tab (tap = browser me khole), right
+  dropdown + three-dot, aur KUCH NAHI (back/logo/title/Fill/Key/
+  Reload header se hat gaye; wapas Home ke liye dock ya device back).
+  Dropdown menu (tab ke neeche): GCS Portal, Fill Today's Data,
+  Saved Login. Three-dot menu: Reload, Copy Link (clipboard + toast),
+  Open in Browser. Preview card wahi, subtitle badla (link upar bar me).
+- OPEN SAWAL (uska jawab chahiye): page ko app ke ANDAR load karna
+  sirf WebView se hoga — jo usne sakht mana kiya hua hai (STRICT RULE
+  #1) — is liye link abhi bhi browser me khulta hai. Agar andar wala
+  page chahiye to WebView ka wazeh order chahiye; uske baad content
+  area WebView se badal denge, header wahi rahega.
+- GitHub APK RULE: is release me v1.78 upload + v1.76 delete (1.77 +
+  1.78 rahengi); manifest apkUrl = GitHub raw v1.78.
+- Verify: TODO build ke baad.
 
 ## v1.77 change (31 Oct 2026) — Station Roster RECREATE (uska order, DEBUG)
 - Gemini se ideas liye (gemini-3.5-flash; pehli call 503, 35s baad retry
@@ -26,7 +53,12 @@
 - GitHub APK RULE (uska order): sirf LATEST 2 APKs — nayi aane par sab
   se purani delete. Is release me: v1.77 upload + v1.75 delete (1.76 +
   1.77 rahengi); manifest apkUrl = GitHub raw v1.77.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~22:28 PKT): APK 12,558,071 bytes, SHA e472bfe5;
+  cert apksigner se b13501ef MATCH; dex "Version 1.77" + "Station
+  Roster" + "Station Crew", 1.76 gayab. GitHub code push ok (HANDOFF
+  header verify); APK GitHub par (browser upload, commit bcd4ab0,
+  size exact verify); v1.75 delete ho chuki (apk folder me sirf 1.76 +
+  1.77 = latest 2); MANIFEST LIVE vc78 JSON verify — apkUrl GitHub raw.
 
 ## v1.76 change (31 Oct 2026) — 63 wala SILENT install + GitHub APK host (uska order, DEBUG)
 - CORRECTION (pehle wale jawab ki): maine kaha tha aakhri Update wali
