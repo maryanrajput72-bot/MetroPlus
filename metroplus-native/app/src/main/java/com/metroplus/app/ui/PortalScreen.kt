@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -161,6 +162,16 @@ object PortalWeb {
         // rendering ko priority — pehli dafa ke baad page zyada tez khulega.
         wv.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
         wv.settings.databaseEnabled = true
+        // v1.84 SPEED (net research + uska order — sirf Portal):
+        // offscreenPreRaster: screen se bahar wale hisse pehle se banenge,
+        // scroll karte waqt ruk-ruk khatam hogi (thodi zyada memory legi).
+        wv.settings.offscreenPreRaster = true
+        // Renderer priority: default IMPORTANT hi sab se upar hai — BOUND
+        // lagane se ulta renderer marne ka zyada chance hota, is liye
+        // IMPORTANT saaf saaf rakha hai (API 26+).
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            wv.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
+        }
         wv.settings.loadsImagesAutomatically = true
         wv.settings.useWideViewPort = true
         wv.settings.loadWithOverviewMode = true
@@ -257,21 +268,22 @@ private fun PoField(label: String, icon: @Composable () -> Unit, value: String, 
 }
 
 // v1.80: Quick Fill dropdown grid ka card (sirf neelay gradients).
+// v1.84: chhota size — paanchon ek hi line me aayen (uska order).
 @Composable
 private fun PoQuickCard(c1: Color, c2: Color, label: String, sub: String, modifier: Modifier, onClick: () -> Unit) {
     Column(
-        modifier = modifier.clip(RoundedCornerShape(14.dp)).background(Color(0xFFEAF2FE))
-            .border(1.dp, c1.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
-            .clickable { onClick() }.padding(horizontal = 8.dp, vertical = 12.dp),
+        modifier = modifier.clip(RoundedCornerShape(12.dp)).background(Color(0xFFEAF2FE))
+            .border(1.dp, c1.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+            .clickable { onClick() }.padding(horizontal = 4.dp, vertical = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(36.dp).clip(RoundedCornerShape(11.dp)).background(cssLinear(135f, 0f to c1, 1f to c2)),
+            modifier = Modifier.size(28.dp).clip(RoundedCornerShape(9.dp)).background(cssLinear(135f, 0f to c1, 1f to c2)),
             contentAlignment = Alignment.Center
-        ) { Icon(Icons.Filled.List, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp)) }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(sub, fontSize = 9.5.sp, color = PoGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        ) { Icon(Icons.Filled.List, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp)) }
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(label, fontSize = 10.5.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(sub, fontSize = 8.5.sp, color = PoGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -385,6 +397,11 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         }
                     }
                 }
+                // v1.84 (uska order): browser frame — left/right patli lines,
+                // upar se neeche tak, taake saaf pata chale site app ke andar
+                // khuli hai (dock ke peeche wale hisse tak lines jayengi).
+                Box(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight().width(1.dp).background(PoInk.copy(alpha = 0.20f)))
+                Box(modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(1.dp).background(PoInk.copy(alpha = 0.20f)))
             }
         }
         // ---- Overlays: dropdown grid + three-dot card. Ye content ko
@@ -415,18 +432,14 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 Column(modifier = Modifier.fillMaxWidth().cssShadow(10.dp, cardShape, PoInk.copy(alpha = 0.18f)).background(Color.White, cardShape).border(1.5.dp, Color(0xFF0B2A5B), cardShape).padding(12.dp)) {
                     Text("QUICK FILL", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = PoInk.copy(alpha = 0.55f), letterSpacing = 1.2.sp)
                     Spacer(modifier = Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        PoQuickCard(Color(0xFF1D6FD8), Color(0xFF38BDF8), "Auto Fill", "Saved login", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Auto Fill") }
-                        PoQuickCard(Color(0xFF0B5BD3), Color(0xFF60A5FA), "TOM A", "Fill data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM A") }
-                        PoQuickCard(Color(0xFF1E40AF), Color(0xFF3B82F6), "TOM B", "Fill data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM B") }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row {
-                        Spacer(modifier = Modifier.weight(0.5f))
-                        PoQuickCard(Color(0xFF0B2A5B), Color(0xFF1D6FD8), "TKM", "Fill card sale", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TKM") }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Fill voucher", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill ASKARI") }
-                        Spacer(modifier = Modifier.weight(0.5f))
+                    // v1.84 (uska order): paanchon chhote cards EK hi line me,
+                    // header se neeche (gap + dark border wahi).
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        PoQuickCard(Color(0xFF1D6FD8), Color(0xFF38BDF8), "Auto Fill", "Login", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Auto Fill") }
+                        PoQuickCard(Color(0xFF0B5BD3), Color(0xFF60A5FA), "TOM A", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM A") }
+                        PoQuickCard(Color(0xFF1E40AF), Color(0xFF3B82F6), "TOM B", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM B") }
+                        PoQuickCard(Color(0xFF0B2A5B), Color(0xFF1D6FD8), "TKM", "Card sale", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TKM") }
+                        PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Voucher", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill ASKARI") }
                     }
                 }
                 }

@@ -1,4 +1,35 @@
-# Metro+ Native App — Handoff (v1.83 / versionCode 84) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.84 / versionCode 85) — DEBUG build (non-debuggable)
+
+## v1.84 change (1 Nov 2026) — Portal speed research + 1-line dropdown + browser frame + Portal fullscreen dock (uska order, DEBUG, SIRF Portal)
+- SPEED — NET RESEARCH (uska order, "batao phir karo"): official
+  Android docs se — (1) `offscreenPreRaster=true`: screen se bahar
+  wale tiles pehle se banenge, scroll par ruk-ruk kam hogi (thodi
+  zyada memory; default false). (2) Renderer policy: default
+  IMPORTANT hi sab se upar hai — BOUND lagane se ulta renderer marne
+  ka zyada chance, is liye IMPORTANT saaf saaf rakha (API 26+ guard).
+  (3) Manifest me `hardwareAccelerated=true` saaf saaf (default bhi
+  true hai). Pehle se tha: HW layer, preload, cache, DOM storage.
+  Seedhi baat: Chrome ke apne alag process + OS-level input priority
+  wale kaam WebView me nahi ho sakte — 100% Chrome jaisa mushkil,
+  lekin ye settings + latest System WebView (Play Store se update,
+  user ka kaam) farq dalenge.
+- DROPDOWN 1 LINE (uska order): paanchon Quick Fill cards ab EK hi
+  line me — card chhote (icon 28dp, label 10.5sp, sub 8.5sp, spacing
+  6dp); sub chhote kiye fit ke liye (Saved login→Login, Fill
+  data→Data, Fill card sale→Card sale, Fill voucher→Voucher). Panel
+  header se neeche (gap + dark border) wahi.
+- BROWSER FRAME (uska order): WebView area ke left + right kinaron
+  par upar se neeche tak 1dp patli lines (PoInk 20% alpha) — saaf
+  pata chale site app ke andar khuli hai.
+- PORTAL FULLSCREEN DOCK (uska order — SIRF Portal): MainActivity me
+  fullScreen me PORTAL add — Portal ka content ab neeche dock wali
+  jagah tak jata hai, dock uske UPAR nazar aata hai (dock pehle se
+  pages ke upar banta hai), scroll dock ke neeche hota hai. Opening /
+  Closing ko haath NAHI lagaya (aakhri order: sirf Portal). NOTE:
+  page ka sab se neeche wala dock-jitna hissa dock ke peeche rahega.
+- GitHub APK RULE: is release me v1.84 upload + v1.82 delete (1.83 +
+  1.84 rahengi); manifest apkUrl = GitHub raw v1.84.
+- Verify: TODO build ke baad.
 
 ## v1.83 change (1 Nov 2026) — Portal fast enter + WebView scroll smooth + dropdown pretty (uska order, DEBUG)
 - PORTAL ENTER FAST (uska order): page switch pehle 350ms right-slide
@@ -25,7 +56,12 @@
   CONFIRM ho gayi.
 - GitHub APK RULE: is release me v1.83 upload + v1.81 delete (1.82 +
   1.83 rahengi); manifest apkUrl = GitHub raw v1.83.
-- Verify: TODO build ke baad.
+- Verify (2026-11-01 ~00:46 PKT): APK 12,564,775 bytes, SHA bbfbefa8;
+  cert apksigner se b13501ef MATCH; dex "Version 1.83" + portal_cookies,
+  1.82 gayab. GitHub code push commit db9ed81a; APK GitHub par (browser
+  upload, commit c931f01, size exact verify); v1.81 delete (apk folder
+  me sirf 1.82 + 1.83 = latest 2); MANIFEST LIVE vc84 JSON verify —
+  apkUrl GitHub raw v1.83.
 
 ## v1.82 change (1 Nov 2026) — Splash dots centered + Portal speed (uska order, DEBUG)
 - SPLASH DOTS (uska order — video wali baat): app khulte waqt wali

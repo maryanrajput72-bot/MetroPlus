@@ -491,7 +491,11 @@ fun MetroPlusApp() {
             // (camera full-screen hai, wahan dock nahi). Keyboard khula ho to content keyboard ke
             // upar khatam hota hai (edge-to-edge me warna chat/form ka neeche wala field keyboard
             // ke peeche chhup jata tha).
-            val fullScreen = shown == AppScreen.CAMERA || shown == AppScreen.LOGIN || shown == AppScreen.SIGNUP
+            // v1.84 (uska order — SIRF Portal): Portal poori screen par,
+            // dock uske UPAR nazar aayega (dock pehle se pages ke upar banta
+            // hai, sirf content ka bottom padding khatam hua hai). Opening /
+            // Closing ko haath nahi lagaya.
+            val fullScreen = shown == AppScreen.CAMERA || shown == AppScreen.LOGIN || shown == AppScreen.SIGNUP || shown == AppScreen.PORTAL
             val bottomSpace = if (fullScreen) 0.dp else maxOf(imeBottom, navBottom + 76.dp)
             // FIX (v1.42): overlay ke khaali area ke tap Home tak na pahunchein —
             // pehle overlay ki background tap nahi rokti thi, is liye khula page
@@ -815,7 +819,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.83", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.84", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
