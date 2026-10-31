@@ -503,11 +503,18 @@ fun MetroPlusApp() {
                 AnimatedContent(
                     targetState = shown,
                     transitionSpec = {
-                        // v1.66: back stack se wapas aaye to ulti slide (purana page left se aata hai).
-                        val back = navBack || initialState == AppScreen.CAMERA
-                        val spec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
-                        (slideInHorizontally(spec) { if (back) -it else it } + fadeIn(tween(350))) togetherWith
-                            (slideOutHorizontally(spec) { if (back) it else -it } + fadeOut(tween(350)))
+                        // v1.83 (uska order): Portal ka right-side slow slide
+                        // KHATAM — Portal sirf tez fade (150ms) se aayega, taake
+                        // tap karte hi foran nazar aaye. Baaki pages wahi slide.
+                        if (targetState == AppScreen.PORTAL) {
+                            fadeIn(tween(150)) togetherWith fadeOut(tween(150))
+                        } else {
+                            // v1.66: back stack se wapas aaye to ulti slide (purana page left se aata hai).
+                            val back = navBack || initialState == AppScreen.CAMERA
+                            val spec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
+                            (slideInHorizontally(spec) { if (back) -it else it } + fadeIn(tween(350))) togetherWith
+                                (slideOutHorizontally(spec) { if (back) it else -it } + fadeOut(tween(350)))
+                        }
                     },
                     label = "pageSwitch",
                     modifier = Modifier.fillMaxSize()
@@ -808,7 +815,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.82", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.83", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

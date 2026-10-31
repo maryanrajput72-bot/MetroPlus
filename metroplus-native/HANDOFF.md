@@ -1,4 +1,31 @@
-# Metro+ Native App — Handoff (v1.82 / versionCode 83) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.83 / versionCode 84) — DEBUG build (non-debuggable)
+
+## v1.83 change (1 Nov 2026) — Portal fast enter + WebView scroll smooth + dropdown pretty (uska order, DEBUG)
+- PORTAL ENTER FAST (uska order): page switch pehle 350ms right-slide
+  + fade tha (Portal bahut slow lagta tha). Ab targetState PORTAL ho
+  to sirf 150ms fade (koi slide nahi) — tap karte hi foran aayega.
+  Baaki pages wahi 350ms slide. (MainActivity AnimatedContent
+  transitionSpec — sirf Portal ka enter badla.)
+- SCROLL SMOOTH (uska order — Chrome comparison): WebView ko GPU
+  hardware layer (`LAYER_TYPE_HARDWARE`) — Compose ke andar scroll ka
+  hang/jank isi se behtar hota hai. Window ki HW acceleration pehle
+  se on hai (theme me koi off nahi). Seedhi baat: Chrome alag
+  process + pehle se garam hota hai, WebView app ke andar chalta hai
+  — is liye 100% Chrome jaisa hona mushkil, lekin ye + preload +
+  cache farq dalenge. Koi aur code issue nahi mila (outer clickable
+  WebView ke touch nahi rokta, recomposition sirf nav par hoti hai,
+  swipe-back vertical scroll ko nahi chhoota).
+- DROPDOWN PRETTY (uska order — v1.81 wala overlap khatam): panel ab
+  header se 6dp NEECHE (gap) khulta hai, 20dp gol kinare, aur gird
+  1.5dp GEHRI NEELI border (#0B2A5B) taake neeche wale page se alag
+  nazar aaye. Three-dot card wahi (overlap) — uska order sirf
+  dropdown ke liye tha.
+- PHONE VERDICT (2026-11-01 ~00:40 PKT, uska jawab): login waghera
+  sab theek hai — v1.82 ki cookie-save login persistence phone par
+  CONFIRM ho gayi.
+- GitHub APK RULE: is release me v1.83 upload + v1.81 delete (1.82 +
+  1.83 rahengi); manifest apkUrl = GitHub raw v1.83.
+- Verify: TODO build ke baad.
 
 ## v1.82 change (1 Nov 2026) — Splash dots centered + Portal speed (uska order, DEBUG)
 - SPLASH DOTS (uska order — video wali baat): app khulte waqt wali
@@ -34,7 +61,12 @@
   ko kaha gaya hai.
 - GitHub APK RULE: is release me v1.82 upload + v1.80 delete (1.81 +
   1.82 rahengi); manifest apkUrl = GitHub raw v1.82.
-- Verify: TODO build ke baad.
+- Verify (2026-11-01 ~00:33 PKT): APK 12,564,543 bytes, SHA 433b7c95;
+  cert apksigner se b13501ef MATCH; dex "Version 1.82" + portal_cookies
+  + "Portal load ho raha", 1.81 gayab. GitHub code push commit
+  108323ca; APK GitHub par (browser upload, commit c2e8dcc, size exact
+  verify); v1.80 delete (apk folder me sirf 1.81 + 1.82 = latest 2);
+  MANIFEST LIVE vc83 JSON verify — apkUrl GitHub raw v1.82.
 
 ## v1.81 change (1 Nov 2026) — Portal preload + keep-alive, rounded header, attached dropdown, login persist, keyboard (uska order, DEBUG)
 - PRELOAD + KEEP-ALIVE (white screen + 6 second wait ki asal wajah):

@@ -150,6 +150,10 @@ object PortalWeb {
         val wv = WebView(ctx.applicationContext)
         // WebView ka apna background bhi neela — load se pehle safed na aaye.
         wv.setBackgroundColor(android.graphics.Color.parseColor("#EAF2FE"))
+        // v1.83 SCROLL (uska order — Chrome jaisa smooth): WebView ko GPU
+        // wali hardware layer — Compose ke andar scroll ka hang/jank isi
+        // se behtar hota hai (window ki HW acceleration pehle se on hai).
+        wv.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
         wv.settings.javaScriptEnabled = true
         wv.settings.domStorageEnabled = true
         // v1.82 SPEED (uska order — Portal tez): site ki cache istemal ho
@@ -389,15 +393,17 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         if (quickOpen || dotMenuOpen) {
             Box(modifier = Modifier.fillMaxSize().clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { quickOpen = false; dotMenuOpen = false })
         }
-        // v1.81: panel header se CHIPKA hua — 6dp overlap taake header ke
-        // andar se nikalta hua lage; headerH naapne se pehle panel nahi
-        // khulta (aadha upar/aadha neeche wali pehli-frame ghalti khatam).
-        // Panel ke kinare header card ke kinaron se mile hue (12dp) taake
-        // ye screen pe extra cheez na lage, header ka hissa lage.
+        // v1.83 (uska order — v1.81 wala chipka hua overlap khatam):
+        // dropdown ab header se thoda NEECHE (6dp gap) khulta hai, gol
+        // kinaron (20dp) ke sath, aur uske gird GEHRI NEELI border hai
+        // taake saaf pata chale ye neeche wale page se alag cheez hai.
+        // headerH naapne se pehle panel nahi khulta (aadha upar/aadha
+        // neeche wali pehli-frame ghalti khatam).
         val topPad = if (headerH > 0) with(density) { headerH.toDp() } - 6.dp else 0.dp
+        val dropTopPad = if (headerH > 0) with(density) { headerH.toDp() } + 6.dp else 0.dp
         if (quickOpen && headerH > 0) {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = topPad)
+                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = dropTopPad)
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { },
             ) {
                 val cardShape = RoundedCornerShape(20.dp)
@@ -406,7 +412,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
                     exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
                 ) {
-                Column(modifier = Modifier.fillMaxWidth().cssShadow(10.dp, cardShape, PoInk.copy(alpha = 0.18f)).background(Color.White, cardShape).padding(12.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().cssShadow(10.dp, cardShape, PoInk.copy(alpha = 0.18f)).background(Color.White, cardShape).border(1.5.dp, Color(0xFF0B2A5B), cardShape).padding(12.dp)) {
                     Text("QUICK FILL", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = PoInk.copy(alpha = 0.55f), letterSpacing = 1.2.sp)
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
