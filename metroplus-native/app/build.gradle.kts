@@ -11,8 +11,8 @@ android {
         applicationId = "com.metroplus.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 64
-        versionName = "1.63"
+        versionCode = 67
+        versionName = "1.66"
     }
 
     signingConfigs {

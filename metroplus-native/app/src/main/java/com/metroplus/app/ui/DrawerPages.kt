@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -474,10 +475,13 @@ private fun DenomCard(value: Int, kind: String, color: Color, on: Boolean, modif
             .clickable { onChange(!on) }.padding(14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.size(width = 40.dp, height = 26.dp).clip(RoundedCornerShape(if (kind == "Coin") 13.dp else 6.dp))
-                    .background(Brush.linearGradient(listOf(color.lighter(0.2f), color.darker(0.15f))))
-            ) { Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.4f), Color.Transparent)))) }
+            // v1.65: chhota rangeen dabba ki jagah Money Calculator wala asli note badge
+            // (gradient + andar dashed lakeer + value); sikke gol.
+            val (ns, ne) = NoteColors[value] ?: (color.lighter(0.2f) to color.darker(0.15f))
+            val coinText = if (kind == "Coin") Color(0xFF3F3F46) else Color.White
+            Box(modifier = Modifier.graphicsLayer { this.alpha = 0.55f + 0.45f * alpha }) {
+                NoteBadge(value, ns, ne, coinText, coin = kind == "Coin", minWidth = 58.dp, height = 34.dp)
+            }
             Spacer(modifier = Modifier.weight(1f))
             DpToggle(on, color.darker(0.1f)) { onChange(it) }
         }

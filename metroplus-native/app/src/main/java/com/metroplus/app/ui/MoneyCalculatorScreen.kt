@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -121,6 +122,30 @@ private fun Modifier.dashedInnerBorder(): Modifier = drawBehind {
         cornerRadius = CornerRadius(6.dp.toPx()), style = stroke
     )
 }
+
+// Note badge (trial jaisa): gradient, kona 9, andar dashed safed lakeer, beech me value.
+// v1.65: Calculator setting page bhi yahi badge use karta hai (uska order "notes waise
+// hi banao jaise Money denomination me hain"). coin = gol sikka (5, 2, 1).
+@Composable
+internal fun NoteBadge(value: Int, start: Color, end: Color, text: Color = Color.White, coin: Boolean = false, minWidth: Dp = 56.dp, height: Dp = 32.dp) {
+    val shape = if (coin) CircleShape else RoundedCornerShape(9.dp)
+    Box(
+        modifier = Modifier.cssShadow(4.dp, shape, Color.Black.copy(alpha = 0.14f))
+            .background(cssLinear(135f, 0f to start, 1f to end), shape)
+            .then(if (coin) Modifier.size(height) else Modifier.defaultMinSize(minWidth = minWidth).height(height).dashedInnerBorder())
+            .padding(horizontal = if (coin) 0.dp else 9.dp),
+        contentAlignment = Alignment.Center
+    ) { Text("$value", fontSize = if (coin) 13.sp else 14.sp, fontWeight = FontWeight.ExtraBold, color = text, letterSpacing = 0.3.sp) }
+}
+
+// Note ke rang (Money Calculator jaise) — setting page ke liye, 75 + sikke samet.
+internal val NoteColors: Map<Int, Pair<Color, Color>> = mapOf(
+    5000 to (Color(0xFFF5C542) to Color(0xFFB8860B)), 1000 to (Color(0xFF5B8DEF) to Color(0xFF2A4FB8)),
+    500 to (Color(0xFF2DD4BF) to Color(0xFF0E8C7E)), 100 to (Color(0xFFFF6B6B) to Color(0xFFC1121F)),
+    75 to (Color(0xFFF472B6) to Color(0xFFBE185D)), 50 to (Color(0xFFA78BFA) to Color(0xFF6D28D9)),
+    20 to (Color(0xFFFB923C) to Color(0xFFC2410C)), 10 to (Color(0xFFD6A46B) to Color(0xFF8A5A2B)),
+    5 to (Color(0xFFE5E7EB) to Color(0xFF9CA3AF)), 2 to (Color(0xFFF1D7A8) to Color(0xFFB08850)), 1 to (Color(0xFFE2E8F0) to Color(0xFF94A3B8))
+)
 
 // Counts ViewModel me — page band karke dobara kholo to likha hua wapas mile.
 class MoneyCalcViewModel : ViewModel() {
@@ -289,12 +314,7 @@ private fun DenomRow(d: Denom, c: Int, onCount: (Int) -> Unit) {
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier.cssShadow(4.dp, RoundedCornerShape(9.dp), Color.Black.copy(alpha = 0.14f))
-                .background(cssLinear(135f, 0f to d.gradStart, 1f to d.gradEnd), RoundedCornerShape(9.dp))
-                .defaultMinSize(minWidth = 56.dp).height(32.dp).dashedInnerBorder().padding(horizontal = 9.dp),
-            contentAlignment = Alignment.Center
-        ) { Text("${d.value}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = d.text, letterSpacing = 0.3.sp) }
+        NoteBadge(d.value, d.gradStart, d.gradEnd, d.text)
         Text("×", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF9AA1AB), modifier = Modifier.padding(horizontal = 6.dp))
         Row(
             modifier = Modifier.background(McInk.copy(alpha = 0.05f), RoundedCornerShape(14.dp)).border(1.dp, McInk.copy(alpha = 0.1f), RoundedCornerShape(14.dp))

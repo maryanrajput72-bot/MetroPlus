@@ -33,6 +33,9 @@ import com.metroplus.app.ui.TomCountScreen
 import com.metroplus.app.ui.PhotoViewerScreen
 import com.metroplus.app.ui.SplashScreen
 import com.metroplus.app.ui.rememberDockIcon
+import com.metroplus.app.ui.LoginScreen
+import com.metroplus.app.ui.SignUpScreen
+import com.metroplus.app.ui.SPLASH_MS
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -96,6 +99,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animate
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import kotlinx.coroutines.Job
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
@@ -124,6 +133,7 @@ import com.metroplus.app.ui.PortalScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -157,7 +167,7 @@ import kotlinx.coroutines.launch
 enum class NavTab { SETTINGS, OPENING, HOME, CLOSING, PORTAL }
 
 // Sub-screens: HOME se aage jo bhi page khulega, right se left slide hoke aayega.
-enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL, GROUP_CHAT, TL_LOCK, CHAT_SETTINGS, APP_INFO, SYSTEM_STORAGE, WA_FORMAT, TOM_COUNT, PHOTO_VIEWER }
+enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL, GROUP_CHAT, TL_LOCK, CHAT_SETTINGS, APP_INFO, SYSTEM_STORAGE, WA_FORMAT, TOM_COUNT, PHOTO_VIEWER, LOGIN, SIGNUP }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -203,7 +213,8 @@ fun MetroPlusApp() {
     var showConfetti by remember { mutableStateOf(false) }
     // v1.62: splash GUI — cold open pe 1.5s, phir Home (sirf GUI, koi login nahi).
     var showSplash by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) { kotlinx.coroutines.delay(1500); showSplash = false }
+    // v1.66: intro ab 5 second (uska order) — progress bar + badalti lines SplashScreen me.
+    LaunchedEffect(Unit) { kotlinx.coroutines.delay(SPLASH_MS.toLong()); showSplash = false }
     fun startDownload(apkUrl: String) {
         // Double download se bacho (do check ek sath mile to bhi ek hi download).
         if (downloadProgress != null) return
@@ -263,12 +274,46 @@ fun MetroPlusApp() {
     val scope = rememberCoroutineScope()
     var activeNav by remember { mutableStateOf(NavTab.HOME) }
     var screen by remember { mutableStateOf(AppScreen.HOME) }
+    // v1.64 swipe-back state — yahan upar taake neeche LaunchedEffect bhi use kar sake.
+    var swipeOffsetX by remember { mutableStateOf(0f) }
+    var swipeClosing by remember { mutableStateOf(false) }
     // Back pe slide-out ke dauran bhi wahi page dikhe (warna khali box slide hota tha).
     var lastSubScreen by remember { mutableStateOf(AppScreen.MONEY) }
     LaunchedEffect(screen) { if (screen != AppScreen.HOME) lastSubScreen = screen }
+    // v1.64: swipe-close ke reset window me naya page khule to offset
+    // spring-back se reset — warna naya page aadha khiska hua aayega.
+    LaunchedEffect(screen) {
+        if (screen != AppScreen.HOME && swipeClosing) {
+            animate(swipeOffsetX, 0f, animationSpec = tween(200, easing = FastOutSlowInEasing)) { v, _ -> swipeOffsetX = v }
+            swipeClosing = false
+        }
+    }
     // Camera jahan se khula, back pe wahin wapas (Opening → GPS → Camera → back = Opening).
     var cameraFrom by remember { mutableStateOf(AppScreen.HOME) }
-    fun backHome() { screen = AppScreen.HOME; activeNav = NavTab.HOME }
+    // v1.66 (uska order "jis tarteeb se gaya usi tarteeb se wapas"): page ka back
+    // stack. Ek khule page se doosra khule (Settings → App Info, Settings →
+    // Calculator, Opening → Camera ...) to pichhla page stack me jata hai; back
+    // pe wahi wapas aata hai. Dock (Home/Opening/Closing/Portal) aur Home se
+    // seedha khulne wale pages stack saaf karte hain — unka back seedha Home.
+    val backStack = remember { mutableStateListOf<AppScreen>() }
+    var navBack by remember { mutableStateOf(false) }
+    fun navFor(s: AppScreen) = when (s) {
+        AppScreen.OPENING -> NavTab.OPENING; AppScreen.CLOSING -> NavTab.CLOSING
+        AppScreen.PORTAL -> NavTab.PORTAL; AppScreen.SETTINGS -> NavTab.SETTINGS
+        else -> activeNav
+    }
+    fun backHome() { backStack.clear(); navBack = true; screen = AppScreen.HOME; activeNav = NavTab.HOME }
+    fun go(to: AppScreen) {
+        if (screen != AppScreen.HOME && screen != to) backStack.add(screen)
+        navBack = false
+        screen = to
+    }
+    fun goBack() {
+        if (backStack.isEmpty()) { backHome(); return }
+        navBack = true
+        screen = backStack.removeAt(backStack.size - 1)
+        activeNav = navFor(screen)
+    }
     var dialog by remember { mutableStateOf<String?>(null) }
     fun toast(msg: String) { Toast.makeText(context, msg, Toast.LENGTH_SHORT).show() }
     fun notYet(name: String) { dialog = "$name\n\nGUI phase: this screen is design-only for now, its feature comes in a later step." }
@@ -287,6 +332,12 @@ fun MetroPlusApp() {
     val density = LocalDensity.current
     val imeBottom = with(density) { WindowInsets.ime.getBottom(density).toDp() }
     val navBottom = with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
+    // v1.64: swipe-back — khula page finger ke sath left khisakta hai.
+    // Aadhi screen tak kheenchne ya tez flick par back; wapas (right) kheenchne
+    // par page apni jagah wapas (cancel). Sirf page ke RIGHT half se shuru
+    // hone wala swipe — taake left side ke content aur drawer-edge se takrao na ho.
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val screenWidthPx = with(density) { LocalConfiguration.current.screenWidthDp.dp.toPx() }
 
     Box(modifier = Modifier.fillMaxSize()) {
     ModalNavigationDrawer(
@@ -311,7 +362,8 @@ fun MetroPlusApp() {
                         else notYet(name)
                     },
                     onCheckUpdate = { closeDrawer(); manualCheck() },
-                    onLogout = { closeDrawer(); toast("GUI phase: logout feature comes later") }
+                    // v1.66: Log Out se Login page (sirf GUI).
+                    onLogout = { closeDrawer(); screen = AppScreen.LOGIN }
                 )
             }
         }
@@ -345,15 +397,76 @@ fun MetroPlusApp() {
         AnimatedVisibility(
             visible = screen != AppScreen.HOME,
             enter = slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { if (isDrawerPage) -it else it } + fadeIn(animationSpec = tween(350)),
-            exit = slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { if (isDrawerPage) -it else it } + fadeOut(animationSpec = tween(350)),
+            // Swipe-close par exit bhi LEFT ko (finger ki taraf) — warna page
+            // wapas right ko slide karke nikalta, jo swipe se ulta lagta.
+            exit = if (swipeClosing) slideOutHorizontally(animationSpec = tween(250, easing = FastOutSlowInEasing)) { -it } + fadeOut(animationSpec = tween(250))
+                else slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { if (isDrawerPage) -it else it } + fadeOut(animationSpec = tween(350)),
             modifier = Modifier.fillMaxSize()
+                .offset { IntOffset(swipeOffsetX.toInt(), 0) }
+                .pointerInput(Unit) {
+                    // Har gesture ke liye dobara set hote hain.
+                    var dragStartedRight = false
+                    var tracker = VelocityTracker()
+                    var offsetAnimJob: Job? = null
+                    fun springBack(duration: Int) {
+                        offsetAnimJob?.cancel()
+                        offsetAnimJob = scope.launch {
+                            animate(swipeOffsetX, 0f, animationSpec = tween(duration, easing = FastOutSlowInEasing)) { v, _ -> swipeOffsetX = v }
+                        }
+                    }
+                    detectHorizontalDragGestures(
+                        onDragStart = { offset ->
+                            // Page khula ho AUR swipe page ke RIGHT half se shuru ho.
+                            dragStartedRight = screen != AppScreen.HOME && offset.x > size.width * 0.5f
+                            if (dragStartedRight) offsetAnimJob?.cancel()
+                            tracker = VelocityTracker()
+                        },
+                        onHorizontalDrag = { change, dragAmount ->
+                            if (!dragStartedRight) return@detectHorizontalDragGestures
+                            change.consume()
+                            tracker.addPosition(change.uptimeMillis, change.position)
+                            swipeOffsetX = (swipeOffsetX + dragAmount).coerceIn(-screenWidthPx, 0f)
+                        },
+                        onDragEnd = {
+                            if (!dragStartedRight) return@detectHorizontalDragGestures
+                            val velocityX = tracker.calculateVelocity().x
+                            val offsetX = swipeOffsetX
+                            // CLOSE: aadhi screen tak ya tez flick — back jaisa.
+                            if (offsetX < -screenWidthPx * 0.5f || velocityX < -1000f) {
+                                offsetAnimJob = scope.launch {
+                                    swipeClosing = true
+                                    if (screen != AppScreen.HOME) backDispatcher?.onBackPressed()
+                                    if (screen == AppScreen.HOME) {
+                                        // Page exit ho raha hai — exit ke dauran
+                                        // offset waisa hi rahe, phir reset.
+                                        kotlinx.coroutines.delay(300)
+                                        swipeOffsetX = 0f
+                                        swipeClosing = false
+                                    } else {
+                                        // Sheet band hui ya doosra sub-page khula —
+                                        // page apni jagah wapas.
+                                        animate(swipeOffsetX, 0f, animationSpec = tween(300, easing = FastOutSlowInEasing)) { v, _ -> swipeOffsetX = v }
+                                        swipeClosing = false
+                                    }
+                                }
+                            } else {
+                                // CANCEL: page wapas apni jagah.
+                                springBack(250)
+                            }
+                        },
+                        onDragCancel = {
+                            if (dragStartedRight) springBack(250)
+                        }
+                    )
+                }
         ) {
             val shown = if (screen != AppScreen.HOME) screen else lastSubScreen
             // Dock har page pe samne rehta hai — is liye page ka content dock ke upar khatam hota hai
             // (camera full-screen hai, wahan dock nahi). Keyboard khula ho to content keyboard ke
             // upar khatam hota hai (edge-to-edge me warna chat/form ka neeche wala field keyboard
             // ke peeche chhup jata tha).
-            val bottomSpace = if (shown == AppScreen.CAMERA) 0.dp else maxOf(imeBottom, navBottom + 76.dp)
+            val fullScreen = shown == AppScreen.CAMERA || shown == AppScreen.LOGIN || shown == AppScreen.SIGNUP
+            val bottomSpace = if (fullScreen) 0.dp else maxOf(imeBottom, navBottom + 76.dp)
             // FIX (v1.42): overlay ke khaali area ke tap Home tak na pahunchein —
             // pehle overlay ki background tap nahi rokti thi, is liye khula page
             // ke neeche wale home tiles bhi dab jate the.
@@ -364,7 +477,8 @@ fun MetroPlusApp() {
                 AnimatedContent(
                     targetState = shown,
                     transitionSpec = {
-                        val back = initialState == AppScreen.CAMERA
+                        // v1.66: back stack se wapas aaye to ulti slide (purana page left se aata hai).
+                        val back = navBack || initialState == AppScreen.CAMERA
                         val spec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
                         (slideInHorizontally(spec) { if (back) -it else it } + fadeIn(tween(350))) togetherWith
                             (slideOutHorizontally(spec) { if (back) it else -it } + fadeOut(tween(350)))
@@ -374,35 +488,43 @@ fun MetroPlusApp() {
                 ) { page ->
                 Box(modifier = Modifier.fillMaxSize().background(HomeBackground)) {
                 when (page) {
-                    AppScreen.MONEY -> MoneyCalculatorScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.OPENING -> OpeningScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; screen = AppScreen.CAMERA }, onOpenViewer = { screen = AppScreen.PHOTO_VIEWER })
-                    AppScreen.CLOSING -> ClosingScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.CAMERA -> GpsCameraScreen(onBack = { if (cameraFrom == AppScreen.OPENING) screen = AppScreen.OPENING else backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.SETTINGS -> SettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenPage = {
+                    AppScreen.MONEY -> MoneyCalculatorScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.OPENING -> OpeningScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; go(AppScreen.CAMERA) }, onOpenViewer = { go(AppScreen.PHOTO_VIEWER) })
+                    AppScreen.CLOSING -> ClosingScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.CAMERA -> GpsCameraScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.SETTINGS -> SettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenPage = {
                         when (it) {
-                            "TL / RP Login" -> screen = AppScreen.TL_LOCK
-                            "Chat Settings" -> screen = AppScreen.CHAT_SETTINGS
-                            "System & Storage" -> screen = AppScreen.SYSTEM_STORAGE
-                            "WhatsApp Report Format" -> screen = AppScreen.WA_FORMAT
-                            "App Info" -> screen = AppScreen.APP_INFO
+                            "TL / RP Login" -> go(AppScreen.TL_LOCK)
+                            "Chat Settings" -> go(AppScreen.CHAT_SETTINGS)
+                            "System & Storage" -> go(AppScreen.SYSTEM_STORAGE)
+                            "WhatsApp Report Format" -> go(AppScreen.WA_FORMAT)
+                            "App Info" -> go(AppScreen.APP_INFO)
+                            // v1.65: Settings ke Quick tiles + profile card se drawer wale pages.
+                            "Edit Profile" -> go(AppScreen.EDIT_PROFILE)
+                            "Calculator setting" -> go(AppScreen.CALC_SETTINGS)
+                            "Gps setting" -> go(AppScreen.GPS_SETTINGS)
+                            "Tl/Rp access setting" -> go(AppScreen.TLRP_SETTINGS)
+                            "Logout" -> go(AppScreen.LOGIN)
                             else -> notYet(it)
                         }
                     })
-                    AppScreen.TOM -> TomDataScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenTomCount = { screen = AppScreen.TOM_COUNT })
-                    AppScreen.COMPLAINTS -> ComplaintScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.EDIT_PROFILE -> EditProfileScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { backHome() })
-                    AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.PORTAL -> PortalScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { backHome() })
-                    AppScreen.TL_LOCK -> TlLockScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.CHAT_SETTINGS -> ChatSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenWaFormat = { screen = AppScreen.WA_FORMAT })
-                    AppScreen.APP_INFO -> AppInfoScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onCheckUpdate = { manualCheck() }, onOpenSystemStorage = { screen = AppScreen.SYSTEM_STORAGE })
-                    AppScreen.SYSTEM_STORAGE -> SystemStorageScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.WA_FORMAT -> WaFormatScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.TOM_COUNT -> TomCountScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.PHOTO_VIEWER -> PhotoViewerScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.TOM -> TomDataScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenTomCount = { go(AppScreen.TOM_COUNT) })
+                    AppScreen.COMPLAINTS -> ComplaintScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.EDIT_PROFILE -> EditProfileScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { goBack() })
+                    AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.PORTAL -> PortalScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { goBack() })
+                    AppScreen.TL_LOCK -> TlLockScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.CHAT_SETTINGS -> ChatSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenWaFormat = { go(AppScreen.WA_FORMAT) })
+                    AppScreen.APP_INFO -> AppInfoScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onCheckUpdate = { manualCheck() }, onOpenSystemStorage = { go(AppScreen.SYSTEM_STORAGE) })
+                    AppScreen.SYSTEM_STORAGE -> SystemStorageScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.WA_FORMAT -> WaFormatScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.TOM_COUNT -> TomCountScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.PHOTO_VIEWER -> PhotoViewerScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.LOGIN -> LoginScreen(onBack = { goBack() }, onSignUp = { go(AppScreen.SIGNUP) }, onGuiNote = { notYet(it) })
+                    AppScreen.SIGNUP -> SignUpScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.HOME -> Unit
                 }
                 }
@@ -413,7 +535,8 @@ fun MetroPlusApp() {
         // ya full-screen camera ho to neeche khisak jata hai.
         AnimatedVisibility(
             // Keyboard khula ho to bhi dock chhup jata hai (wo keyboard ke peeche hota).
-            visible = drawerState.targetValue == DrawerValue.Closed && screen != AppScreen.CAMERA && imeBottom == 0.dp,
+            visible = drawerState.targetValue == DrawerValue.Closed && screen != AppScreen.CAMERA &&
+                screen != AppScreen.LOGIN && screen != AppScreen.SIGNUP && imeBottom == 0.dp,
             enter = slideInVertically(tween(250)) { it } + fadeIn(tween(250)),
             exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250)),
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -421,6 +544,10 @@ fun MetroPlusApp() {
             BottomNavBar(
                 activeNav = activeNav, onNavClick = { tab ->
                     activeNav = tab
+                    // v1.66: dock se khula page "seedha" hai — purana back stack saaf,
+                    // is ka back seedha Home (uska order).
+                    backStack.clear()
+                    navBack = false
                     when (tab) {
                         NavTab.HOME -> screen = AppScreen.HOME
                         NavTab.OPENING -> screen = AppScreen.OPENING
@@ -481,9 +608,10 @@ private fun BottomNavBar(modifier: Modifier = Modifier, activeNav: NavTab, onNav
     // wo LAAL pill ban jata hai — safed gol me 3D icon + poora naam — pill smooth phail/simat jati hai.
     // v1.63: dock se Settings hata diya (uska order) — sirf 4 rahenge.
     // Settings ab bhi drawer ki "app Setting" row aur Home ki Settings entry se khulti hai.
+    // v1.64 (uska order): Home pehle, phir Opening, phir Closing, aakhir me Portal.
     val tabs = listOf(
-        Triple(NavTab.OPENING, DockIcon.OPENING, "Opening"),
         Triple(NavTab.HOME, DockIcon.HOME, "Home"),
+        Triple(NavTab.OPENING, DockIcon.OPENING, "Opening"),
         Triple(NavTab.CLOSING, DockIcon.CLOSING, "Closing"),
         Triple(NavTab.PORTAL, DockIcon.PORTAL, "Portal")
     )
@@ -637,7 +765,8 @@ private fun ProfileDrawer(
             DrawerDivider()
             // "app Setting" row wapas (uske 'Ok kro' pe) — pehle ghalat
             // samajh ke hata di thi; ab dobara 4 rows hain.
-            DrawerMenuRow(icon = Icons.Filled.Settings, label = "app Setting", colors = listOf(Color(0xFFFF7EB0), Color(0xFFE91E63)), onClick = { onMenu("app Setting") })
+            // v1.65: label "app Setting" → "Settings" (uska order).
+            DrawerMenuRow(icon = Icons.Filled.Settings, label = "Settings", colors = listOf(Color(0xFFFF7EB0), Color(0xFFE91E63)), onClick = { onMenu("app Setting") })
         }
         Spacer(modifier = Modifier.height(16.dp))
         // Neeche: version pill + laal "Check update" button.
@@ -649,7 +778,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.63", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.66", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

@@ -78,8 +78,9 @@ private val XMuted = Color(0xFF6B7280)
 private fun XHeader(title: String, onBack: () -> Unit) {
     val hShape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().cssShadow(12.dp, hShape, Color(0xFF15803D).copy(alpha = 0.3f)).clip(hShape)
-            .background(cssLinear(135f, 0f to Color(0xFF34D399), 0.55f to Color(0xFF16A34A), 1f to Color(0xFF0F766E)))
+        // v1.66: Settings ke andar ke pages bhi Settings ke naye rang (indigo → jamni → gulabi), sabz nahi.
+        modifier = Modifier.fillMaxWidth().cssShadow(12.dp, hShape, Color(0xFF7C3AED).copy(alpha = 0.3f)).clip(hShape)
+            .background(cssLinear(135f, 0f to Color(0xFF6366F1), 0.55f to Color(0xFF8B5CF6), 1f to Color(0xFFEC4899)))
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 18.dp),
@@ -527,24 +528,7 @@ fun PhotoViewerScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     }
 }
 
-// ---------------- Splash (app khulte hi, 1.5s, phir Home) ----------------
-
-@Composable
-fun SplashScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .background(cssLinear(135f, 0f to Color(0xFF1A0B0D), 0.5f to Color(0xFF8E1820), 1f to Color(0xFFD3343C))),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(painterResource(id = R.drawable.logo_hd), contentDescription = "Metro + logo", modifier = Modifier.size(120.dp))
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Metro +", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = (-0.5).sp)
-            Spacer(modifier = Modifier.height(6.dp))
-            Text("Daily Shift Companion", fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.8f))
-        }
-    }
-}
+// v1.66: Splash yahan se SplashLogin.kt me chala gaya (5s + progress + lines).
 
 // ---------------- Premium Request modal (drawer TL/RP page ke liye) ----------------
 
@@ -567,7 +551,7 @@ fun PremiumRequestModal(onClose: () -> Unit, onGuiNote: (String) -> Unit) {
                 ) { Icon(Icons.Filled.Close, contentDescription = "Close", tint = XInk, modifier = Modifier.size(17.dp)) }
             }
             Spacer(modifier = Modifier.height(6.dp))
-            Text("Admin ko request jayegi — TL ya RP access ke liye.", fontSize = 12.5.sp, color = XMuted, lineHeight = 18.sp)
+            Text("Your request goes to the admin for TL or RP access.", fontSize = 12.5.sp, color = XMuted, lineHeight = 18.sp)
             Spacer(modifier = Modifier.height(14.dp))
             OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Your name") }, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(10.dp))

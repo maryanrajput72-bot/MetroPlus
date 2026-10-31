@@ -1,4 +1,44 @@
-# Metro+ Native App — Handoff (v1.63 / versionCode 64) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.66 / versionCode 67) — DEBUG build (non-debuggable)
+
+## v1.66 change (31 Oct 2026) — back tarteeb, 5s intro, Login + Sign Up GUI (DEBUG, phone pe NAHI gayi)
+- BACK STACK (MainActivity): go(X) = khule page ko stack me daal ke X kholo;
+  goBack() = stack se pichhla page (khaali ho to Home). Saare sub-pages ka onBack
+  ab goBack(); page-se-page raste (Settings rows/tiles, Opening → Camera/Viewer,
+  Tom → TOM Count, Chat Settings → WA Format, App Info → System & Storage,
+  Login → Sign Up) go() se. Dock tap aur Home/drawer se khulne wale pages stack
+  saaf karte hain (unka back seedha Home). navBack flag se wapsi pe ulti slide.
+  Emulator pe dekha: Settings → Calculator → back = Settings; Settings → Logout
+  → Login → Sign Up → back = Login → back = Settings.
+- INTRO (SplashLogin.kt SplashScreen, SPLASH_MS = 5000): logo pop-in + saans
+  leti roshni, neeche 4 badalti English lines, gradient progress bar + % + dots.
+  Bug fix: splash pehle tap rokta nahi tha (clickable enabled=false) — tap peeche
+  Home tak jata tha; ab tap consume hota hai.
+- LOGIN / SIGN UP (sirf GUI, pageState me values): Login = Employee ID/Gmail,
+  password (aankh se dikhao/chhupao), Remember me, Forgot ID, Log In, "Create new
+  account". Sign Up = naam, Employee ID, mobile, Gmail, station picker, shift,
+  role, password + confirm (match na ho to laal note), confirm checkbox, Sign Up.
+  Rasta: drawer My Account → Log Out, aur Settings ka Logout button. Dock in pe
+  chhupa rehta hai.
+- Settings ke andar ke pages (XHeader: Chat Settings, App Info, System & Storage,
+  TOM Count waghera) bhi sabz se Settings ke jamni-gulabi rang me.
+- PremiumRequestModal ki Roman Urdu line English ki (in-app English rule).
+
+## v1.65 change (31 Oct 2026) — Settings naya rang, chat icon, calculator notes (DEBUG, phone pe NAHI gayi)
+- Setup note: v1.64 zip me keystore (jaan boojh ke) aur app/build.gradle.kts
+  (ghalti se) nahi the — dono v1.61 se liye; v1.61 folder D:\MetroPlus-v1.61-old.
+  v1.64 ka apna change HANDOFF me likha nahi tha.
+- Drawer row label "app Setting" → "Settings" (onMenu key wahi "app Setting").
+- SettingsScreen poora naya: sabz hataya — hero indigo → jamni → gulabi, profile
+  card hero ke andar (asal logo, tap = Edit Profile), QUICK SETTINGS 4 dabbe
+  (Profile, Calculator, GPS, TL/RP → drawer wale pages; MainActivity onOpenPage me
+  naye raste), group dabbe apne rang (Account teal, General gulabi, App neela),
+  jamni→gulabi toggles, Logout gradient button. WhatsApp Report Format row HATA
+  di (WA_FORMAT page/route code me hain, bas Settings se rasta nahi).
+- Home chat button: sabz → teal 3D dabba + safed Forum icon + laal "3" badge (GUI).
+- Calculator setting: chhote rang dabbe ki jagah Money Calculator wala asli note
+  badge (MoneyCalculatorScreen.kt me internal NoteBadge + NoteColors; DenomRow bhi
+  isi ko use karta hai); 5/2/1 gol sikke.
+- Verify: emulator pe Home header, drawer, Settings (dono hisse), Calculator dekhe.
 
 ## v1.63 change (31 Oct 2026) — dock 4 tabs + 63 jaisa updater (DEBUG)
 - Uska order (14:06 PKT): neeche dock se Settings icon hatao (sirf 4 rahenge:
@@ -24,6 +64,11 @@
   b13501ef EXACT match (v1.62 ke upar in-place update hogi), dex me
   "Version 1.63" + "Installing update" + "Download failed" + "Updating" + "MB".
   Dock 4-tab change compile se guzra (when exhaustive ke liye else branch).
+- Manifest LIVE (14:38 PKT): vc64/1.63 JSON, commit 95c778e1, blob 30894f88,
+  get_file_contents se verify. NOTE: pehli koshish (ef552c51) me content
+  base64 de diya tha to file me base64 string save ho gayi thi — pakar ke
+  raw JSON se dobara likha. Aage se manifest me content HAMESHA raw JSON.
+- GitHub code head: 024a7066 (MainActivity, UpdateCheck, build.gradle, HANDOFF).
 
 ## v1.62 change (31 Oct 2026) — 63 ke reh gaye GUI pages, SIRF GUI (DEBUG, phone pe NAHI gayi)
 - Uska order (11:40 + 11:45 PKT): comparison SIRF GUI ka ho, asli kaam baad me;
@@ -532,3 +577,16 @@ to the updater manifest (`maryanrajput72-bot/MetroPlus/metroplus-app-version.jso
 ## Folder
 - `app/` source + resources, `gradle/` + `gradlew*` wrapper, `keystore/` signing key,
   `apk/MetroPlus-v1.40-debug.apk` last built (DEBUG) build.
+
+## v1.64/vc65 (2026-10-31, main chat se)
+- Dock order: Home, Opening, Closing, Portal (uske order pe).
+- Swipe-back (MainActivity.kt, overlay level): page finger ke sath left khisakta hai;
+  swipe page ke RIGHT half se shuru ho; aadhi screen tak ya tez flick (< -1000 px/s)
+  par system back dispatch hota hai (sheet khuli ho to pehle sheet); wapas right
+  kheenchne par cancel (spring-back); close par exit bhi left ko slide hota hai
+  (swipeClosing flag). Back button waisa hi hai.
+- Version bump TEEN jagah (rule): build.gradle.kts vc65/1.64 + drawer pill "Version 1.64"
+  + UpdateCheck.kt CURRENT_VERSION_CODE = 65 (ye chhootne par install ke baad update
+  dobara offer hota — v1.64 ki pehli build me yehi ghalti hui thi, dobara build ki).
+- APK: MetroPlus-v1.64-debug.apk, 12,455,087 bytes, SHA 1b8f705f, cert b13501ef.
+  Manifest live (commit 8190e44c). Code metroplus-native/ par push pending hai.

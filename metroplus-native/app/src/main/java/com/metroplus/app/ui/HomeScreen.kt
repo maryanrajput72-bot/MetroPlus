@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -275,18 +276,29 @@ fun HomeScreen(
                         Text(if (isOnline) "LIVE" else "OFFLINE", fontSize = 10.5.sp, fontWeight = FontWeight.ExtraBold, color = live, letterSpacing = 0.8.sp)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    // v1.57: chat button 3D — gehra saya, upar chamak (63 wala bubble wahi).
+                    // v1.65 (uska order "message icon aur pyara"): sabz → teal 3D dabba,
+                    // upar shishe ki chamak, andar safed chat bubbles, aur kone pe laal
+                    // "3" badge (GUI demo — asli unread count chat wiring ke sath).
                     val chatShape = RoundedCornerShape(16.dp)
-                    Box(
-                        modifier = Modifier.size(46.dp)
-                            .cssShadow(8.dp, chatShape, BrandRed.copy(alpha = 0.3f)).clip(chatShape)
-                            .background(cssLinear(160f, 0f to Color.White, 1f to Color(0xFFF3DCDE)))
-                            .drawBehind { drawRect(Brush.verticalGradient(listOf(Color.White, Color.White.copy(alpha = 0f)), endY = size.height / 2)) }
-                            .border(1.dp, BrandRed.copy(alpha = 0.18f), chatShape)
-                            .clickable { onChatClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(painterResource(id = R.drawable.ic_chat_bubble), contentDescription = "Group Chat", contentScale = ContentScale.Fit, modifier = Modifier.size(30.dp))
+                    Box(modifier = Modifier.size(50.dp)) {
+                        Box(
+                            modifier = Modifier.align(Alignment.BottomStart).size(46.dp)
+                                .cssShadow(10.dp, chatShape, Color(0xFF059669).copy(alpha = 0.45f)).clip(chatShape)
+                                .background(cssLinear(145f, 0f to Color(0xFF6EE7B7), 0.5f to Color(0xFF10B981), 1f to Color(0xFF0F766E)))
+                                .drawBehind { drawRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.45f), Color.White.copy(alpha = 0f)), endY = size.height * 0.55f)) }
+                                .border(1.dp, Color.White.copy(alpha = 0.45f), chatShape)
+                                .clickable { onChatClick() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Filled.Forum, contentDescription = "Group Chat", tint = Color.White, modifier = Modifier.size(24.dp))
+                        }
+                        Box(
+                            modifier = Modifier.align(Alignment.TopEnd).size(19.dp)
+                                .cssShadow(3.dp, CircleShape, Color(0xFFE11D48).copy(alpha = 0.5f))
+                                .background(Brush.linearGradient(listOf(Color(0xFFFF6B6B), Color(0xFFE11D48))), CircleShape)
+                                .border(2.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) { Text("3", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
                     }
                 }
             }
