@@ -55,6 +55,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -155,6 +156,20 @@ object PortalWeb {
         // wali hardware layer — Compose ke andar scroll ka hang/jank isi
         // se behtar hota hai (window ki HW acceleration pehle se on hai).
         wv.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+        // v1.85 SCROLL (63 comparison — trial shell ke settings, sirf Portal):
+        // overscroll glow band (fling par extra draw nahi), horizontal
+        // scrollbar off (site sirf vertical hai), nested scrolling on,
+        // textZoom 100 saaf saaf, scrollbar content ke andar (chaurai na
+        // ghate). Trial pattern: DOWN par parent ko touch intercept se roko.
+        wv.overScrollMode = android.view.View.OVER_SCROLL_NEVER
+        wv.isHorizontalScrollBarEnabled = false
+        wv.scrollBarStyle = android.view.View.SCROLLBARS_INSIDE_OVERLAY
+        wv.isNestedScrollingEnabled = true
+        wv.settings.textZoom = 100
+        wv.setOnTouchListener { v, event ->
+            if (event.action == android.view.MotionEvent.ACTION_DOWN) v.parent?.requestDisallowInterceptTouchEvent(true)
+            false
+        }
         wv.settings.javaScriptEnabled = true
         wv.settings.domStorageEnabled = true
         // v1.82 SPEED (uska order — Portal tez): site ki cache istemal ho
@@ -304,7 +319,7 @@ private fun PoMenuRow(icon: androidx.compose.ui.graphics.vector.ImageVector, col
 }
 
 @Composable
-fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
+fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Boolean = true) {
     var showLogin by remember { mutableStateOf(false) }
     var showFill by remember { mutableStateOf(false) }
     // v1.80: dropdown Quick Fill overlay + three-dot card.
@@ -327,8 +342,14 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     }
     val density = LocalDensity.current
     var headerH by remember { mutableStateOf(0) }
+    // v1.85: overlay hamesha composed rehta hai (63 ki tarah) — BackHandler
+    // sirf tab jab Portal waqai khula ho, warna Home ka back kharab hota.
+    // Chhupte waqt menus/sheets band (dobara kholo to saaf Portal mile).
+    LaunchedEffect(isActive) {
+        if (!isActive) { quickOpen = false; dotMenuOpen = false; showLogin = false; showFill = false }
+    }
     // Back: pehle menus/panel/sheets, phir WebView history, phir page.
-    BackHandler {
+    BackHandler(enabled = isActive) {
         if (quickOpen) quickOpen = false
         else if (dotMenuOpen) dotMenuOpen = false
         else if (showLogin) showLogin = false

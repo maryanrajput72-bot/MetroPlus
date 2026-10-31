@@ -1,4 +1,37 @@
-# Metro+ Native App — Handoff (v1.84 / versionCode 85) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.85 / versionCode 86) — DEBUG build (non-debuggable)
+
+## v1.85 change (1 Nov 2026) — 63 comparison + Portal always-alive overlay (uska order, DEBUG, SIRF Portal)
+- 63 COMPARISON (trial263-ref se parha, andaza nahi): 63 ka Portal
+  ek IFRAME tha jo main WebView ke andar HAMESHA ZINDA rehta tha —
+  band par sirf CSS translateY(100%) se chhupta tha, kabhi detach
+  nahi hota tha (is liye dobara kholo to garam + foran); enter slide
+  0.3s (fade kabhi nahi); neeche ::after 84px dock-space (iframe dock
+  se upar khatam); shell dex me scroll settings: OVER_SCROLL_NEVER,
+  horizontal scrollbar off, nested scrolling on, requestDisallow-
+  InterceptTouchEvent, textZoom, HW layer. Native v1.84 tak: alag
+  WebView (band par detach, khulne par re-attach), enter fade 150ms,
+  fullscreen (footer red line dock ke peeche), scroll settings default.
+- IMPLEMENT (sirf Portal): (1) Portal HAMESHA-ZINDA OVERLAY —
+  PortalScreen ab AnimatedContent me nahi, root Box me hamesha
+  composed rehti hai, sirf right-side offset (screenWidthPx) + alpha
+  se chhupti hai; enter right se left 350ms slide (fade KHATAM).
+  Guards: BackHandler sirf isActive par; chhupte waqt menus/sheets
+  band; lastSubScreen me PORTAL nahi (warna HOME wapas par inner
+  PortalScreen WebView ka parent chheen leti); inner PORTAL branch =
+  Unit (when-exhaustive ke liye). (2) DOCK-SPACE WAPAS — overlay ko
+  bottom padding maxOf(imeBottom, navBottom+76dp) (63 ke spacer ki
+  tarah); v1.84 fullscreen revert; footer ki red line ab dock ke
+  peeche nahi chhupegi. (3) TRIAL SCROLL SETTINGS PortalWeb me:
+  OVER_SCROLL_NEVER, horizontal scrollbar off, SCROLLBARS_INSIDE_
+  OVERLAY, nested scrolling on, textZoom 100, DOWN par parent
+  intercept rok (OnTouchListener, consume nahi karta). NOTE: Portal
+  par swipe-back ab nahi chalega (detector neeche wale pages Box
+  par hai) — system back / dock se wapas. Trial ke mixed-content /
+  file-access / geolocation / zoom-controls values dex se nahi pata
+  (sirf method naam), site ko zaroorat nahi — chheda nahi.
+- GitHub APK RULE: is release me v1.85 upload + v1.83 delete (1.84 +
+  1.85 rahengi); manifest apkUrl = GitHub raw v1.85.
+- Verify: TODO build ke baad.
 
 ## v1.84 change (1 Nov 2026) — Portal speed research + 1-line dropdown + browser frame + Portal fullscreen dock (uska order, DEBUG, SIRF Portal)
 - SPEED — NET RESEARCH (uska order, "batao phir karo"): official
@@ -29,7 +62,12 @@
   page ka sab se neeche wala dock-jitna hissa dock ke peeche rahega.
 - GitHub APK RULE: is release me v1.84 upload + v1.82 delete (1.83 +
   1.84 rahengi); manifest apkUrl = GitHub raw v1.84.
-- Verify: TODO build ke baad.
+- Verify: BUILD SUCCESSFUL 3m32s; APK 12,563,623 bytes, SHA
+  757f9eb1…; apksigner cert b13501ef match; dex me "Version 1.84"
+  1x, "Version 1.83" 0x, OffscreenPreRaster 1x, portal_cookies 1x.
+  GitHub code head 76554cb4, APK commit 87b51fb (size API se exact
+  match), v1.82 delete commit 2101ca79, manifest commit 7814b45c
+  (vc85 JSON re-read verify).
 
 ## v1.83 change (1 Nov 2026) — Portal fast enter + WebView scroll smooth + dropdown pretty (uska order, DEBUG)
 - PORTAL ENTER FAST (uska order): page switch pehle 350ms right-slide

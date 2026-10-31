@@ -304,7 +304,10 @@ fun MetroPlusApp() {
     var swipeClosing by remember { mutableStateOf(false) }
     // Back pe slide-out ke dauran bhi wahi page dikhe (warna khali box slide hota tha).
     var lastSubScreen by remember { mutableStateOf(AppScreen.MONEY) }
-    LaunchedEffect(screen) { if (screen != AppScreen.HOME) lastSubScreen = screen }
+    // v1.85: PORTAL lastSubScreen me nahi — warna HOME wapas par inner
+    // PortalScreen bhi compose hoti aur overlay wale WebView se parent
+    // chheen leti (ek View ke do parent nahi ho sakte).
+    LaunchedEffect(screen) { if (screen != AppScreen.HOME && screen != AppScreen.PORTAL) lastSubScreen = screen }
     // v1.64: swipe-close ke reset window me naya page khule to offset
     // spring-back se reset — warna naya page aadha khiska hua aayega.
     LaunchedEffect(screen) {
@@ -486,16 +489,18 @@ fun MetroPlusApp() {
                     )
                 }
         ) {
-            val shown = if (screen != AppScreen.HOME) screen else lastSubScreen
+            // v1.85: Portal ab hamesha-zinda overlay hai (63 ki tarah) —
+            // inner switch me kabhi nahi aata; uske neeche lastSubScreen
+            // rehta hai (opaque overlay se nazar nahi aata).
+            val shown = if (screen != AppScreen.HOME && screen != AppScreen.PORTAL) screen else lastSubScreen
             // Dock har page pe samne rehta hai — is liye page ka content dock ke upar khatam hota hai
             // (camera full-screen hai, wahan dock nahi). Keyboard khula ho to content keyboard ke
             // upar khatam hota hai (edge-to-edge me warna chat/form ka neeche wala field keyboard
             // ke peeche chhup jata tha).
-            // v1.84 (uska order — SIRF Portal): Portal poori screen par,
-            // dock uske UPAR nazar aayega (dock pehle se pages ke upar banta
-            // hai, sirf content ka bottom padding khatam hua hai). Opening /
-            // Closing ko haath nahi lagaya.
-            val fullScreen = shown == AppScreen.CAMERA || shown == AppScreen.LOGIN || shown == AppScreen.SIGNUP || shown == AppScreen.PORTAL
+            // v1.85: v1.84 wala Portal fullscreen WAPAS — us se site ke
+            // footer ki red line dock ke peeche chhup rahi thi. Portal ab
+            // overlay me apni dock-space khud rakhta hai (63 ki tarah).
+            val fullScreen = shown == AppScreen.CAMERA || shown == AppScreen.LOGIN || shown == AppScreen.SIGNUP
             val bottomSpace = if (fullScreen) 0.dp else maxOf(imeBottom, navBottom + 76.dp)
             // FIX (v1.42): overlay ke khaali area ke tap Home tak na pahunchein —
             // pehle overlay ki background tap nahi rokti thi, is liye khula page
@@ -507,18 +512,14 @@ fun MetroPlusApp() {
                 AnimatedContent(
                     targetState = shown,
                     transitionSpec = {
-                        // v1.83 (uska order): Portal ka right-side slow slide
-                        // KHATAM — Portal sirf tez fade (150ms) se aayega, taake
-                        // tap karte hi foran nazar aaye. Baaki pages wahi slide.
-                        if (targetState == AppScreen.PORTAL) {
-                            fadeIn(tween(150)) togetherWith fadeOut(tween(150))
-                        } else {
-                            // v1.66: back stack se wapas aaye to ulti slide (purana page left se aata hai).
-                            val back = navBack || initialState == AppScreen.CAMERA
-                            val spec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
-                            (slideInHorizontally(spec) { if (back) -it else it } + fadeIn(tween(350))) togetherWith
-                                (slideOutHorizontally(spec) { if (back) it else -it } + fadeOut(tween(350)))
-                        }
+                        // v1.85 (uska order): fade KHATAM — Portal ab overlay
+                        // hai, is liye inner switch me kabhi nahi aata; baaki
+                        // pages wahi 350ms right-slide (uski pasand).
+                        // v1.66: back stack se wapas aaye to ulti slide (purana page left se aata hai).
+                        val back = navBack || initialState == AppScreen.CAMERA
+                        val spec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
+                        (slideInHorizontally(spec) { if (back) -it else it } + fadeIn(tween(350))) togetherWith
+                            (slideOutHorizontally(spec) { if (back) it else -it } + fadeOut(tween(350)))
                     },
                     label = "pageSwitch",
                     modifier = Modifier.fillMaxSize()
@@ -551,7 +552,10 @@ fun MetroPlusApp() {
                     AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { goBack() })
                     AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenLogin = { go(AppScreen.TL_LOCK) })
-                    AppScreen.PORTAL -> PortalScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    // v1.85: Portal yahan kabhi nahi (overlay me hai) — ye
+                    // branch sirf when-exhaustive ke liye, WebView yahan
+                    // dobara attach nahi hoga.
+                    AppScreen.PORTAL -> Unit
                     AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { goBack() })
                     AppScreen.TL_LOCK -> TlLockScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.CHAT_SETTINGS -> ChatSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenWaFormat = { go(AppScreen.WA_FORMAT) })
@@ -567,6 +571,31 @@ fun MetroPlusApp() {
                 }
                 }
             }
+        }
+        // v1.85 (63 comparison — uska order): Portal HAMESHA-ZINDA overlay.
+        // 63 me iframe kabhi detach nahi hota tha (CSS se chhupta tha); yahan
+        // WebView wali PortalScreen hamesha composed rehti hai aur sirf
+        // right-side offset se chhupti hai — detach/re-attach ka jhatka
+        // khatam, enter right se left slide (fade nahi). Neeche dock-space
+        // (63 ke 84px spacer ki tarah) taake footer ki red line dock ke
+        // peeche na chhupe. Dock iske UPAR banta hai (baad me aata hai).
+        // NOTE: Portal par swipe-back ab nahi chalega (detector neeche wale
+        // pages Box par hai) — system back / dock se wapas jao.
+        val portalX by animateFloatAsState(
+            if (screen == AppScreen.PORTAL) 0f else screenWidthPx,
+            tween(350, easing = FastOutSlowInEasing), label = "portalOverlayX"
+        )
+        val portalAlpha by animateFloatAsState(
+            if (screen == AppScreen.PORTAL) 1f else 0f,
+            tween(350), label = "portalOverlayAlpha"
+        )
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .offset { IntOffset(portalX.toInt(), 0) }
+                .graphicsLayer { alpha = portalAlpha }
+                .padding(bottom = maxOf(imeBottom, navBottom + 76.dp))
+        ) {
+            PortalScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, isActive = screen == AppScreen.PORTAL)
         }
         // Dock sab pages ke UPAR (naya page khulne pe bhi samne rehta hai). Sirf drawer khula ho
         // ya full-screen camera ho to neeche khisak jata hai.
@@ -819,7 +848,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.84", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.85", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
