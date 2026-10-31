@@ -37,7 +37,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -71,6 +73,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -248,7 +253,7 @@ private fun PoCard(title: String?, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun PoField(label: String, icon: @Composable () -> Unit, value: String, onValue: (String) -> Unit, placeholder: String, password: Boolean = false) {
+private fun PoField(label: String, icon: @Composable () -> Unit, value: String, onValue: (String) -> Unit, placeholder: String, password: Boolean = false, keyboard: KeyboardType = KeyboardType.Text) {
     var showPass by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(12.dp)
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp, bottom = 6.dp)) {
@@ -258,6 +263,7 @@ private fun PoField(label: String, icon: @Composable () -> Unit, value: String, 
     }
     BasicTextField(
         value = value, onValueChange = onValue, singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboard),
         visualTransformation = if (password && !showPass) PasswordVisualTransformation() else VisualTransformation.None,
         textStyle = TextStyle(fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = PoInk),
         modifier = Modifier.fillMaxWidth(),
@@ -321,7 +327,11 @@ private fun PoMenuRow(icon: androidx.compose.ui.graphics.vector.ImageVector, col
 @Composable
 fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Boolean = true) {
     var showLogin by remember { mutableStateOf(false) }
-    var showFill by remember { mutableStateOf(false) }
+    // v1.86: NAYI TKM GUI (63 ke TKM Auto-Fill dialog se, sky blue) —
+    // purani full-screen Fill sheet (showFill) hata di gayi hai.
+    var showTkm by remember { mutableStateOf(false) }
+    var tkmCardCount by remember { mutableStateOf("") }
+    var tkmSaleAmount by remember { mutableStateOf("") }
     // v1.80: dropdown Quick Fill overlay + three-dot card.
     var quickOpen by remember { mutableStateOf(false) }
     var dotMenuOpen by remember { mutableStateOf(false) }
@@ -346,14 +356,14 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
     // sirf tab jab Portal waqai khula ho, warna Home ka back kharab hota.
     // Chhupte waqt menus/sheets band (dobara kholo to saaf Portal mile).
     LaunchedEffect(isActive) {
-        if (!isActive) { quickOpen = false; dotMenuOpen = false; showLogin = false; showFill = false }
+        if (!isActive) { quickOpen = false; dotMenuOpen = false; showLogin = false; showTkm = false }
     }
     // Back: pehle menus/panel/sheets, phir WebView history, phir page.
     BackHandler(enabled = isActive) {
         if (quickOpen) quickOpen = false
         else if (dotMenuOpen) dotMenuOpen = false
         else if (showLogin) showLogin = false
-        else if (showFill) showFill = false
+        else if (showTkm) showTkm = false
         else if (PortalWeb.webView?.canGoBack() == true) PortalWeb.webView?.goBack()
         else onBack()
     }
@@ -418,11 +428,13 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                         }
                     }
                 }
-                // v1.84 (uska order): browser frame — left/right patli lines,
-                // upar se neeche tak, taake saaf pata chale site app ke andar
-                // khuli hai (dock ke peeche wale hisse tak lines jayengi).
-                Box(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight().width(1.dp).background(PoInk.copy(alpha = 0.20f)))
-                Box(modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(1.dp).background(PoInk.copy(alpha = 0.20f)))
+                // v1.86 (uska order): browser frame — left/right BILKUL
+                // bareek (1dp) WHITE-BLUE MIX lines (safed se sky blue
+                // gradient), upar se neeche tak, taake saaf pata chale site
+                // app ke andar khuli hai.
+                val sideLine = Brush.verticalGradient(listOf(Color.White, Color(0xFF38BDF8)))
+                Box(modifier = Modifier.align(Alignment.CenterStart).fillMaxHeight().width(1.dp).background(sideLine))
+                Box(modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(1.dp).background(sideLine))
             }
         }
         // ---- Overlays: dropdown grid + three-dot card. Ye content ko
@@ -453,14 +465,16 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                 Column(modifier = Modifier.fillMaxWidth().cssShadow(10.dp, cardShape, PoInk.copy(alpha = 0.18f)).background(Color.White, cardShape).border(1.5.dp, Color(0xFF0B2A5B), cardShape).padding(12.dp)) {
                     Text("QUICK FILL", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = PoInk.copy(alpha = 0.55f), letterSpacing = 1.2.sp)
                     Spacer(modifier = Modifier.height(10.dp))
-                    // v1.84 (uska order): paanchon chhote cards EK hi line me,
-                    // header se neeche (gap + dark border wahi).
+                    // v1.84: paanchon chhote cards EK hi line me, header se
+                    // neeche (gap + dark border wahi). v1.86 (uska order):
+                    // ASKARI card DARMIYAN (teesri position) me; TKM card
+                    // nayi TKM GUI (dialog) kholta hai.
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         PoQuickCard(Color(0xFF1D6FD8), Color(0xFF38BDF8), "Auto Fill", "Login", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Auto Fill") }
                         PoQuickCard(Color(0xFF0B5BD3), Color(0xFF60A5FA), "TOM A", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM A") }
-                        PoQuickCard(Color(0xFF1E40AF), Color(0xFF3B82F6), "TOM B", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM B") }
-                        PoQuickCard(Color(0xFF0B2A5B), Color(0xFF1D6FD8), "TKM", "Card sale", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TKM") }
                         PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Voucher", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill ASKARI") }
+                        PoQuickCard(Color(0xFF1E40AF), Color(0xFF3B82F6), "TOM B", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM B") }
+                        PoQuickCard(Color(0xFF0B2A5B), Color(0xFF1D6FD8), "TKM", "Card sale", Modifier.weight(1f)) { quickOpen = false; tkmCardCount = ""; tkmSaleAmount = ""; showTkm = true }
                     }
                 }
                 }
@@ -522,47 +536,52 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                 }
             }
         }
-        // ---- 63 ki Data-Fill sheet (nested overlay) ----
-        if (showFill) {
-            val today = remember { SimpleDateFormat("EEEE, d MMMM", Locale.ENGLISH).format(Calendar.getInstance().time) }
-            val fillRows = listOf("TOM A" to "TOM A", "TOM B" to "TOM B", "TKM" to "TKM", "BOP / POS" to "BOP")
-            Box(
-                modifier = Modifier.fillMaxSize().background(Color(0xFFEAF2FE))
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().background(Color(0xFFEAF2FE)).statusBarsPadding().padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Fill Today's Data", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, letterSpacing = (-0.3).sp, modifier = Modifier.weight(1f))
-                        PoHeaderBtn({ Icon(Icons.Filled.Close, contentDescription = "Close", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showFill = false }
-                    }
-                    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text(today, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PoGray, modifier = Modifier.padding(horizontal = 4.dp))
-                        PoCard(null) {
-                            fillRows.forEachIndexed { i, (label, key) ->
-                                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Text("$label: —", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PoInk, modifier = Modifier.weight(1f))
-                                    Box(
-                                        modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(PoRed).clickable { onGuiNote("Portal Fill $key") }.padding(horizontal = 12.dp, vertical = 8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) { Text("Auto-Fill", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = Color.White) }
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Box(
-                                        modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(Color(0xFFEAF2FE)).border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(10.dp))
-                                            .clickable { onGuiNote("Copy Portal $key") }.padding(horizontal = 10.dp, vertical = 8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) { Icon(Icons.Filled.ContentCopy, contentDescription = null, tint = PoGray, modifier = Modifier.size(16.dp)) }
-                                }
-                                if (i < fillRows.size - 1) Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                            }
+        // ---- NAYI TKM GUI (v1.86, 63 ke TKM Auto-Fill dialog se, sky blue) ----
+        // Purani full-screen Fill sheet ki jagah bottom-sheet card — 63 ki
+        // tarah: drag bar, title, note, 2 number fields, Auto-Fill + Cancel.
+        // GUI phase: Auto-Fill abhi note dikhata hai (site me asli fill agla step).
+        if (showTkm) {
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)).clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { showTkm = false }) {
+                Column(
+                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(Color.White)
+                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    Box(modifier = Modifier.width(44.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFFE2E8F0)).align(Alignment.CenterHorizontally))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(Color(0xFFE0F2FE)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.ConfirmationNumber, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(18.dp))
                         }
-                        Text("Values will appear here once today's closing is saved in Tom Data — save wiring comes in a later step.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp, modifier = Modifier.padding(horizontal = 4.dp))
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("TKM Auto-Fill", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, modifier = Modifier.weight(1f))
+                        PoHeaderBtn({ Icon(Icons.Filled.Close, contentDescription = "Close", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showTkm = false }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Enter card count and sale amount — then tap Auto-Fill:", fontSize = 13.sp, color = PoGray, lineHeight = 18.sp)
+                    Spacer(modifier = Modifier.height(14.dp))
+                    PoField("Master card count (cards used)", { Icon(Icons.Filled.ConfirmationNumber, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(15.dp)) }, tkmCardCount, { tkmCardCount = it.filter { ch -> ch.isDigit() } }, "0", keyboard = KeyboardType.Number)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    PoField("Sale Amount (Rs.)", { Icon(Icons.Filled.AttachMoney, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(15.dp)) }, tkmSaleAmount, { tkmSaleAmount = it.filter { ch -> ch.isDigit() || ch == '.' } }, "0", keyboard = KeyboardType.Decimal)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), Color(0xFF0EA5E9).copy(alpha = 0.25f))
+                                .clip(RoundedCornerShape(14.dp)).background(cssLinear(135f, 0f to Color(0xFF38BDF8), 1f to Color(0xFF0EA5E9)))
+                                .clickable { showTkm = false; onGuiNote("Portal Fill TKM") },
+                            contentAlignment = Alignment.Center
+                        ) { Text("Auto-Fill", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                        Box(
+                            modifier = Modifier.height(48.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFEAF2FE)).border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
+                                .clickable { showTkm = false }.padding(horizontal = 18.dp),
+                            contentAlignment = Alignment.Center
+                        ) { Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PoInk) }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
         }
+
     }
 }

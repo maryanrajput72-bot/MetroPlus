@@ -1,4 +1,31 @@
-# Metro+ Native App — Handoff (v1.85 / versionCode 86) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.86 / versionCode 87) — DEBUG build (non-debuggable)
+
+## v1.86 change (1 Nov 2026) — TKM GUI (63 se) + side lines white-blue + ASKARI darmiyan + Closing purple (uska order, DEBUG)
+- TKM GUI (63 ke TKM Auto-Fill dialog se — trial263-ref: title, note,
+  "Master card count (cards used)" + "Sale Amount (Rs.)" number
+  fields, Auto-Fill + Cancel): NAYI bottom-sheet card (scrim + safed
+  card, drag bar, sky-blue title icon + sky-blue Auto-Fill gradient
+  #38BDF8→#0EA5E9, Portal ka color sky blue). TKM dropdown card ab
+  ye dialog kholta hai (fields khulte waqt saaf). GUI phase:
+  Auto-Fill abhi note dikhata hai (site me asli fill agla step).
+  PURANI full-screen "Fill Today's Data" sheet (showFill) HATA DI —
+  nayi GUI ke sath pehli wali nahi.
+- ASKARI card (uska order): dropdown me DARMIYAN (teesri position) —
+  tartib ab: Auto Fill, TOM A, ASKARI, TOM B, TKM.
+- SIDE LINES (uska order): WebView ke left/right 1dp lines ab
+  WHITE-BLUE MIX (safed se sky blue #38BDF8 vertical gradient),
+  bilkul bareek — andar khula browser saaf pata chale.
+- CLOSING PURPLE (uska order — SIRF Closing): sara purple (dark +
+  light, jahan jo acha lage) — ClInk gehra purple #2E1065, ClMuted
+  purple-grey, bg halka purple #F3F0FF; TOM card lavender→medium
+  purple, RMBS card pale lavender, Card Claim card lavender→rich
+  purple (stepper/share/WhatsApp squares bhi purple), PMBS tile +
+  chevron purple. Hero/section pehle se purple the (wahi). Shared
+  cheezein nahi chhedi: BrandRed constants, DatePickerSheet (shared),
+  ComplaintFormScreen (shared), baaki screens ke rang wahi.
+- GitHub APK RULE: is release me v1.86 upload + v1.84 delete (1.85 +
+  1.86 rahengi); manifest apkUrl = GitHub raw v1.86.
+- Verify: TODO build ke baad.
 
 ## v1.85 change (1 Nov 2026) — 63 comparison + Portal always-alive overlay (uska order, DEBUG, SIRF Portal)
 - 63 COMPARISON (trial263-ref se parha, andaza nahi): 63 ka Portal
@@ -31,7 +58,12 @@
   (sirf method naam), site ko zaroorat nahi — chheda nahi.
 - GitHub APK RULE: is release me v1.85 upload + v1.83 delete (1.84 +
   1.85 rahengi); manifest apkUrl = GitHub raw v1.85.
-- Verify: TODO build ke baad.
+- Verify: BUILD SUCCESSFUL 3m54s; APK 12,565,603 bytes, SHA
+  fd727083…; apksigner cert b13501ef match; dex me "Version 1.85"
+  1x, "Version 1.84" 0x, portalOverlayX 1x, portal_cookies 1x,
+  OffscreenPreRaster 1x. GitHub code head f8e26add, APK commit
+  007d3a8 (size API se exact match), v1.83 delete (baad me read
+  fail = file gayab), manifest vc86 JSON re-read verify.
 
 ## v1.84 change (1 Nov 2026) — Portal speed research + 1-line dropdown + browser frame + Portal fullscreen dock (uska order, DEBUG, SIRF Portal)
 - SPEED — NET RESEARCH (uska order, "batao phir karo"): official

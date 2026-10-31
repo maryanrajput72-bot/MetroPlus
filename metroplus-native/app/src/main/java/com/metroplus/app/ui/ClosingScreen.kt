@@ -67,8 +67,10 @@ import java.util.Locale
 // Closing Time — trial 2.1.63 ke closingTimeScreen ki EXACT copy (computed CSS, 1px = 1dp):
 // purple hero (kona 26) jiske andar REPORT DATE button, "SHIFT CLOSINGS" (TOM·TKM·POS, RMBS),
 // "CLAIMS & REPORTS" (Card Claim stepper + Share, PMBS Complaint). Share/Save wiring agle step me.
-private val ClInk = Color(0xFF14181C)
-private val ClMuted = Color(0xFF6B7280)
+// v1.86 (uska order — SIRF Closing): sara purple — gehra purple ink,
+    // halka purple-grey muted. Baaki screens ke rang nahi chhede.
+private val ClInk = Color(0xFF2E1065)
+private val ClMuted = Color(0xFF7A68A6)
 
 // Card Claim count ViewModel me — page band karke dobara kholo to wahi rahe.
 class ClosingViewModel : ViewModel() {
@@ -85,7 +87,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     val vm: ClosingViewModel = viewModel()
     var cardCount by vm.cardCount
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3F0FF))) {
     Column(modifier = Modifier.fillMaxSize()) {
         // Header: white 94%, padding 14/16, 38dp gol back + "Closing Time" 18sp (baein).
         Row(
@@ -140,43 +142,43 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             ClSection("SHIFT CLOSINGS", top = 22.dp)
             // v1.74 (uska order): Closing cards bhi hub style — har card ka
             // apna 2-rang gradient (pehle sab pe ek hi lavender tint tha).
-            ClCard(watermark = 125.dp, colors = listOf(Color(0xFFFFE4E6), Color(0xFFFB7185))) {
-                ClIconTile(Icons.Filled.ConfirmationNumber, BrandRedLight, BrandRedDark)
+            ClCard(watermark = 125.dp, colors = listOf(Color(0xFFEDE9FE), Color(0xFFA78BFA))) {
+                ClIconTile(Icons.Filled.ConfirmationNumber, Color(0xFFC4B5FD), Color(0xFF7C3AED))
                 ClText("TOM · TKM · POS", "Ticket machines, TKM & POS closing", Modifier.weight(1f))
                 ClWa { onGuiNote("TOM · TKM · POS") }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            ClCard(watermark = 122.dp, colors = listOf(Color(0xFFFFF3B0), Color(0xFFFFC93C))) {
-                ClIconTile(Icons.Filled.DirectionsBus, Color(0xFFFFC04D), Color(0xFFF08C00))
+            ClCard(watermark = 122.dp, colors = listOf(Color(0xFFF3F0FF), Color(0xFFDDD6FE))) {
+                ClIconTile(Icons.Filled.DirectionsBus, Color(0xFF8B5CF6), Color(0xFF5B21B6))
                 ClText("RMBS Closing", "Red line station closing format", Modifier.weight(1f))
                 ClWa { onGuiNote("RMBS Closing") }
             }
             ClSection("CLAIMS & REPORTS", top = 22.dp)
-            // Card Claim: upar icon + text, neeche −/count/+ (green) aur chaura Share.
+            // Card Claim: upar icon + text, neeche −/count/+ (purple) aur chaura Share.
             // Height FIXED 140dp (trial jaisi — 14 + 52 + 12 + 48 + 14).
             val shape = RoundedCornerShape(22.dp)
             Box(
-                // v1.74: hub style — poora 2-rang mint gradient + safed border.
-                modifier = Modifier.fillMaxWidth().height(140.dp).cssShadow(8.dp, shape, Color(0xFF0F8F80).copy(alpha = 0.16f)).clip(shape)
-                    .background(cssLinear(120f, 0f to Color(0xFFD1FAE5), 1f to Color(0xFF34D399))).border(1.dp, Color.White.copy(alpha = 0.7f), shape)
+                // v1.74: hub style — poora 2-rang purple gradient + safed border.
+                modifier = Modifier.fillMaxWidth().height(140.dp).cssShadow(8.dp, shape, Color(0xFF6D28D9).copy(alpha = 0.16f)).clip(shape)
+                    .background(cssLinear(120f, 0f to Color(0xFFEDE9FE), 1f to Color(0xFF8B5CF6))).border(1.dp, Color.White.copy(alpha = 0.7f), shape)
             ) {
                 Watermark(219.dp, x = 200.dp, y = (-32).dp, alpha = 0.075f)
                 Column(modifier = Modifier.padding(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        ClIconTile(Icons.Filled.Badge, BrandRedLight, Color(0xFF0F8F80))
+                        ClIconTile(Icons.Filled.Badge, Color(0xFFC4B5FD), Color(0xFF6D28D9))
                         ClText("Card Claim", "How many cards to claim?", Modifier.weight(1f))
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ClStep("−") { cardCount = (cardCount - 1).coerceAtLeast(0) }
                         Box(
-                            modifier = Modifier.size(64.dp, 48.dp).background(Color.White, RoundedCornerShape(14.dp)).border(1.3.dp, Color(0xFFE8E1E1), RoundedCornerShape(14.dp)),
+                            modifier = Modifier.size(64.dp, 48.dp).background(Color.White, RoundedCornerShape(14.dp)).border(1.3.dp, Color(0xFFDDD6FE), RoundedCornerShape(14.dp)),
                             contentAlignment = Alignment.Center
                         ) { Text("$cardCount", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = ClInk, textAlign = TextAlign.Center) }
                         ClStep("+") { cardCount = (cardCount + 1).coerceAtMost(999999) }
                         Row(
-                            modifier = Modifier.weight(1f).height(48.dp).cssShadow(8.dp, RoundedCornerShape(16.dp), Color(0xFF128C7E).copy(alpha = 0.3f))
-                                .clip(RoundedCornerShape(16.dp)).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E)))
+                            modifier = Modifier.weight(1f).height(48.dp).cssShadow(8.dp, RoundedCornerShape(16.dp), Color(0xFF5B21B6).copy(alpha = 0.3f))
+                                .clip(RoundedCornerShape(16.dp)).background(cssLinear(135f, 0f to Color(0xFF8B5CF6), 1f to Color(0xFF5B21B6)))
                                 .clickable { onGuiNote("Card Claim Share") },
                             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -189,9 +191,9 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             ClCard(watermark = 122.dp, colors = listOf(Color(0xFFE9D5FF), Color(0xFFA855F7)), onClick = { pmbsOpen = true }) {
-                ClIconTile(Icons.Filled.EditNote, Color(0xFFFF7A7A), Color(0xFFE53935))
+                ClIconTile(Icons.Filled.EditNote, Color(0xFFC4B5FD), Color(0xFF7C3AED))
                 ClText("PMBS Complaint", "Write an incident complaint letter", Modifier.weight(1f))
-                Icon3DTile(Icons.Filled.ChevronRight, Color(0xFFE53935), size = 34.dp, iconSize = 18.dp, corner = 11.dp)
+                Icon3DTile(Icons.Filled.ChevronRight, Color(0xFF7C3AED), size = 34.dp, iconSize = 18.dp, corner = 11.dp)
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -249,13 +251,13 @@ private fun ClText(title: String, sub: String, modifier: Modifier) {
     }
 }
 
-// 48dp green WhatsApp square (kona 16) — asli WhatsApp logo, white background ke baghair,
-// green button ke upar seedha (clean asset: background flood-fill se transparent).
+// 48dp purple WhatsApp square (kona 16) — asli WhatsApp logo, white background ke baghair,
+// purple button ke upar seedha (clean asset: background flood-fill se transparent).
 @Composable
 private fun ClWa(onClick: () -> Unit) {
     Box(
-        modifier = Modifier.size(48.dp).cssShadow(8.dp, RoundedCornerShape(16.dp), Color(0xFF128C7E).copy(alpha = 0.3f))
-            .clip(RoundedCornerShape(16.dp)).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E))).clickable { onClick() },
+        modifier = Modifier.size(48.dp).cssShadow(8.dp, RoundedCornerShape(16.dp), Color(0xFF5B21B6).copy(alpha = 0.3f))
+            .clip(RoundedCornerShape(16.dp)).background(cssLinear(135f, 0f to Color(0xFF8B5CF6), 1f to Color(0xFF5B21B6))).clickable { onClick() },
         contentAlignment = Alignment.Center
     ) { Image(painterResource(id = R.drawable.img_icon_whatsapp_clean), contentDescription = "WhatsApp", modifier = Modifier.size(36.dp)) }
 }
@@ -263,8 +265,8 @@ private fun ClWa(onClick: () -> Unit) {
 @Composable
 private fun ClStep(label: String, onClick: () -> Unit) {
     Box(
-        modifier = Modifier.size(44.dp, 48.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFF9F5F5))
-            .border(1.3.dp, Color(0xFFE8E1E1), RoundedCornerShape(14.dp)).clickable { onClick() },
+        modifier = Modifier.size(44.dp, 48.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFF5F3FF))
+            .border(1.3.dp, Color(0xFFDDD6FE), RoundedCornerShape(14.dp)).clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) { Text(label, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F8F80)) }
+    ) { Text(label, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6D28D9)) }
 }
