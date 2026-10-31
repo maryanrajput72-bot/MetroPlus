@@ -52,12 +52,13 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     BackHandler { onBack() }
-    val staff = remember { mutableStateListOf(*demoStaff.toTypedArray()) }
-    var newId by remember { mutableStateOf("") }
-    var newName by remember { mutableStateOf("") }
+    // List + form ViewModel me (page band karke kholo to wahi rahein).
+    val staff = pageList("staffEdit_list") { demoStaff }
+    var newId by pageState("staffEdit_newId", "")
+    var newName by pageState("staffEdit_newName", "")
     var err by remember { mutableStateOf("") }
     val ink = Color(0xFF14181C)
-    var station by remember { mutableStateOf("Shaheed-e-Millat") }
+    var station by pageState("staffEdit_station", "Shaheed-e-Millat")
     var stationOpen by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
@@ -102,7 +103,7 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         .clickable { stationOpen = true }.padding(horizontal = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = null, tint = Color(0xFF9E1F25), modifier = Modifier.size(15.dp))
+                    Icon(Icons.Filled.LocationOn, contentDescription = null, tint = BrandRedDark, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(station, fontSize = 13.5.sp, color = ink, modifier = Modifier.weight(1f))
                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(18.dp))
@@ -120,7 +121,7 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     Text(id, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9AA1AB),
                         modifier = Modifier.background(Color(0xFFF0F3F5), RoundedCornerShape(8.dp)).padding(horizontal = 9.dp, vertical = 4.dp))
                     Spacer(modifier = Modifier.width(10.dp))
-                    Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = Color(0xFFE11D2E), modifier = Modifier.size(20.dp).clickable { staff.remove(name to id) })
+                    Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = BrandRed, modifier = Modifier.size(20.dp).clickable { staff.remove(name to id) })
                 }
             }
             // Add Member form.
@@ -156,13 +157,13 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
                 if (err.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(err, fontSize = 12.5.sp, color = Color(0xFFE11D2E))
+                    Text(err, fontSize = 12.5.sp, color = BrandRed)
                 }
             }
             // Save Changes (save function agle step me).
             Box(
-                modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), Color(0xFF9E1F25).copy(alpha = 0.25f))
-                    .clip(RoundedCornerShape(14.dp)).background(Color(0xFF9E1F25)).clickable { onGuiNote("Save Changes") },
+                modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), BrandRedDark.copy(alpha = 0.25f))
+                    .clip(RoundedCornerShape(14.dp)).background(BrandRedDark).clickable { onGuiNote("Save Changes") },
                 contentAlignment = Alignment.Center
             ) { Text("Save Changes", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             Spacer(modifier = Modifier.height(8.dp))

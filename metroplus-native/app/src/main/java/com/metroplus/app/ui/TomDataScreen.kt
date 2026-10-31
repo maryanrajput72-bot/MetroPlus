@@ -107,7 +107,7 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         ) {
             TdCircle(Icons.Filled.ArrowBack, "Back", onBack)
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.ReceiptLong, contentDescription = null, tint = Color(0xFFB02A31), modifier = Modifier.size(18.dp))
+                Icon(Icons.Filled.ReceiptLong, contentDescription = null, tint = Section.Tom, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Tom Data Register", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TdInk)
             }
@@ -146,41 +146,40 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
     // #F2BDC0→#E69A9E tha, Opening halka neela #DCECFF→#B9D4FB tha.
     val stops = if (closing) arrayOf(0f to Color(0xFFE88F97), 0.55f to Color(0xFFD46970), 1f to Color(0xFFD46970))
     else arrayOf(0f to Color(0xFFA9C7F7), 0.55f to Color(0xFF86A9EF), 1f to Color(0xFF86A9EF))
-    val shadow = if (closing) Color(0xFF9E1F25).copy(alpha = 0.16f) else Color(0xFF2563EB).copy(alpha = 0.14f)
-    val border = if (closing) Color(0xFF9E1F25).copy(alpha = 0.3f) else Color(0xFF2563EB).copy(alpha = 0.22f)
+    val shadow = if (closing) BrandRedDark.copy(alpha = 0.16f) else Color(0xFF2563EB).copy(alpha = 0.14f)
+    val border = if (closing) BrandRedDark.copy(alpha = 0.3f) else Color(0xFF2563EB).copy(alpha = 0.22f)
     val shift = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift"
     Box(
         modifier = Modifier.fillMaxWidth().cssShadow(8.dp, shape, shadow).clip(shape).background(cssLinear(125f, *stops)).border(1.dp, border, shape)
     ) {
         Watermark(219.dp, x = 200.dp, y = (-8).dp, alpha = 0.2f)
-        Column(modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 20.dp, bottom = 18.dp)) {
+        // Batch item 12a: hero thora aur chhota (padding/avatar/font kam).
+        Column(modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier.size(46.dp).cssShadow(4.dp, RoundedCornerShape(14.dp), Color.Black.copy(alpha = 0.08f))
+                    modifier = Modifier.size(40.dp).cssShadow(4.dp, RoundedCornerShape(14.dp), Color.Black.copy(alpha = 0.08f))
                         .background(Color.White.copy(alpha = 0.75f), RoundedCornerShape(14.dp)).border(1.dp, Color.White.copy(alpha = 0.95f), RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
-                ) { Image(remember { heroBusIcon() }, contentDescription = "Metro bus", modifier = Modifier.size(40.dp)) }
+                ) { Image(remember { heroBusIcon() }, contentDescription = "Metro bus", modifier = Modifier.size(34.dp)) }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Daily Shift Register", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TdMuted, letterSpacing = 0.3.sp)
-                    Text("Shaheed-e-Millat", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = TdInk, letterSpacing = (-0.2).sp, maxLines = 1)
+                    Text("Shaheed-e-Millat", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = TdInk, letterSpacing = (-0.2).sp, maxLines = 1)
                 }
-                HeroMini(R.drawable.img_icon_save, Color.Black.copy(alpha = 0.4f), Color.White.copy(alpha = 0.18f)) { onGuiNote("Save") }
-                Spacer(modifier = Modifier.width(7.dp))
-                HeroMini(R.drawable.img_icon_whatsapp, Color(0xFFDE4A51).copy(alpha = 0.15f), Color(0xFFDE4A51).copy(alpha = 0.4f)) { onGuiNote("WhatsApp") }
+                // Batch item 12a: hero ke WhatsApp + Saved wale chhote icons KHATAM.
             }
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
-                    modifier = Modifier.clip(RoundedCornerShape(18.dp)).background(Color(0xFFB02A31).copy(alpha = 0.1f))
-                        .border(1.dp, Color(0xFFB02A31).copy(alpha = 0.3f), RoundedCornerShape(18.dp)).clickable { onGuiNote("Shift") }
+                    modifier = Modifier.clip(RoundedCornerShape(18.dp)).background(Section.Tom.copy(alpha = 0.1f))
+                        .border(1.dp, Section.Tom.copy(alpha = 0.3f), RoundedCornerShape(18.dp)).clickable { onGuiNote("Shift") }
                         .padding(horizontal = 9.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Filled.Schedule, contentDescription = null, tint = Color(0xFFE6353E), modifier = Modifier.size(12.dp))
                     Spacer(modifier = Modifier.width(5.dp))
-                    Text(shift, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF7A1A1F))
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF7A1A1F).copy(alpha = 0.7f), modifier = Modifier.size(14.dp))
+                    Text(shift, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Section.Tom.darker())
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Section.Tom.darker().copy(alpha = 0.7f), modifier = Modifier.size(14.dp))
                 }
                 Row(
                     modifier = Modifier.clip(RoundedCornerShape(18.dp)).background(TdInk.copy(alpha = 0.05f))
@@ -195,20 +194,13 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
                 }
             }
             if (tomDateOpen) DatePickerSheet(tomDmy, { tomDmy = it }, { tomDateOpen = false })
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text("Total Shift Revenue", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = TdMuted, letterSpacing = 0.3.sp)
-            Text("Rs. 0", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = TdInk, letterSpacing = (-0.8).sp)
+            Text("Rs. 0", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = TdInk, letterSpacing = (-0.8).sp)
         }
     }
 }
 
-@Composable
-private fun HeroMini(image: Int, bg: Color, border: Color, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier.size(29.dp).clip(CircleShape).background(bg).border(1.dp, border, CircleShape).clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) { Image(painterResource(id = image), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(28.dp).clip(CircleShape)) }
-}
 
 // Opening / Closing switch: white card (kona 18), active button gradient (Opening neela, Closing laal).
 @Composable
@@ -220,7 +212,7 @@ private fun ModeSwitch(closing: Boolean, onChange: (Boolean) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SwitchButton("Opening Data", Icons.Filled.MeetingRoom, !closing, listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), Color.White) { onChange(false) }
-        SwitchButton("Closing Data", Icons.Filled.DoorFront, closing, listOf(Color(0xFFE6353E), Color(0xFFA30D14)), Color(0xFF230607)) { onChange(true) }
+        SwitchButton("Closing Data", Icons.Filled.DoorFront, closing, listOf(Color(0xFFE6353E), BrandRedDark), Color(0xFF230607)) { onChange(true) }
     }
 }
 
@@ -243,7 +235,7 @@ private fun RowScope.SwitchButton(label: String, icon: ImageVector, active: Bool
 
 // ---------------- card + field building blocks ----------------
 private class CardStyle(val stops: Array<Pair<Float, Color>>, val border: Color)
-private val P1 = CardStyle(arrayOf(0f to Color(0xFFF7D7D9), 1f to Color(0xFFEFB1B4)), Color(0xFF9E1F25).copy(alpha = 0.3f))
+private val P1 = CardStyle(arrayOf(0f to Color(0xFFF7D7D9), 1f to Color(0xFFEFB1B4)), BrandRedDark.copy(alpha = 0.3f))
 private val P2 = CardStyle(arrayOf(0f to Color(0xFFFDF3D7), 1f to Color(0xFFFBE3A6)), Color(0xFFB8860B).copy(alpha = 0.3f))
 private val P3 = CardStyle(arrayOf(0f to Color(0xFFF4D2D4), 1f to Color(0xFFE8A7AA)), Color(0xFF0F766E).copy(alpha = 0.3f))
 private val P4 = CardStyle(arrayOf(0f to Color(0xFFDCEAFF), 1f to Color(0xFFB9D4FB)), Color(0xFF2563EB).copy(alpha = 0.3f))
@@ -253,7 +245,7 @@ private val Cyan = Badge(Color(0xFF0E7490), Color(0xFF06B6D4))
 private val Amber = Badge(Color(0xFFB45309), Color(0xFFF59E0B))
 private val Purple = Badge(Color(0xFF7E22CE), Color(0xFFA855F7))
 private val Orange = Badge(Color(0xFFC2410C), Color(0xFFEA580C))
-private val RedB = Badge(Color(0xFF78040A), Color(0xFFB91018))
+private val RedB = Badge(Color(0xFF78040A), BrandRedDark)
 
 @Composable
 private fun TomCard(style: CardStyle, icon: Int, title: String, badge: String, badgeStyle: Badge, badgeIcon: ImageVector? = null, content: @Composable () -> Unit) {
@@ -305,36 +297,38 @@ private fun TdInput(value: String, readOnly: Boolean, onValue: (String) -> Unit)
     BasicTextField(
         value = value, onValueChange = { t -> onValue(t.filter { it.isDigit() }.take(8)) }, readOnly = readOnly, singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        textStyle = TextStyle(fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = if (readOnly) Color(0xFF7A1A1F) else TdInk, textAlign = TextAlign.Center),
+        textStyle = TextStyle(fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = if (readOnly) BrandRedDeep else TdInk, textAlign = TextAlign.Center),
         modifier = Modifier.fillMaxWidth(),
         decorationBox = { inner ->
             Box(
                 modifier = Modifier.fillMaxWidth().height(36.dp).clip(shape)
                     .then(
-                        if (readOnly) Modifier.background(Brush.verticalGradient(listOf(Color(0xFFB02A31).copy(alpha = 0.1f), Color(0xFFB02A31).copy(alpha = 0.18f))))
-                            .border(1.3.dp, Color(0xFFB02A31).copy(alpha = 0.35f), shape)
+                        if (readOnly) Modifier.background(Brush.verticalGradient(listOf(BrandRed.copy(alpha = 0.1f), BrandRed.copy(alpha = 0.18f))))
+                            .border(1.3.dp, BrandRed.copy(alpha = 0.35f), shape)
                         else Modifier.background(Color(0xFFF6F2F2)).border(1.3.dp, TdInk.copy(alpha = 0.12f), shape)
                     ).padding(horizontal = 6.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if (value.isEmpty()) Text("0", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = if (readOnly) Color(0xFF7A1A1F) else TdInk.copy(alpha = 0.35f), textAlign = TextAlign.Center)
+                if (value.isEmpty()) Text("0", fontSize = 13.5.sp, fontWeight = FontWeight.Bold, color = if (readOnly) BrandRedDeep else TdInk.copy(alpha = 0.35f), textAlign = TextAlign.Center)
                 inner()
             }
         }
     )
 }
 
-// Buttons: kona 18; primary amber, WhatsApp green, secondary white (ya laal tint).
+// Buttons: kona 18; primary amber, purple (batch item 12: save buttons),
+// WhatsApp green, secondary white (ya laal tint).
 @Composable
 private fun TdButton(label: String, icon: ImageVector, kind: String, modifier: Modifier = Modifier.fillMaxWidth(), onClick: () -> Unit) {
     val shape = RoundedCornerShape(18.dp)
-    val (h, fs, fw) = when (kind) { "primary", "closingEnter" -> Triple(45.dp, 15.sp, FontWeight.Bold); else -> Triple(41.dp, 13.5.sp, FontWeight.SemiBold) }
+    val (h, fs, fw) = when (kind) { "primary", "closingEnter", "purple" -> Triple(45.dp, 15.sp, FontWeight.Bold); else -> Triple(41.dp, 13.5.sp, FontWeight.SemiBold) }
     val fg = when (kind) { "secondary" -> TdInk; "danger" -> Color(0xFFF87171); else -> Color.White }
     Row(
         modifier = modifier.height(h)
             .then(
                 when (kind) {
                     "primary" -> Modifier.cssShadow(8.dp, shape, Color(0xFFF59E0B).copy(alpha = 0.4f)).clip(shape).background(cssLinear(135f, 0f to Color(0xFFF59E0B), 1f to Color(0xFFD97706)))
+                    "purple" -> Modifier.cssShadow(8.dp, shape, Color(0xFF8B5CF6).copy(alpha = 0.4f)).clip(shape).background(cssLinear(135f, 0f to Color(0xFF8B5CF6), 1f to Color(0xFF6D28D9)))
                     "whatsapp" -> Modifier.cssShadow(5.dp, shape, Color(0xFF25D366).copy(alpha = 0.3f)).clip(shape).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E)))
                     "danger" -> Modifier.clip(shape).background(Color(0xFFEF4444).copy(alpha = 0.08f)).border(1.dp, Color(0xFFEF4444).copy(alpha = 0.4f), shape)
                     else -> Modifier.clip(shape).background(Color.White).border(1.dp, TdInk.copy(alpha = 0.12f), shape)
@@ -342,7 +336,9 @@ private fun TdButton(label: String, icon: ImageVector, kind: String, modifier: M
             ).clickable { onClick() },
         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(16.dp))
+        // WhatsApp button pe asli WhatsApp logo (saaf, bina background wala).
+        if (kind == "whatsapp") Image(painterResource(id = R.drawable.img_icon_whatsapp_clean), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(22.dp))
+        else Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text(label, fontSize = fs, fontWeight = fw, color = fg, maxLines = 1)
     }
@@ -352,21 +348,21 @@ private fun TdButton(label: String, icon: ImageVector, kind: String, modifier: M
 @Composable
 private fun OpeningMode(vm: TomDataViewModel, onGuiNote: (String) -> Unit) {
     TomCard(P1, R.drawable.img_icon_roll, "Roll Opening Counts", "Auto Opening", Cyan, Icons.Filled.AutoFixHigh) {
-        FieldRow(vm, listOf(Field("op_bop", "BOP Roll Opening", Color(0xFFC084FC)), Field("op_tom", "TOM Roll Opening", Color(0xFFB02A31)), Field("op_tkm", "TKM Roll Opening", Color(0xFFB91018))))
+        FieldRow(vm, listOf(Field("op_bop", "BOP Roll Opening", Color(0xFFC084FC)), Field("op_tom", "TOM Roll Opening", BrandRed), Field("op_tkm", "TKM Roll Opening", BrandRedDark)))
     }
     Spacer(modifier = Modifier.height(14.dp))
     TomCard(P2, R.drawable.img_icon_lcd, "TOM Opening Balances", "Machine Opening", Amber) {
         FieldRow(vm, listOf(Field("op_tom1", "TOM 01 Opening", Color(0xFF38BDF8)), Field("op_tom2", "TOM 02 Opening", Color(0xFFFBBF24))))
     }
     Spacer(modifier = Modifier.height(14.dp))
+    // Batch item 12b: LINE 1 pehle Save Opening (purple), LINE 2 ek row me
+    // WhatsApp + Copy (sirf ye naam).
+    TdButton("Save Opening", Icons.Filled.Save, "purple") { onGuiNote("Save Opening") }
+    Spacer(modifier = Modifier.height(10.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        TdButton("Send to WhatsApp", Icons.Filled.Chat, "whatsapp", Modifier.weight(1f)) { onGuiNote("Send to WhatsApp") }
-        Spacer(modifier = Modifier.weight(1f))
+        TdButton("WhatsApp", Icons.Filled.Chat, "whatsapp", Modifier.weight(1f)) { onGuiNote("Send to WhatsApp") }
+        TdButton("Copy", Icons.Filled.ContentCopy, "secondary", Modifier.weight(1f)) { onGuiNote("Copy Opening Report") }
     }
-    Spacer(modifier = Modifier.height(10.dp))
-    TdButton("Save Opening", Icons.Filled.Save, "primary") { onGuiNote("Save Opening") }
-    Spacer(modifier = Modifier.height(10.dp))
-    TdButton("Copy Opening Report", Icons.Filled.ContentCopy, "secondary") { onGuiNote("Copy Opening Report") }
 }
 
 // ---------------- CLOSING MODE ----------------
@@ -393,7 +389,9 @@ private fun ClosingMode(vm: TomDataViewModel, onGuiNote: (String) -> Unit) {
     Spacer(modifier = Modifier.height(14.dp))
     GrandSummary()
     Spacer(modifier = Modifier.height(30.dp))
-    TdButton("Save & Lock Daily Register", Icons.Filled.Save, "primary") { onGuiNote("Save & Lock Daily Register") }
+    // Batch item 12c: Save & Lock ka colour purple (amber pyara nahi lag raha tha).
+    // Clear/Reset, TOM B, Daily Summary wahi rahenge.
+    TdButton("Save & Lock Daily Register", Icons.Filled.Save, "purple") { onGuiNote("Save & Lock Daily Register") }
     Spacer(modifier = Modifier.height(10.dp))
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         TdButton("Send to WhatsApp", Icons.Filled.Chat, "whatsapp", Modifier.weight(1f)) { onGuiNote("Send to WhatsApp") }
@@ -432,7 +430,7 @@ private fun GrandSummary() {
     val shape = RoundedCornerShape(22.dp)
     Column(
         modifier = Modifier.fillMaxWidth().cssShadow(10.dp, shape, Color(0xFFFF6B2B).copy(alpha = 0.18f)).clip(shape)
-            .background(cssLinear(120f, *P1.stops)).border(1.dp, Color(0xFF9E1F25).copy(alpha = 0.3f), shape)
+            .background(cssLinear(120f, *P1.stops)).border(1.dp, BrandRedDark.copy(alpha = 0.3f), shape)
             .padding(horizontal = 16.dp, vertical = 18.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -479,8 +477,8 @@ private fun heroBusIcon(): ImageVector {
     fun n(d: String) = PathParser().parsePathString(d).toNodes()
     return ImageVector.Builder(defaultWidth = 64.dp, defaultHeight = 64.dp, viewportWidth = 64f, viewportHeight = 64f).apply {
         addPath(n("M12,58.5a20,3.2 0 1,0 40,0a20,3.2 0 1,0 -40,0z"), fill = SolidColor(Color.Black), fillAlpha = 0.18f)
-        addPath(n(rr(10f, 9f, 44f, 45f, 12f)), fill = SolidColor(Color(0xFF7A0F13)))
-        addPath(n(rr(10f, 7f, 44f, 44f, 12f)), fill = Brush.linearGradient(0f to Color(0xFFFF6B6B), 0.55f to Color(0xFFE5383B), 1f to Color(0xFFA4161A), start = Offset(0f, 7f), end = Offset(0f, 51f)))
+        addPath(n(rr(10f, 9f, 44f, 45f, 12f)), fill = SolidColor(BrandRedDeep))
+        addPath(n(rr(10f, 7f, 44f, 44f, 12f)), fill = Brush.linearGradient(0f to Color(0xFFFF6B6B), 0.55f to Color(0xFFE5383B), 1f to BrandRedDark, start = Offset(0f, 7f), end = Offset(0f, 51f)))
         addPath(n(rr(16f, 9.5f, 32f, 5f, 2.5f)), fill = Brush.linearGradient(0f to Color.White, 1f to Color(0xFFFFD6D6), start = Offset(0f, 9.5f), end = Offset(0f, 14.5f)), fillAlpha = 0.9f)
         addPath(n(rr(15f, 17f, 34f, 16f, 5f)), fill = SolidColor(Color(0xFF5C0B0E)))
         addPath(n(rr(15.5f, 16.5f, 33f, 15.5f, 5f)), fill = Brush.linearGradient(0f to Color(0xFFE0F4FF), 0.5f to Color(0xFF8FD3FF), 1f to Color(0xFF3A86D8), start = Offset(15.5f, 16.5f), end = Offset(48.5f, 32f)))
