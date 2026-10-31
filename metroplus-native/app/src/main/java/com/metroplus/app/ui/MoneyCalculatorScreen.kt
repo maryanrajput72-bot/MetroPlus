@@ -251,15 +251,15 @@ private fun TomClosingCard() {
     val shift = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning" else "Evening"
     Box(
         modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF3C1416).copy(alpha = 0.08f)).clip(shape)
-            .background(cssLinear(160f, 0f to Color.White, 1f to Color(0xFFFBF2F2))).border(1.dp, Color(0xFF9E1F25).copy(alpha = 0.18f), shape)
+            .background(cssLinear(160f, 0f to Color.White, 1f to Color(0xFFFBF2F2))).border(1.dp, Section.Money.copy(alpha = 0.25f), shape)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.PointOfSale, contentDescription = null, tint = Color(0xFF9E1F25), modifier = Modifier.size(13.dp))
+                        Icon(Icons.Filled.PointOfSale, contentDescription = null, tint = Section.Money, modifier = Modifier.size(13.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("TODAY'S TOM CLOSING", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF9E1F25), letterSpacing = 1.sp)
+                        Text("TODAY'S TOM CLOSING", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Section.Money, letterSpacing = 1.sp)
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Text("Shaheed-e-Millat · $shift", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = McInk, maxLines = 1)
