@@ -172,14 +172,17 @@ fun GpsCameraScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         }
                     }
                     Spacer(modifier = Modifier.size(3.dp))
+                    // Batch item 11: 63 ke stamp jaisa demo — demo coords Pak
+                    // Secretariat ke hain, is liye station ka naam wahi (live
+                    // values CameraX step me ayengi).
                     Text(
-                        "Finding nearest Metro station...",
+                        "Pak Secretariat",
                         fontSize = 18.sp, fontWeight = FontWeight.Black, color = Color(0xFFFFC107),
                         maxLines = 1, overflow = TextOverflow.Ellipsis, lineHeight = 21.sp
                     )
                     Spacer(modifier = Modifier.size(3.dp))
                     Text(
-                        "Fetching live address...",
+                        "Pak Secretariat Metro Station, Islamabad",
                         fontSize = 11.5.sp, color = Color.White, lineHeight = 14.5.sp,
                         maxLines = 2, overflow = TextOverflow.Ellipsis
                     )
