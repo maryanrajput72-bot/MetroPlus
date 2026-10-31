@@ -112,16 +112,51 @@ object PortalWeb {
         private set
     var onUrl: ((String) -> Unit)? = null
     var onLoading: ((Boolean) -> Unit)? = null
+    // Login save ke liye: app ka context (cookies save/restore ke liye).
+    private var appCtx: Context? = null
+    private const val COOKIE_PREFS = "portal_cookies"
+    private const val COOKIE_KEY = "cookies"
 
     fun preload(ctx: Context) { getOrCreate(ctx) }
 
+    // v1.82 LOGIN SAVE (uska order): app band hone par phone site ka
+    // session cookie mita deta hai — isi liye dobara kholo to logout
+    // milta tha (app khula ho to theek rehta tha). Ab har page load par
+    // cookies save hoti hain, aur naya WebView banne se pehle wahi
+    // cookies wapas lagti hain — login laga rahega.
+    private fun saveCookies() {
+        val ctx = appCtx ?: return
+        val cookies = CookieManager.getInstance().getCookie(PORTAL_URL) ?: return
+        ctx.getSharedPreferences(COOKIE_PREFS, Context.MODE_PRIVATE)
+            .edit().putString(COOKIE_KEY, cookies).apply()
+        CookieManager.getInstance().flush()
+    }
+
+    private fun restoreCookies() {
+        val ctx = appCtx ?: return
+        val saved = ctx.getSharedPreferences(COOKIE_PREFS, Context.MODE_PRIVATE)
+            .getString(COOKIE_KEY, null) ?: return
+        val cm = CookieManager.getInstance()
+        saved.split(";").forEach { part ->
+            val cookie = part.trim()
+            if (cookie.isNotEmpty()) cm.setCookie(PORTAL_URL, cookie)
+        }
+        cm.flush()
+    }
+
     fun getOrCreate(ctx: Context): WebView {
+        appCtx = ctx.applicationContext
         webView?.let { return it }
         val wv = WebView(ctx.applicationContext)
         // WebView ka apna background bhi neela — load se pehle safed na aaye.
         wv.setBackgroundColor(android.graphics.Color.parseColor("#EAF2FE"))
         wv.settings.javaScriptEnabled = true
         wv.settings.domStorageEnabled = true
+        // v1.82 SPEED (uska order — Portal tez): site ki cache istemal ho
+        // (dobara kholo to images/files dobara download nahi), database on,
+        // rendering ko priority — pehli dafa ke baad page zyada tez khulega.
+        wv.settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+        wv.settings.databaseEnabled = true
         wv.settings.loadsImagesAutomatically = true
         wv.settings.useWideViewPort = true
         wv.settings.loadWithOverviewMode = true
@@ -137,10 +172,14 @@ object PortalWeb {
             override fun onPageFinished(view: WebView, url: String?) {
                 loading = false
                 everLoaded = true
+                // Har page load par cookies save — login session mehfooz.
+                saveCookies()
                 url?.let { lastUrl = it; onUrl?.invoke(it) }
                 onLoading?.invoke(false)
             }
         }
+        // Pehle save ki hui cookies wapas lagao, phir site load karo.
+        restoreCookies()
         wv.loadUrl(PORTAL_URL)
         webView = wv
         return wv

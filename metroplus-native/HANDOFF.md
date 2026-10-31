@@ -1,4 +1,40 @@
-# Metro+ Native App — Handoff (v1.81 / versionCode 82) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.82 / versionCode 83) — DEBUG build (non-debuggable)
+
+## v1.82 change (1 Nov 2026) — Splash dots centered + Portal speed (uska order, DEBUG)
+- SPLASH DOTS (uska order — video wali baat): app khulte waqt wali
+  screen ke neeche progress bar ke neeche dots pehle SIDE (left) par
+  the (+ % right par). Ab dots progress bar ke neeche bilkul DARMIYAN
+  me hain, aur % unke neeche darmiyan me hai. (SplashLogin.kt — usne
+  ise "login page" kaha tha; asal me ye splash/intro screen hai.)
+- PORTAL SPEED (uska order): PortalWeb me cacheMode LOAD_DEFAULT
+  (site ki cache istemal ho — dobara kholo to files dobara download
+  nahi), databaseEnabled on. (renderPriority hataya — nayi SDK me ye
+  API maujood nahi, is liye pehli v1.82 build fail hui thi.)
+- LOGIN SAVE (uska order, 00:27 PKT): app khula ho to login theek
+  rehta tha, app band karke dobara kholo to logout — wajah: app band
+  hone par phone site ka session cookie mita deta hai. Ab
+  onPageFinished par cookies SharedPreferences ("portal_cookies") me
+  save hoti hain, aur getOrCreate me loadUrl se pehle wahi cookies
+  restore hoti hain — login app restart par bhi laga rahega. CAVEAT
+  (seedhi baat): agar site ka session cookie HttpOnly hua (site ki
+  security) to app use parh nahi sakta — us surat me dobara login
+  mang sakta hai; phir fallback saved-login auto-fill hoga (uske liye
+  password save karna parega — uska order chahiye hoga). NOTE (seedhi
+  baat): site ka apna server (ai.studio) jitna slow hai utna app tez
+  nahi kar sakta — app ki taraf ki susti (cold load, cache na hona)
+  ye khatam karti hai.
+- KEYBOARD (video wali baat): adjustResize hi rehta hai — keyboard
+  khulne par site ka page field ko nazar lane ke liye upar hota hai
+  (site ka apna scroll); isko rokne se likhne wali jagah keyboard ke
+  peeche chhup jati. Garam WebView + cache se keyboard ka aana aur
+  page ka hilna pehle se behtar hoga.
+- VIDEO NOTE: uski 00:22 wali video me header purana (v1.80, poori
+  chaudai) nazar aata hai — matlab video 1.81 pahunche se pehle ki
+  hai, ya phone par 1.81 abhi nahi aaya. Drawer me Version check karne
+  ko kaha gaya hai.
+- GitHub APK RULE: is release me v1.82 upload + v1.80 delete (1.81 +
+  1.82 rahengi); manifest apkUrl = GitHub raw v1.82.
+- Verify: TODO build ke baad.
 
 ## v1.81 change (1 Nov 2026) — Portal preload + keep-alive, rounded header, attached dropdown, login persist, keyboard (uska order, DEBUG)
 - PRELOAD + KEEP-ALIVE (white screen + 6 second wait ki asal wajah):
@@ -29,7 +65,12 @@
   bhare milenge. Password save NAHI hota (security).
 - GitHub APK RULE: is release me v1.81 upload + v1.79 delete (1.80 +
   1.81 rahengi); manifest apkUrl = GitHub raw v1.81.
-- Verify: TODO build ke baad.
+- Verify (2026-11-01 ~00:17 PKT): APK 12,563,775 bytes, SHA c63cc9e7;
+  cert apksigner se b13501ef MATCH; dex "Version 1.81" + "Portal load ho
+  raha", 1.80 gayab. GitHub code push me PortalWeb 17 refs (verify);
+  APK GitHub par (browser upload, commit f5db929, size exact verify);
+  v1.79 delete (apk folder me sirf 1.80 + 1.81 = latest 2); MANIFEST
+  LIVE vc82 JSON verify — apkUrl GitHub raw v1.81.
 
 ## v1.80 change (31 Oct 2026) — Portal WebView + overlay menus + full blue theme (uska order, DEBUG)
 - WEBVIEW (uska wazeh order — STRICT RULE #1 ka Portal-only exception):

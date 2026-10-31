@@ -150,16 +150,19 @@ fun SplashScreen() {
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
+            // v1.82 (uska order): dots ab side par nahi — progress bar ke
+            // neeche bilkul darmiyan me; % bhi unke neeche darmiyan me.
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 // Chhote dots — kaunsi line chal rahi hai.
-                Row(horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.weight(1f)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                     SpLines.indices.forEach { i ->
                         Box(modifier = Modifier.size(width = if (i == lineIndex) 16.dp else 6.dp, height = 6.dp).clip(CircleShape)
                             .background(Color.White.copy(alpha = if (i <= lineIndex) 0.95f else 0.3f)))
                     }
                 }
-                Text("${(progress.value * 100).toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White.copy(alpha = 0.9f))
             }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text("${(progress.value * 100).toInt()}%", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White.copy(alpha = 0.9f), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         }
     }
 }
