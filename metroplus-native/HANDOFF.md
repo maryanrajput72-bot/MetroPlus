@@ -1,4 +1,29 @@
-# Metro+ Native App — Handoff (v1.62 / versionCode 63) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.63 / versionCode 64) — DEBUG build (non-debuggable)
+
+## v1.63 change (31 Oct 2026) — dock 4 tabs + 63 jaisa updater (DEBUG)
+- Uska order (14:06 PKT): neeche dock se Settings icon hatao (sirf 4 rahenge:
+  Opening, Home, Closing, Portal); Settings ab bhi drawer ki "app Setting"
+  row aur Home ki Settings entry se khulti hai — NavTab.SETTINGS enum aur
+  baaki raste chhede nahi, sirf dock ki list se entry hatayi hai.
+- Uska order: update 63 jaisa same-to-same ho, nazar aaye ke kaise ho raha
+  hai. 63 ke 60-updater.js se parha: silent top bar (gradient line + safed
+  strip "Updating… X%"), 100% pe bar band + "Installing update…" toast phir
+  install, fail pe "Download Fail" popup + Try again, manual check pe
+  "You already have the latest version" toast. Native me farq tha: server
+  size (content-length) na bheje to progress -1 rehta tha aur strip par
+  sirf "Updating…" likha aata tha, % nahi — isi liye v1.62 ka update atka
+  hua lag raha tha.
+- Fix: UpdateManager.downloadUpdate ab (pct, downloaded, total) bhejta hai;
+  strip par % mile to "Updating… X%", na mile to "Updating… X.X MB"
+  (downloaded MB) — progress hamesha nazar aayega. 100% pe confetti ke
+  sath "Installing update…" toast (63 jaisa). Fail pe bar chhupne ke sath
+  "Download failed — please try again" toast (63 ke fail popup ka toast
+  version; retry agle foreground check ya drawer Check Update se).
+  Confetti wahi v1.54 wala (63 me relaunch pe thi, native me 100% pe).
+- Verify (build 14:13 PKT): APK 12,452,343 bytes, SHA f832b144…, cert
+  b13501ef EXACT match (v1.62 ke upar in-place update hogi), dex me
+  "Version 1.63" + "Installing update" + "Download failed" + "Updating" + "MB".
+  Dock 4-tab change compile se guzra (when exhaustive ke liye else branch).
 
 ## v1.62 change (31 Oct 2026) — 63 ke reh gaye GUI pages, SIRF GUI (DEBUG, phone pe NAHI gayi)
 - Uska order (11:40 + 11:45 PKT): comparison SIRF GUI ka ho, asli kaam baad me;
@@ -28,8 +53,9 @@
   4561f84c…, cert b13501ef EXACT match (wahi keystore — in-place update
   hoga), dex me "Version 1.62" + saare naye labels mile (TL PIN, System &
   Storage, WhatsApp Format, TOM Machines, Premium Request, View Attendance,
-  This Week, Crop frame, Staff Attendance, splash text). GitHub push ke
-  baad manifest NAHI chheda — phone abhi v1.54 par hai.
+  This Week, Crop frame, Staff Attendance, splash text). Manifest bhi update
+  ho gaya (12:31 PKT, commit be283d9c) — phone par agle open par v1.62 ka
+  update aayega (link 2 Nov 2026 tak valid hai).
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.

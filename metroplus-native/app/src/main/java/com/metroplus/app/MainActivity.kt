@@ -1,6 +1,7 @@
 package com.metroplus.app
 
 import android.os.Bundle
+import java.util.Locale
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
@@ -196,6 +197,8 @@ fun MetroPlusApp() {
     // Update mile to khud download shuru, progress upar pill me, 100% pe khud install
     // screen — app ke andar koi dialog, koi button nahi (trial 63 ka silent system).
     var downloadProgress by remember { mutableStateOf<Int?>(null) }
+    // v1.63: 63 jaisa nazar aane wala progress — % na mile to downloaded MB.
+    var downloadBytes by remember { mutableStateOf(0L) }
     // Batch item 13: update pe confetti (63 wali) — 100% hote hi dikhegi.
     var showConfetti by remember { mutableStateOf(false) }
     // v1.62: splash GUI — cold open pe 1.5s, phir Home (sirf GUI, koi login nahi).
@@ -205,15 +208,19 @@ fun MetroPlusApp() {
         // Double download se bacho (do check ek sath mile to bhi ek hi download).
         if (downloadProgress != null) return
         downloadProgress = 0
+        downloadBytes = 0L
         UpdateManager.downloadUpdate(
             context.applicationContext, apkUrl,
-            onProgress = { pct -> downloadProgress = pct },
+            onProgress = { pct, down, _ -> downloadProgress = pct; downloadBytes = down },
             onComplete = { file ->
                 // Pehle 100% dikhao + confetti (63 wali), phir silent install —
                 // koi button, koi dialog nahi. Install 2.7s baad khulta hai taake
                 // confetti nazar aa jaye (confetti 2.6s chalti hai).
                 downloadProgress = 100
                 showConfetti = true
+                // 63 ki tarah: install se pehle "Installing update…" nazar aaye.
+                // (toast() yahan se upar hai is liye direct Toast use kiya.)
+                Toast.makeText(context, "Installing update…", Toast.LENGTH_SHORT).show()
                 Handler(Looper.getMainLooper()).postDelayed({
                     downloadProgress = null
                     showConfetti = false
@@ -229,8 +236,11 @@ fun MetroPlusApp() {
                 }, 2700)
             },
             onError = {
-                // Error par bar chhup jata hai, koi error popup nahi.
+                // 63 ki tarah fail bhi NAZAR aaye (63 me "Download Fail" popup
+                // tha) — bar chhupegi aur toast batayega; dobara check agle
+                // foreground par ya drawer ke Check Update se ho jayega.
                 downloadProgress = null
+                Toast.makeText(context, "Download failed — please try again", Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -413,10 +423,13 @@ fun MetroPlusApp() {
                     activeNav = tab
                     when (tab) {
                         NavTab.HOME -> screen = AppScreen.HOME
-                        NavTab.SETTINGS -> screen = AppScreen.SETTINGS
                         NavTab.OPENING -> screen = AppScreen.OPENING
                         NavTab.CLOSING -> screen = AppScreen.CLOSING
                         NavTab.PORTAL -> screen = AppScreen.PORTAL
+                        // SETTINGS dock se hat gaya hai — drawer/Home se aaye to
+                        // bhi yahan kabhi nahi pahunchega; lambda ka when
+                        // exhaustive hona lazmi hai is liye else rakha hai.
+                        else -> {}
                     }
                 }
             )
@@ -435,7 +448,11 @@ fun MetroPlusApp() {
                 Surface(color = Color.White.copy(alpha = 0.94f), shadowElevation = 4.dp) {
                     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            text = if (pct >= 0) "Updating\u2026 $pct%" else "Updating\u2026",
+                            // v1.63: % na mile (server size na bheje) to sirf
+                            // "Updating…" ki bajaye downloaded MB dikhao — 63 ki
+                            // tarah progress hamesha NAZAR aaye.
+                            text = if (pct >= 0) "Updating\u2026 $pct%"
+                                else "Updating\u2026 " + "%.1f".format(Locale.US, downloadBytes / 1048576.0) + " MB",
                             fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9E1F25)
                         )
                     }
@@ -462,8 +479,9 @@ fun MetroPlusApp() {
 private fun BottomNavBar(modifier: Modifier = Modifier, activeNav: NavTab, onNavClick: (NavTab) -> Unit) {
     // Dock (user ka diya design): SAFED pill bar, baaki items sirf rangeen 3D icon; jo select ho
     // wo LAAL pill ban jata hai — safed gol me 3D icon + poora naam — pill smooth phail/simat jati hai.
+    // v1.63: dock se Settings hata diya (uska order) — sirf 4 rahenge.
+    // Settings ab bhi drawer ki "app Setting" row aur Home ki Settings entry se khulti hai.
     val tabs = listOf(
-        Triple(NavTab.SETTINGS, DockIcon.SETTINGS, "Settings"),
         Triple(NavTab.OPENING, DockIcon.OPENING, "Opening"),
         Triple(NavTab.HOME, DockIcon.HOME, "Home"),
         Triple(NavTab.CLOSING, DockIcon.CLOSING, "Closing"),
@@ -631,7 +649,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.62", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.63", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

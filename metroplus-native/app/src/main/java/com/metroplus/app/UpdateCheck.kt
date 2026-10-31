@@ -33,7 +33,7 @@ object ForegroundTicker {
 // Format: {"versionCode": 12, "versionName": "1.11", "apkUrl": "https://.../MetroPlus-v1.11.apk"}
 object UpdateManager {
     const val MANIFEST_URL = "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-app-version.json"
-    const val CURRENT_VERSION_CODE = 63
+    const val CURRENT_VERSION_CODE = 64
 
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile private var cancelled = false
@@ -72,10 +72,14 @@ object UpdateManager {
         }.start()
     }
 
+    // v1.63: progress ke sath downloaded/total bytes bhi bhejo — 63 ki tarah
+    // update hamesha NAZAR aaye. Server size na bheje to pct = -1 hota hai
+    // (pehle sirf "Updating…" likha aata tha, % nahi) — ab us soorat me
+    // UI downloaded MB dikhata hai, taake pata chalta rahe ke kaam ho raha hai.
     fun downloadUpdate(
         context: Context,
         apkUrl: String,
-        onProgress: (percent: Int) -> Unit,
+        onProgress: (percent: Int, downloaded: Long, total: Long) -> Unit,
         onComplete: (file: File) -> Unit,
         onError: () -> Unit
     ) {
@@ -105,13 +109,13 @@ object UpdateManager {
                             val pct = if (total > 0) ((downloaded * 100) / total).toInt().coerceIn(0, 100) else -1
                             if (pct != lastPct) {
                                 lastPct = pct
-                                mainHandler.post { onProgress(pct) }
+                                mainHandler.post { onProgress(pct, downloaded, total) }
                             }
                         }
                     }
                 }
                 if (cancelled) { mainHandler.post { onError() }; return@Thread }
-                mainHandler.post { onProgress(100) }
+                mainHandler.post { onProgress(100, downloaded, total) }
                 mainHandler.post { onComplete(outFile) }
             } catch (_: Exception) {
                 try { outFile?.delete() } catch (_: Exception) { }
