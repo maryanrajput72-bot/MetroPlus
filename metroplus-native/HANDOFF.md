@@ -1,4 +1,27 @@
-# Metro+ Native App — Handoff (v1.67 / versionCode 68) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.68 / versionCode 69) — DEBUG build (non-debuggable)
+
+## v1.68 change (31 Oct 2026) — launcher icon: red-yellow gradient + yellow glow (uska order, DEBUG)
+- Shikayat: phone par app ka icon blur type lagta tha, jabke splash/main
+  logo pyara lagta hai. Wajah: launcher PNGs purane render the (192 max),
+  logo_hd 512 ka sharp source hai. Fix: naya icon logo_hd (512) se banaya
+  — design wahi, sirf rang badle (uska wazeh order: logo ko kuch nahi
+  karna, sirf colour change).
+- Rang: M par upar se golden-yellow gradient (neeche pure red — zyada
+  red, yellow accent); badge ka dark maroon wahi; bahar ka black shadow
+  hata ke golden-yellow glow halo lagaya (fringe = semi-transparent dark
+  pixels jo asal transparency ke 10px andar hon; badge interior ko haath
+  nahi lagaya). Pehli 2 koshishein zyada peeli ho gayi thi (badge bhi
+  gold ho gaya tha) — teesri me fringe detection theek ki to badge dark
+  raha, M red-yellow raha.
+- Sharpness: 512 master se LANCZOS downscale + halka UnsharpMask, exact
+  densities 48/72/96/144/192; round icons wahi artwork circular mask ke
+  sath. Purane icons ka backup: icon-backup-v167/ (project root, res se
+  bahar — APK me package nahi hota).
+- logo_hd.webp NAHI chheda (splash/main logo wahi pyara wala rahega).
+- NOTE: mipmap PNGs binary hain — GitHub text-only push me NAHI jati
+  (pehle wali binaries ki tarah); naye icons workspace + APK me hain.
+  Agli zip sync me res/mipmap-* zaroor shamil karna.
+- Verify: TODO build ke baad (APK ke andar mipmap-xxxhdpi hash + cert + dex).
 
 ## v1.67 change (31 Oct 2026) — Login/SignUp form update (uska order, DEBUG)
 - Login: Employee ID/Gmail field + Password field hata diye. Ab do fields:
@@ -18,7 +41,14 @@
   "Please fill in all fields" aur login/sign up NAHI hoga; sab bhara ho to
   pehle wala GUI note. Shift/Role ke default (Morning/Operator) hain is
   liye wo hamesha selected rehte hain.
-- Verify: TODO build ke baad (dex strings + cert b13501ef + size).
+- Verify (build 16:33 PKT): APK 12,492,195 bytes, SHA 20a1efbb…, cert
+  b13501ef EXACT match, dex me "Version 1.67" + "Your ID" + "TL Name" +
+  "I confirm this detail" + "Fill in your details" + "Please fill in all
+  fields" maujood; "Employee ID / Gmail" + "Create a password" + "Type it
+  again" + "Passwords do not match" gayab.
+- GitHub code head: 38f40c7e (SplashLogin, build.gradle, UpdateCheck,
+  MainActivity, HANDOFF). Manifest LIVE (16:36 PKT): vc68/1.67 JSON,
+  commit 5d9708cb, get_file_contents se verify.
 
 ## v1.66 push record (31 Oct 2026, is session) — Muse check + GitHub + manifest
 - User ki bheji zip (MetroPlus-v1.66-source_3_kg6y.zip) check ki: build.gradle
