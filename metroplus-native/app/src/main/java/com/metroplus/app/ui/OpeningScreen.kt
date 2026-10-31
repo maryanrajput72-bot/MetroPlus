@@ -144,7 +144,7 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
     val (titleIcon, titleTint, title) = when (tab) {
         OpTab.MENU -> Triple(Icons.Filled.WbSunny, Color(0xFFF59E0B), "Opening")
         OpTab.DATA -> Triple(Icons.Filled.FolderOpen, Color(0xFFF59E0B), "Opening Data")
-        OpTab.STAFF -> Triple(Icons.Filled.Groups, Color(0xFFA32228), "Staff Attendance")
+        OpTab.STAFF -> Triple(Icons.Filled.Groups, BrandRedDark, "Staff Attendance")
         OpTab.LEAVE -> Triple(Icons.Filled.CalendarMonth, Color(0xFF0F766E), "Leave Form")
         OpTab.GPS -> Triple(Icons.Filled.PhotoCamera, Color(0xFF1A6FD8), "GPS Picture")
     }
@@ -198,9 +198,14 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
         val heroShape = RoundedCornerShape(24.dp)
         Box(
             modifier = Modifier.fillMaxWidth().cssShadow(12.dp, heroShape, Color(0xFFF2641A).copy(alpha = 0.28f)).clip(heroShape)
-                .background(cssLinear(135f, 0f to Color(0xFFFFB547), 0.55f to Color(0xFFFF8A1E), 1f to Color(0xFFF2641A)))
+                // v1.61: kai-rang (sunehra → narangi → gulabi-laal) + chamak.
+                .background(cssLinear(135f, 0f to Color(0xFFFFD166), 0.5f to Color(0xFFFF8A1E), 1f to Color(0xFFF43F5E)))
         ) {
-            Watermark(126.dp, x = 237.dp, y = (-14).dp, alpha = 0.2f)
+            // matchParentSize: chamak card ko lamba na kare (sirf content jitna rahe).
+            Box(Modifier.matchParentSize()) {
+                Glow(180.dp, x = 70.dp, y = (-80).dp, alpha = 0.35f, align = Alignment.TopEnd)
+                Watermark(126.dp, x = 237.dp, y = (-14).dp, alpha = 0.2f)
+            }
             Column(modifier = Modifier.padding(18.dp)) {
                 Text("START OF SHIFT", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 1.2.sp)
                 Spacer(modifier = Modifier.height(4.dp))
@@ -209,10 +214,10 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
                 Text("${demoShift()} shift · $heroDate", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
         }
-        PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF4DC), Color(0xFFFFE0A8)), { open(OpTab.DATA) }) {
+        PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF1C2), Color(0xFFFFA94D)), { open(OpTab.DATA) }) {
             Image(painterResource(id = R.drawable.ic_dock_opening), contentDescription = null, modifier = Modifier.size(46.dp))
         }
-        FancyTile("Staff Attendance", "Who is on duty today", listOf(Color(0xFFD93C44), Color(0xFFA32228)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
+        FancyTile("Staff Attendance", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
         FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFF7EF0C1), Color(0xFF0F766E)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
         PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), { open(OpTab.GPS) }) {
             Icon(Icons.Filled.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
@@ -226,8 +231,10 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
 private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: () -> Unit, icon: @Composable () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
-            .background(Color.White).border(1.dp, OpInk.copy(alpha = 0.06f), shape).clickable { onClick() }
+        // v1.61: safed ki jagah icon ke rang ka halka gradient + rangeen saya; arrow 3D tile.
+        modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(8.dp, shape, iconBg.last().copy(alpha = 0.18f)).clip(shape)
+            .background(Brush.horizontalGradient(listOf(iconBg.last().lighter(0.9f), Color.White)))
+            .border(1.dp, iconBg.last().copy(alpha = 0.16f), shape).clickable { onClick() }
     ) {
         Watermark(132.dp, x = 232.dp, y = (-22).dp, alpha = 0.075f)
         Row(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -237,9 +244,7 @@ private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: 
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(sub, fontSize = 12.5.sp, color = OpMuted, lineHeight = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
-            Box(modifier = Modifier.size(32.dp).background(Color(0xFFF5F1F1), CircleShape), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF5B6B57), modifier = Modifier.size(18.dp))
-            }
+            Icon3DTile(Icons.Filled.ChevronRight, iconBg.last().darker(0.05f), size = 34.dp, iconSize = 18.dp, corner = 11.dp)
         }
     }
 }
@@ -250,8 +255,9 @@ private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: 
 private fun FancyTile(title: String, sub: String, iconBg: List<Color>, image: Int, onClick: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f)).clip(shape)
-            .background(Color.White).border(1.dp, OpInk.copy(alpha = 0.06f), shape)
+        modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(8.dp, shape, iconBg.last().copy(alpha = 0.18f)).clip(shape)
+            .background(Brush.horizontalGradient(listOf(iconBg.last().lighter(0.9f), Color.White)))
+            .border(1.dp, iconBg.last().copy(alpha = 0.16f), shape)
             .clickable { onClick() }
     ) {
         Watermark(138.dp, x = 228.dp, y = (-23).dp, alpha = 0.075f)
@@ -265,10 +271,7 @@ private fun FancyTile(title: String, sub: String, iconBg: List<Color>, image: In
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(sub, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF716878), lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            Box(
-                modifier = Modifier.size(38.dp).cssShadow(3.dp, CircleShape, Color(0xFF2D143C).copy(alpha = 0.10f)).background(Color.White, CircleShape),
-                contentAlignment = Alignment.Center
-            ) { Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFF5B287E), modifier = Modifier.size(20.dp)) }
+            Icon3DTile(Icons.Filled.ChevronRight, iconBg.last(), size = 36.dp, iconSize = 19.dp, corner = 12.dp)
         }
     }
 }
@@ -468,7 +471,7 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, o
         // Staff List heading: 20sp title | "N Operators" laal 18sp | purple Edit button.
         Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp).padding(horizontal = 3.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Staff List", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430), modifier = Modifier.weight(1f))
-            Text("$total Operators", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFE11D2E))
+            Text("$total Operators", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = BrandRed)
             Spacer(modifier = Modifier.width(16.dp))
             Row(
                 modifier = Modifier.height(44.dp).cssShadow(5.dp, RoundedCornerShape(13.dp), Color(0xFF8B24E8).copy(alpha = 0.24f))
@@ -734,7 +737,7 @@ private fun StationBox(text: String, onClick: () -> Unit) {
             .clickable { onClick() }.padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Filled.LocationOn, contentDescription = null, tint = Color(0xFF9E1F25), modifier = Modifier.size(15.dp))
+        Icon(Icons.Filled.LocationOn, contentDescription = null, tint = BrandRedDark, modifier = Modifier.size(15.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text(text, fontSize = 13.5.sp, color = OpInk, modifier = Modifier.weight(1f))
         Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(18.dp))
@@ -750,9 +753,9 @@ private fun ShiftPick(selected: String, onPick: (String) -> Unit) {
             val shape = RoundedCornerShape(14.dp)
             Box(
                 modifier = Modifier.weight(1f).height(45.dp)
-                    .then(if (on) Modifier.cssShadow(6.dp, shape, Color(0xFFB91018).copy(alpha = 0.35f)).border(3.dp, Color(0xFFE11D2E).copy(alpha = 0.25f), shape).padding(1.dp) else Modifier)
+                    .then(if (on) Modifier.cssShadow(6.dp, shape, BrandRedDark.copy(alpha = 0.35f)).border(3.dp, BrandRed.copy(alpha = 0.25f), shape).padding(1.dp) else Modifier)
                     .clip(shape)
-                    .then(if (on) Modifier.background(cssLinear(135f, 0f to Color(0xFFE11D2E), 1f to Color(0xFFB91018))) else Modifier.background(Color.White).border(1.3.dp, Color(0xFFE5E7EB), shape))
+                    .then(if (on) Modifier.background(cssLinear(135f, 0f to BrandRed, 1f to BrandRedDark)) else Modifier.background(Color.White).border(1.3.dp, Color(0xFFE5E7EB), shape))
                     .clickable { onPick(s) },
                 contentAlignment = Alignment.Center
             ) { Text(s, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (on) Color.White else Color(0xFF5B6470)) }
@@ -798,7 +801,7 @@ private fun StaffPicker(picked: String?, onPick: (String, String) -> Unit) {
                 // 63 jaisa: lamba naam (12+) poori line (lo-wide), chhota aadhi.
                 modifier = Modifier.then(if (name.length >= 12) Modifier.fillMaxWidth() else Modifier.weight(1f)).height(54.dp).cssShadow(2.dp, shape, OpInk.copy(alpha = 0.05f)).clip(shape)
                     .background(cssLinear(120f, 0f to c[0], 1f to c[1]))
-                    .border(if (picked == name) 2.dp else 1.3.dp, if (picked == name) Color(0xFFE11D2E) else Color(0xFFE9EDF0), shape)
+                    .border(if (picked == name) 2.dp else 1.3.dp, if (picked == name) BrandRed else Color(0xFFE9EDF0), shape)
                     .clickable { onPick(name, id) }.padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
