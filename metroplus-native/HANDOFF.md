@@ -1,4 +1,18 @@
-# Metro+ Native App — Handoff (v1.72 / versionCode 73) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.73 / versionCode 74) — DEBUG build (non-debuggable)
+
+## v1.73 change (31 Oct 2026) — minis tartib (uska order, DEBUG)
+- More with Metro ke 4 cards ki tartib: pehla Tom Data, doosra
+  Complaints (upar wali row), neeche GPS Camera, chautha Money Calc.
+  Sirf list ki tartib badli — har card ka rang/icon/kaam wahi.
+- OPEN (uske sawaal ka jawab diya, build ka order NAHI mila):
+  notification panel me quick access — mumkin hai: ongoing notification
+  (3 action buttons) ya Quick Settings tile. Buttons se WhatsApp redirect
+  (chat khul ke prefilled text, user khud Send dabayega — khamoshi se
+  auto-send official tareeqe se NAHI hota), ya app ke screens ke deep
+  links. Reliable rakhne ke liye foreground service + BOOT receiver
+  chahiye; Android 13+ par notification permission ek dafa leni hogi.
+  Buttons ki list uske batane par banegi.
+- Verify: TODO build ke baad.
 
 ## v1.72 change (31 Oct 2026) — Staff Edit theek + week strip naya (uska order, DEBUG)
 - Staff Edit: hero status bar ke upar/andar ja raha tha (statusBarsPadding
@@ -13,7 +27,11 @@
   (Mon/Tue... 3 harf — 7 poore naam ek line me nahi aate), neeche us din
   hazir bande ki ginti (person icon + number; 5 sabz, 4 peela, 3 ya kam
   laal; demo counts, aaj = 5). Aaj ka din halki laal pill me.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~19:49 PKT): APK 12,541,183 bytes, SHA a08a0db3;
+  cert apksigner se b13501ef MATCH; dex "Version 1.72", 1.71 gayab.
+  (Pehli build runtime restart se mari thi — stale v1.71 APK check karke
+  dobara build chalayi.) GitHub code head 422f75f1, MANIFEST LIVE vc73
+  JSON verify (RAW JSON). Updater se update aani chahiye.
 
 ## v1.71 change (31 Oct 2026) — supervisor card + TL login ek + 2-rang cards (uska order, DEBUG)
 - Supervisor: Settings ACCOUNT me "Supervisor Name" row + pencil ab chhota

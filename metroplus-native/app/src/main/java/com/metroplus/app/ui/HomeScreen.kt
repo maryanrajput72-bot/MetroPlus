@@ -231,12 +231,16 @@ fun HomeScreen(
     }
     // More with Metro: banners se thore gehre (uska purana "dark" order wahi), lekin ab
     // har tile apne section rang se — chaaron ek parivar jaise.
+    // v1.73 (uska order): tartib — pehla Tom Data, doosra Complaints (upar
+    // wali row), neeche GPS Camera, chautha Money Calc. Rang har card ke
+    // apne hi rehte hain (Tom rose, Complaints purple, GPS teal, Money
+    // yellow) — sirf jagah badli hai.
     val minis = remember {
         listOf(
-            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, miniStops(GpsBlue), Color(0xFF0D9488).copy(alpha = 0.25f), Color(0xFF0D9488)),
-            MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, miniStops(Section.Money), Section.Money.copy(alpha = 0.25f), Section.Money),
+            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, miniStops(Section.Tom), Color(0xFFE11D48).copy(alpha = 0.25f), Color(0xFFE11D48)),
             MiniCard("REPORTS", "Complaints", "Tap to open complaints", "complaints tom agm tkm reports", R.drawable.img_complaint, miniStops(Section.Complaints), Section.Complaints.copy(alpha = 0.25f), Section.Complaints),
-            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, miniStops(Section.Tom), Color(0xFFE11D48).copy(alpha = 0.25f), Color(0xFFE11D48))
+            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, miniStops(GpsBlue), Color(0xFF0D9488).copy(alpha = 0.25f), Color(0xFF0D9488)),
+            MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, miniStops(Section.Money), Section.Money.copy(alpha = 0.25f), Section.Money)
         )
     }
     val hubs = remember {
