@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -34,20 +33,15 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -138,38 +132,50 @@ internal fun BoxScope.Watermark(size: Dp, x: Dp, y: Dp, alpha: Float) {
 internal fun Modifier.cssShadow(elevation: Dp, shape: Shape, color: Color): Modifier =
     shadow(elevation = elevation, shape = shape, ambientColor = color, spotColor = color)
 
+// accent = us section ka rang (v1.56 rang-nizaam) — kicker, Open button, arrow tile.
 private data class Banner(
     val kicker: String, val title: String, val sub: String, val imageRes: Int,
-    val stops: Array<Pair<Float, Color>>, val shadow: Color, val isWelcome: Boolean = false
+    val stops: Array<Pair<Float, Color>>, val shadow: Color, val isWelcome: Boolean = false,
+    val accent: Color = Color.Unspecified
 )
 private data class MiniCard(
     val kicker: String, val title: String, val sub: String, val label: String, val imageRes: Int,
-    val stops: Array<Pair<Float, Color>>, val shadow: Color
+    val stops: Array<Pair<Float, Color>>, val shadow: Color, val accent: Color
 )
+// v1.58: GPS teal (Portal pehle se neela hai — do neele ek jaise lagte the).
+private val GpsBlue = Color(0xFF0891B2)
+
+// v1.60 (uska order "colors pyare karo"): v1.58 ke halke ek-rang dabbe phike lagte
+// the. Ab har section ka 3-rang (hue badalta) gradient — halka → beech → gehra:
+// Money peela→narangi, Tom aadoo→coral→gulabi, GPS aqua→neela, Complaints
+// lavender→jamni→gulabi, Portal neela→indigo, Opening sunehra→narangi, Closing
+// lavender→jamni. Banners sab se halke, minis sab se rangeen, hubs beech me.
+private fun vivid(c: Color): Triple<Color, Color, Color> = when (c) {
+    Section.Money -> Triple(Color(0xFFFFF1A8), Color(0xFFFFC94D), Color(0xFFFF8F3D))
+    Section.Tom -> Triple(Color(0xFFFFE0CF), Color(0xFFFF9A76), Color(0xFFFF5F86))
+    GpsBlue -> Triple(Color(0xFFD2F6FF), Color(0xFF63D2F0), Color(0xFF3A7BEF))
+    Section.Complaints -> Triple(Color(0xFFEDE3FF), Color(0xFFB794F6), Color(0xFFE56FCF))
+    Section.Portal -> Triple(Color(0xFFDCEBFF), Color(0xFF8DB7FF), Color(0xFF7A6CF0))
+    Section.Opening -> Triple(Color(0xFFFFF0C2), Color(0xFFFFC266), Color(0xFFFF8457))
+    Section.Closing -> Triple(Color(0xFFEFE6FF), Color(0xFFBBA4FF), Color(0xFFC07CF5))
+    else -> Triple(c.lighter(0.85f), c.lighter(0.5f), c)
+}
+private fun bannerStops(c: Color) = vivid(c).let { (l, m, d) -> arrayOf(0f to l.lighter(0.55f), 0.6f to l, 1f to m.lighter(0.25f)) }
+private fun miniStops(c: Color) = vivid(c).let { (l, m, d) -> arrayOf(0f to l, 0.55f to m, 1f to d) }
+private fun hubStops(c: Color) = vivid(c).let { (l, m, d) -> arrayOf(0f to l.lighter(0.4f), 0.6f to l, 1f to m.lighter(0.1f)) }
 private data class Hub(
     val tag: String, val tagColor: Color, val title: String, val sub: String,
     val iconRes: Int, val stops: Array<Pair<Float, Color>>
 )
 
-// Trial ke gradients (html[data-theme] .ep-b-* overrides).
-private val YellowStops = arrayOf(0f to Color(0xFFFFF8D9), 0.6f to Color(0xFFFFE795), 1f to Color(0xFFFFD666))
-private val PeachStops = arrayOf(0f to Color(0xFFFFF3E8), 0.6f to Color(0xFFFFDCC0), 1f to Color(0xFFFFC59B))
-private val BlueStops = arrayOf(0f to Color(0xFFEAF3FF), 0.6f to Color(0xFFCFE2FF), 1f to Color(0xFFB0CDFF))
-private val PurpleStops = arrayOf(0f to Color(0xFFF4EDFF), 0.6f to Color(0xFFE1D1FF), 1f to Color(0xFFCBB2FF))
-private val YellowShadow = Color(0xFFE6AA00).copy(alpha = 0.2f)
-private val PeachShadow = Color(0xFFEA6E28).copy(alpha = 0.18f)
-private val BlueShadow = Color(0xFF3B6EE6).copy(alpha = 0.18f)
-private val PurpleShadow = Color(0xFF7C3AED).copy(alpha = 0.18f)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     onProfileClick: () -> Unit,
     onChatClick: () -> Unit,
-    onRefreshClick: () -> Unit,
     onFeatureClick: (String) -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf("") }
     // LIVE/OFFLINE badge (purani trial app jaisa): internet ho to green LIVE,
     // na ho to red OFFLINE. NetworkCallback se live update hota hai.
     val appContext = LocalContext.current.applicationContext
@@ -194,6 +200,8 @@ fun HomeScreen(
         try { cm.registerDefaultNetworkCallback(cb) } catch (_: Exception) { }
         onDispose { try { cm.unregisterNetworkCallback(cb) } catch (_: Exception) { } }
     }
+    // App wapas foreground me aaye to shift/date dobara (12 baje ke paar purana shift na rahe).
+    @Suppress("UNUSED_VARIABLE") val resumeTick = com.metroplus.app.ForegroundTicker.resumeCount.value
     val now = Calendar.getInstance()
     val shift = if (now.get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift"
     val dateText = SimpleDateFormat("EEEE, d MMMM", Locale.ENGLISH).format(now.time)
@@ -201,55 +209,41 @@ fun HomeScreen(
     val banners = remember {
         listOf(
             Banner("", "", "", 0, arrayOf(), Color(0xFF9E1F25).copy(alpha = 0.35f), isWelcome = true),
-            Banner("FARES & FINANCE", "Money Calculator", "Tap to calculate", R.drawable.img_money, YellowStops, YellowShadow),
-            Banner("DAILY REGISTER", "Tom Data", "Tap to open register", R.drawable.img_tom, PeachStops, PeachShadow),
-            Banner("PHOTOS & MAP", "GPS Camera", "Tap to open camera", R.drawable.img_gps, BlueStops, BlueShadow),
-            Banner("ONLINE PORTAL", "Online Portal", "Tap to open portal", R.drawable.img_portal, PurpleStops, PurpleShadow)
+            Banner("FARES & FINANCE", "Money Calculator", "Tap to calculate", R.drawable.img_money, bannerStops(Section.Money), Section.Money.copy(alpha = 0.22f), accent = Section.Money),
+            Banner("DAILY REGISTER", "Tom Data", "Tap to open register", R.drawable.img_tom, bannerStops(Section.Tom), Section.Tom.copy(alpha = 0.22f), accent = Section.Tom),
+            Banner("PHOTOS & MAP", "GPS Camera", "Tap to open camera", R.drawable.img_gps, bannerStops(GpsBlue), GpsBlue.copy(alpha = 0.22f), accent = GpsBlue),
+            Banner("ONLINE PORTAL", "Online Portal", "Tap to open portal", R.drawable.img_portal, bannerStops(Section.Portal), Section.Portal.copy(alpha = 0.22f), accent = Section.Portal)
         )
     }
-// More with Metro tiles ke liye thore dark stops (uska order) — upar wale
-// banners inhi purane stops pe rahenge, sirf 4 tiles dark hui hain.
-val MiniBlueStops = arrayOf(0f to Color(0xFFB7D2FF), 0.6f to Color(0xFF8FB6FF), 1f to Color(0xFF6B9BF5))
-val MiniYellowStops = arrayOf(0f to Color(0xFFFFE9A3), 0.6f to Color(0xFFFFC93D), 1f to Color(0xFFFFB020))
-val MiniPurpleStops = arrayOf(0f to Color(0xFFCDB4FF), 0.6f to Color(0xFFA78BFA), 1f to Color(0xFF8B5CF6))
-val MiniPeachStops = arrayOf(0f to Color(0xFFFFD2A8), 0.6f to Color(0xFFFFAB6B), 1f to Color(0xFFFB923C))
+    // More with Metro: banners se thore gehre (uska purana "dark" order wahi), lekin ab
+    // har tile apne section rang se — chaaron ek parivar jaise.
     val minis = remember {
         listOf(
-            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, MiniBlueStops, BlueShadow),
-            MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, MiniYellowStops, YellowShadow),
-            MiniCard("REPORTS", "Complaints", "Tap to open complaints", "complaints tom agm tkm reports", R.drawable.img_complaint, MiniPurpleStops, PurpleShadow),
-            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, MiniPeachStops, PeachShadow)
+            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, miniStops(GpsBlue), GpsBlue.copy(alpha = 0.25f), GpsBlue),
+            MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, miniStops(Section.Money), Section.Money.copy(alpha = 0.25f), Section.Money),
+            MiniCard("REPORTS", "Complaints", "Tap to open complaints", "complaints tom agm tkm reports", R.drawable.img_complaint, miniStops(Section.Complaints), Section.Complaints.copy(alpha = 0.25f), Section.Complaints),
+            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, miniStops(Section.Tom), Section.Tom.copy(alpha = 0.25f), Section.Tom)
         )
     }
     val hubs = remember {
         listOf(
             // Settings hub khatam (uska order) — sirf pehle 3 hubs rahenge.
             // Baaki 3 ke colors waazeh dark (halka step nazar nahi aata tha).
-            Hub("START SHIFT", Color(0xFFD9650F), "Opening", "Opening data, staff & GPS", R.drawable.ic_dock_opening,
-                arrayOf(0f to Color(0xFFFFEFC9), 0.6f to Color(0xFFFFD694), 1f to Color(0xFFFFBE78))),
-            Hub("END SHIFT", Color(0xFF5B3FD0), "Closing", "End-of-shift reports", R.drawable.ic_dock_closing,
-                arrayOf(0f to Color(0xFFE9DEFF), 0.6f to Color(0xFFCDB4FF), 1f to Color(0xFFAC8FFF))),
-            Hub("ONLINE", Color(0xFF1C6FD1), "Online Portal", "Central online portal", R.drawable.ic_dock_portal,
-                arrayOf(0f to Color(0xFFD6EBFF), 0.6f to Color(0xFFA9D2FF), 1f to Color(0xFF7FB9FF)))
+            // v1.57: tag + arrow tile us section ke rang me.
+            Hub("START SHIFT", Section.Opening, "Opening", "Opening data, staff & GPS", R.drawable.ic_dock_opening, hubStops(Section.Opening)),
+            Hub("END SHIFT", Section.Closing, "Closing", "End-of-shift reports", R.drawable.ic_dock_closing, hubStops(Section.Closing)),
+            Hub("ONLINE", Section.Portal, "Online Portal", "Central online portal", R.drawable.ic_dock_portal, hubStops(Section.Portal))
         )
     }
     val pagerState = rememberPagerState(pageCount = { banners.size })
-    // Trial: har 5s agla banner (aakhri ke baad pehla); chhoone ke 8s baad tak ruka rehta hai.
-    val dragged by pagerState.interactionSource.collectIsDraggedAsState()
-    var lastTouch by remember { mutableLongStateOf(0L) }
-    LaunchedEffect(dragged) { if (dragged) lastTouch = System.currentTimeMillis() }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(5000)
-            if (System.currentTimeMillis() - lastTouch < 8000 || pagerState.isScrollInProgress) continue
-            pagerState.animateScrollToPage((pagerState.currentPage + 1) % banners.size)
-        }
-    }
-    // Trial jaisa: search sirf mini cards ko label se filter karta hai.
-    val q = searchQuery.trim().lowercase()
-    val shownMinis = if (q.isEmpty()) minis else minis.filter { q in it.label }
+    // Batch item 2 (31 Oct 2026, uska order): banner auto-slide FILHAL BAND —
+    // manual swipe hi chalegi. Jab usko chahiye hogi tab ye loop wapas lagega.
+    // (Pehle: har 5s agla banner, aakhri ke baad pehla — wahi backward slide thi.)
+    // Trial jaisa search hata diya gaya hai (batch item 3) — saare mini cards dikhte hain.
+    val shownMinis = minis
 
-    LazyColumn(modifier = Modifier.fillMaxSize().background(HomeBackground)) {
+    // v1.57: plain #F3EDED ki jagah upar safed → neeche halka gulabi gradient.
+    LazyColumn(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFFBF8F8), HomeBackground, Color(0xFFF1E3E4))))) {
         // Header: white, padding 14/20, 46dp logo, "Hey There" 17sp, LIVE badge + chat button (46, kona 16).
         item {
             Surface(modifier = Modifier.fillMaxWidth(), color = Color.White, shadowElevation = 3.dp) {
@@ -261,7 +255,9 @@ val MiniPeachStops = arrayOf(0f to Color(0xFFFFD2A8), 0.6f to Color(0xFFFFAB6B),
                         Image(
                             painter = painterResource(id = R.drawable.logo_hd),
                             contentDescription = "Metro M logo", contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(46.dp)
+                            // v1.59: asal logo wahi, sirf rang/contrast enhance + thora bara (46 → 50).
+                            colorFilter = LogoEnhance,
+                            modifier = Modifier.size(50.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Hi Aryan 👋", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Ink, letterSpacing = (-0.2).sp)
@@ -279,11 +275,14 @@ val MiniPeachStops = arrayOf(0f to Color(0xFFFFD2A8), 0.6f to Color(0xFFFFAB6B),
                         Text(if (isOnline) "LIVE" else "OFFLINE", fontSize = 10.5.sp, fontWeight = FontWeight.ExtraBold, color = live, letterSpacing = 0.8.sp)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
+                    // v1.57: chat button 3D — gehra saya, upar chamak (63 wala bubble wahi).
+                    val chatShape = RoundedCornerShape(16.dp)
                     Box(
                         modifier = Modifier.size(46.dp)
-                            .cssShadow(6.dp, RoundedCornerShape(16.dp), Color(0xFFA32228).copy(alpha = 0.18f))
-                            .background(cssLinear(160f, 0f to Color.White, 1f to Color(0xFFF7ECED)), RoundedCornerShape(16.dp))
-                            .border(1.dp, Color(0xFFA32228).copy(alpha = 0.12f), RoundedCornerShape(16.dp))
+                            .cssShadow(8.dp, chatShape, BrandRed.copy(alpha = 0.3f)).clip(chatShape)
+                            .background(cssLinear(160f, 0f to Color.White, 1f to Color(0xFFF3DCDE)))
+                            .drawBehind { drawRect(Brush.verticalGradient(listOf(Color.White, Color.White.copy(alpha = 0f)), endY = size.height / 2)) }
+                            .border(1.dp, BrandRed.copy(alpha = 0.18f), chatShape)
                             .clickable { onChatClick() },
                         contentAlignment = Alignment.Center
                     ) {
@@ -292,45 +291,9 @@ val MiniPeachStops = arrayOf(0f to Color(0xFFFFD2A8), 0.6f to Color(0xFFFFAB6B),
                 }
             }
         }
-        // Search pill (44, white, halki border) + refresh circle (48, laal icon).
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    modifier = Modifier.weight(1f).height(44.dp)
-                        .cssShadow(2.dp, RoundedCornerShape(999.dp), Ink.copy(alpha = 0.07f))
-                        .background(Color.White, RoundedCornerShape(999.dp))
-                        .border(1.dp, Ink.copy(alpha = 0.05f), RoundedCornerShape(999.dp))
-                        .padding(horizontal = 18.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Filled.Search, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(17.dp))
-                    Spacer(modifier = Modifier.width(10.dp))
-                    BasicTextField(
-                        value = searchQuery, onValueChange = { searchQuery = it },
-                        modifier = Modifier.weight(1f), singleLine = true,
-                        textStyle = TextStyle(fontSize = 14.sp, color = Ink),
-                        decorationBox = { inner ->
-                            if (searchQuery.isEmpty()) Text("Search", color = Color(0xFF9AA1AB), fontSize = 14.sp)
-                            inner()
-                        }
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Box(
-                    modifier = Modifier.size(48.dp)
-                        .cssShadow(2.dp, CircleShape, Ink.copy(alpha = 0.07f))
-                        .background(Color.White, CircleShape)
-                        .border(1.dp, Ink.copy(alpha = 0.05f), CircleShape)
-                        .clickable { onRefreshClick() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Filled.Refresh, contentDescription = "Refresh", tint = Coral, modifier = Modifier.size(20.dp))
-                }
-            }
-        }
+        // Batch item 3 (31 Oct 2026, uska order): search pill + refresh circle
+        // dono hata diye gaye hain — taake cards upar aa jayen. Manual update
+        // check ab bhi har app open pe 5 second baad khud hota hai.
         // Banner carousel (trial CSS): card = (screen - 40) ka 88%, gap 12; pehla card trial
         // jaisa left se 20dp (deewar ke saath) — centered padding se pehla card 39dp andar
         // ho jata tha, is liye contentPadding 20dp hai; side cards 0.92 + 75% opacity.
@@ -420,10 +383,12 @@ private fun fitBannerTitle(m: TextMeasurer, title: String, width: Dp, d: Density
 
 @Composable
 private fun SectionTitle(text: String, top: Dp) {
-    Text(
-        text, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = Ink, letterSpacing = (-0.2).sp,
-        modifier = Modifier.padding(start = 22.dp, end = 20.dp, top = top, bottom = 12.dp)
-    )
+    // v1.57: title se pehle chhoti laal gradient patti.
+    Row(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = top, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(width = 5.dp, height = 18.dp).background(Brush.verticalGradient(listOf(BrandRedLight, BrandRedDark)), RoundedCornerShape(3.dp)))
+        Spacer(modifier = Modifier.width(9.dp))
+        Text(text, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = Ink, letterSpacing = (-0.2).sp)
+    }
 }
 
 // Welcome banner: laal 4-stop gradient + 2 radial chamak, "DEAR" + naam, station, chips, role badge.
@@ -512,7 +477,7 @@ private fun ColorBanner(b: Banner, height: Dp, titleSize: TextUnit, onClick: () 
         Row(modifier = Modifier.fillMaxSize().padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    b.kicker, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Ink.copy(alpha = 0.7f), letterSpacing = 1.2.sp,
+                    b.kicker, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = b.accent.darker(0.3f), letterSpacing = 1.2.sp,
                     modifier = Modifier.background(Color.White.copy(alpha = 0.6f), RoundedCornerShape(20.dp)).padding(horizontal = 9.dp, vertical = 2.dp)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -520,9 +485,13 @@ private fun ColorBanner(b: Banner, height: Dp, titleSize: TextUnit, onClick: () 
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(b.sub, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Ink.copy(alpha = 0.6f))
                 Spacer(modifier = Modifier.height(12.dp))
+                // v1.57: kala "Open" ab section ke rang ka 3D pill (upar chamak).
+                val openShape = RoundedCornerShape(20.dp)
                 Row(
-                    modifier = Modifier.cssShadow(6.dp, RoundedCornerShape(20.dp), Color.Black.copy(alpha = 0.18f))
-                        .background(Ink, RoundedCornerShape(20.dp)).padding(horizontal = 13.dp, vertical = 7.dp),
+                    modifier = Modifier.cssShadow(6.dp, openShape, b.accent.copy(alpha = 0.45f)).clip(openShape)
+                        .background(Brush.verticalGradient(listOf(b.accent.lighter(0.12f), b.accent.darker(0.18f))))
+                        .drawBehind { drawRect(Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.3f), Color.Transparent), endY = size.height / 2)) }
+                        .padding(horizontal = 13.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Open", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
@@ -559,19 +528,17 @@ private fun MiniTile(m: MiniCard, modifier: Modifier, onClick: () -> Unit) {
     ) {
         Glow(130.dp, x = 50.dp, y = (-50).dp, alpha = 0.6f, align = Alignment.TopEnd)
         Watermark(98.dp, x = 90.dp, y = 32.dp, alpha = 0.075f)
-        Box(
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp).size(28.dp)
-                .cssShadow(3.dp, CircleShape, Color.Black.copy(alpha = 0.08f))
-                .background(Color.White.copy(alpha = 0.75f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) { Icon(Icons.Filled.ArrowForward, contentDescription = null, tint = Ink, modifier = Modifier.size(13.dp)) }
+        // v1.57: safed arrow gola ab section rang ka 3D tile.
+        Box(modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp)) {
+            Icon3DTile(Icons.Filled.ArrowForward, m.accent, size = 30.dp, iconSize = 14.dp, corner = 10.dp)
+        }
         Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 16.dp)) {
             Image(
                 painterResource(id = m.imageRes), contentDescription = null, contentScale = ContentScale.Crop,
                 modifier = Modifier.size(62.dp).cssShadow(4.dp, CircleShape, Ink.copy(alpha = 0.14f)).background(Color.White, CircleShape).clip(CircleShape)
             )
             Spacer(modifier = Modifier.height(10.dp))
-            Text(m.kicker, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Ink.copy(alpha = 0.55f), letterSpacing = 1.1.sp)
+            Text(m.kicker, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = m.accent.darker(0.35f), letterSpacing = 1.1.sp)
             Spacer(modifier = Modifier.height(3.dp))
             Text(m.title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Ink, letterSpacing = (-0.3).sp)
             Text(m.sub, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Ink.copy(alpha = 0.6f), lineHeight = 18.sp)
@@ -608,11 +575,9 @@ private fun HubCard(h: Hub, onClick: () -> Unit) {
             Text(h.title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = HubInk, letterSpacing = (-0.3).sp, lineHeight = 22.sp)
             Text(h.sub, fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = HubInk.copy(alpha = 0.62f))
         }
-        Box(
-            modifier = Modifier.align(Alignment.CenterEnd).padding(end = 14.dp).size(32.dp)
-                .cssShadow(4.dp, CircleShape, Color.Black.copy(alpha = 0.08f))
-                .background(Color.White, CircleShape),
-            contentAlignment = Alignment.Center
-        ) { Icon(Icons.Filled.ArrowForward, contentDescription = null, tint = h.tagColor, modifier = Modifier.size(14.dp)) }
+        // v1.57: arrow ab section rang ka 3D tile.
+        Box(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 14.dp)) {
+            Icon3DTile(Icons.Filled.ArrowForward, h.tagColor, size = 34.dp, iconSize = 16.dp, corner = 11.dp)
+        }
     }
 }

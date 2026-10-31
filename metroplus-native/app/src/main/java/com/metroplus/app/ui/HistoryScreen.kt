@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.sp
 // View/Delete abhi GUI note dikhate hain.
 private val HistInk = Color(0xFF14181C)
 private val HistMuted = Color(0xFF6B7280)
-private val HistRed = Color(0xFF9E1F25)
+private val HistRed = Section.Tom // v1.56: Tom Data section ka narangi
 
 private class HistDay(
     val day: Int, val month: String, val weekday: String, val shift: String,
@@ -174,8 +174,8 @@ private fun HistItem(d: HistDay, onGuiNote: (String) -> Unit) {
                 .clip(RoundedCornerShape(14.dp)).background(cssLinear(160f, 0f to Color(0xFFF8ECED), 1f to Color(0xFFF1D7D8))),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
         ) {
-            Text(d.day.toString(), fontSize = 21.sp, fontWeight = FontWeight.Bold, color = Color(0xFF7A1A1F), lineHeight = 21.sp)
-            Text(d.month.uppercase(), fontSize = 10.5.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF7A1A1F), letterSpacing = 0.5.sp)
+            Text(d.day.toString(), fontSize = 21.sp, fontWeight = FontWeight.Bold, color = Section.Tom.darker(), lineHeight = 21.sp)
+            Text(d.month.uppercase(), fontSize = 10.5.sp, fontWeight = FontWeight.ExtraBold, color = Section.Tom.darker(), letterSpacing = 0.5.sp)
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -192,10 +192,10 @@ private fun HistItem(d: HistDay, onGuiNote: (String) -> Unit) {
             // Line 2: Opening/Closing ✓ chips (trial .th-l2).
             Spacer(modifier = Modifier.height(4.dp))
             Row {
-                if (d.openingSaved) HistChip("Opening ✓", Color(0xFFF6DFE0), Color(0xFF7A1A1F))
+                if (d.openingSaved) HistChip("Opening ✓", Section.Tom.copy(alpha = 0.12f), Section.Tom.darker())
                 if (d.closingSaved) {
                     if (d.openingSaved) Spacer(modifier = Modifier.width(6.dp))
-                    HistChip("Closing ✓", Color(0xFFF6DFE0), Color(0xFF7A1A1F))
+                    HistChip("Closing ✓", Section.Tom.copy(alpha = 0.12f), Section.Tom.darker())
                 }
             }
             // Sale line — sirf sale > 0 ho to (trial logic).
