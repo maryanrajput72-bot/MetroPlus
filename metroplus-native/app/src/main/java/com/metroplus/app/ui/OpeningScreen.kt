@@ -135,9 +135,14 @@ internal class OpeningViewModel : ViewModel() {
 private fun demoShift(): String = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning" else "Evening"
 
 @Composable
-fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit, onOpenViewer: () -> Unit = {}) {
+fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit, onOpenViewer: () -> Unit = {}, resetSignal: Int = 0) {
     val vm: OpeningViewModel = viewModel()
     var tab by vm.tab
+    // v1.79: dock/home se entry par tab wapas MENU (section home).
+    // Pehli composition par resetSignal 0 hai, is liye guard hai.
+    androidx.compose.runtime.LaunchedEffect(resetSignal) {
+        if (resetSignal > 0) vm.tab.value = OpTab.MENU
+    }
     // Item 4: Staff Edit page (trial staffEditScreen) — Staff tab ke upar slide hoke aata hai.
     var staffEditOpen by remember { mutableStateOf(false) }
     BackHandler {
@@ -149,7 +154,7 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
     val (titleIcon, titleTint, title) = when (tab) {
         OpTab.MENU -> Triple(Icons.Filled.WbSunny, Color(0xFFF59E0B), "Opening")
         OpTab.DATA -> Triple(Icons.Filled.FolderOpen, Color(0xFFF59E0B), "Opening Data")
-        OpTab.STAFF -> Triple(Icons.Filled.Groups, BrandRedDark, "Station Roster")
+        OpTab.STAFF -> Triple(Icons.Filled.Groups, BrandRedDark, "Staff Attendance")
         OpTab.LEAVE -> Triple(Icons.Filled.CalendarMonth, Color(0xFF0F766E), "Leave Form")
         OpTab.GPS -> Triple(Icons.Filled.PhotoCamera, Color(0xFF1A6FD8), "GPS Picture")
     }
@@ -224,7 +229,7 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
         PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF1C2), Color(0xFFFFA94D)), listOf(Color(0xFFFFF3B0), Color(0xFFFFC93C)), { open(OpTab.DATA) }) {
             Image(painterResource(id = R.drawable.ic_dock_opening), contentDescription = null, modifier = Modifier.size(46.dp))
         }
-        FancyTile("Station Roster", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), listOf(Color(0xFFFFE4E6), Color(0xFFFB7185)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
+        FancyTile("Staff Attendance", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), listOf(Color(0xFFFFE4E6), Color(0xFFFB7185)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
         FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFF7EF0C1), Color(0xFF0F766E)), listOf(Color(0xFFCCFBF1), Color(0xFF2DD4BF)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
         PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), listOf(Color(0xFFE0F2FE), Color(0xFF38BDF8)), { open(OpTab.GPS) }) {
             Icon(Icons.Filled.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
@@ -551,7 +556,8 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, o
             demoStaff.forEachIndexed { i, (name, id) -> RosterCard(vm, i, name, id) }
         }
         // Report actions: WhatsApp (green gradient) | Copy (white).
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 1.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        // v1.79 (uska order): buttons thode neeche (pehle cards se chipke hue the).
+        Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
                 modifier = Modifier.weight(1f).height(48.dp).cssShadow(8.dp, RoundedCornerShape(13.dp), Color(0xFF128C7E).copy(alpha = 0.3f))
                     .background(cssLinear(135f, 0f to Color(0xFF20C981), 1f to Color(0xFF078B78)), RoundedCornerShape(13.dp))
@@ -675,8 +681,8 @@ private fun RosterCard(vm: OpeningViewModel, i: Int, name: String, id: String) {
                 ) { Text(name.first().toString(), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = avatarText) }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(name, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("ID $id", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFF5B6470))
+                    Text(name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("ID $id", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF5B6470))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Box {
@@ -719,13 +725,13 @@ private fun RosterCard(vm: OpeningViewModel, i: Int, name: String, id: String) {
                         .background(Color.White).border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(12.dp)).padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RosterStep("−", tint, Color.Black) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] - 10).coerceAtLeast(0) }
+                    RosterStep("−", tint, Color.Black) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] - 1).coerceAtLeast(0) }
                     Spacer(modifier = Modifier.width(6.dp))
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(String.format(Locale.US, "%02d:%02d", m / 60, m % 60), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1)
                     }
                     Spacer(modifier = Modifier.width(6.dp))
-                    RosterStep("+", null, Color.White, accent) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] + 10).coerceAtMost(24 * 60) }
+                    RosterStep("+", null, Color.White, accent) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] + 1).coerceAtMost(24 * 60) }
                 }
             }
         }

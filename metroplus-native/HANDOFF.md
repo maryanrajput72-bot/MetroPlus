@@ -1,4 +1,38 @@
-# Metro+ Native App — Handoff (v1.78 / versionCode 79) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.79 / versionCode 80) — DEBUG build (non-debuggable)
+
+## v1.79 change (31 Oct 2026) — Portal ek-line bar + nav reset + roster tweaks (uska order, DEBUG)
+- PORTAL: header ab EK pill line hai (halka neela #E3EEFD bg + blue
+  border): lock + link (darmiyan tak hi — weight spacer link ko aadhe
+  par rokta hai, lamba link bhi utna hi aayega) + dropdown + blue
+  three-dot button (safed dots). GCS Portal tab chip hata diya.
+  Dropdown click par header ke neeche Quick Fill ka EK card khulta hai
+  (Auto Fill, TOM A/B, TKM, ASKARI — AnimatedVisibility). Neeche sirf
+  browser wali jagah (preview card) bachi: QUICK FILL aur SAVED LOGIN
+  cards neeche se hata diye. Three-dot menu (tartib): Open Portal
+  Login (sheet), Settings (app Settings — naya onOpenSettings param,
+  MainActivity se go(SETTINGS)), Fill Today's Data (sheet), Reload,
+  Copy Link, Open in Browser. Login sheet + Fill sheet wahi hain.
+- NAV RESET (uska order + root cause): Opening ka tab Activity-scoped
+  OpeningViewModel me rehta tha, is liye dock switch ke baad bhi Staff
+  tab wapas aa jata tha. Ab dock OPENING tap aur Home-tile Opening par
+  openingReset++ hota hai; OpeningScreen LaunchedEffect par tab MENU
+  par reset karta hai. Back sequence (goBack, Camera se wapas) is se
+  mutasir nahi — wahan tab wahi rehta hai. Closing (remember state)
+  aur Portal (remember sheets) pehle hi composition chhodne par reset
+  ho jate the — un me change nahi.
+- ROSTER: stepper step 10 -> 1 minute (dono taraf, 0..1440); naam
+  15sp -> 16sp, ID 11sp -> 12sp (dono poori nazar aati hain, stacked
+  lines wahi); WhatsApp/Copy row top padding 1dp -> 12dp (neeche).
+  NAAM WAPAS: "Station Roster" -> "Staff Attendance" (menu tile, page
+  title, ExtraGuiScreens sheet) — uske naye order par. Section header
+  "Station Crew" wahi hai.
+- OPEN SAWAL (wahi): neeche wali jagah browser ke liye hai (preview
+  card); page andar load karna sirf WebView se hoga — uska sakht rule
+  — is liye abhi bhi browser me khulta hai. Wazeh "WebView laga do"
+  order par agle update me content area WebView hoga, header wahi.
+- GitHub APK RULE: is release me v1.79 upload + v1.77 delete (1.78 +
+  1.79 rahengi); manifest apkUrl = GitHub raw v1.79.
+- Verify: TODO build ke baad.
 
 ## v1.78 change (31 Oct 2026) — Roster COLORFUL + Portal browser header (uska order, DEBUG)
 - ROSTER COLORFUL (structure v1.77 wahi, sirf rang badle): page bg
@@ -25,7 +59,13 @@
   area WebView se badal denge, header wahi rahega.
 - GitHub APK RULE: is release me v1.78 upload + v1.76 delete (1.77 +
   1.78 rahengi); manifest apkUrl = GitHub raw v1.78.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~22:52 PKT): APK 12,561,079 bytes, SHA 9f0e1d3a;
+  cert apksigner se b13501ef MATCH; dex "Version 1.78" + "Station
+  Roster" + "GCS Portal" + "Copy Link", 1.77 gayab. GitHub code push
+  commit 29835f53; APK GitHub par (browser upload, commit 0388bb1,
+  size exact verify); v1.76 delete (commit 04e491c0; apk folder me
+  sirf 1.77 + 1.78 = latest 2); MANIFEST LIVE vc79 JSON verify —
+  apkUrl GitHub raw v1.78.
 
 ## v1.77 change (31 Oct 2026) — Station Roster RECREATE (uska order, DEBUG)
 - Gemini se ideas liye (gemini-3.5-flash; pehli call 503, 35s baad retry

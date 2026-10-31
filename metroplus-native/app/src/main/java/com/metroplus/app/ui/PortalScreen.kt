@@ -162,9 +162,11 @@ private fun PoQuickRow(color: Color, label: String, sub: String, onClick: () -> 
 }
 
 @Composable
-fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
+fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenSettings: () -> Unit = {}) {
     var showLogin by remember { mutableStateOf(false) }
     var showFill by remember { mutableStateOf(false) }
+    // v1.79: dropdown se khulne wala Quick Fill panel (header ke neeche).
+    var quickOpen by remember { mutableStateOf(false) }
     // Sheet khuli ho to Back pehle sheet band kare, phir page (History wala pattern).
     BackHandler { if (showLogin) showLogin = false else if (showFill) showFill = false else onBack() }
     val ctx = LocalContext.current
@@ -179,7 +181,6 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
     ) {
-        var tabMenuOpen by remember { mutableStateOf(false) }
         var dotMenuOpen by remember { mutableStateOf(false) }
         fun copyLink() {
             try {
@@ -189,57 +190,57 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             } catch (_: Exception) { }
         }
         Column(modifier = Modifier.fillMaxSize()) {
-            // v1.78 BROWSER header (uska order): sab se upar URL bar (link
-            // nazar aaye), uske neeche header row — left chhota link tab,
-            // right dropdown + three-dot, aur KUCH NAHI. Pehle wale header
-            // buttons (Fill/Key/Reload) menus me chale gaye. NOTE: page ko
-            // app ke andar load karna WebView mangta hai (uska sakht rule)
-            // — is liye link abhi bhi browser me khulta hai; andar wala
-            // page uske jawab ke baad lagayenge.
+            // v1.79 BROWSER bar (uska order, ek-ek cheez): EK hi line —
+            // lock + link (darmiyan tak hi, lamba link bhi utna hi aayega)
+            // + dropdown + three-dot. GCS Portal tab chip hata diya.
+            // Bar ka background halka neela, three-dot button portal blue.
+            // Dropdown = Quick Fill panel (neeche khulta hai); three-dot =
+            // Open Portal Login, Settings, Reload, Copy Link, Open in Browser.
+            // NOTE (wahi): page app ke andar load karna WebView mangta hai
+            // (uska sakht rule) — link abhi bhi browser me khulta hai.
             Column(modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.94f)).statusBarsPadding()) {
-                // URL bar (sab se upar): lock + poora link.
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)
-                        .clip(RoundedCornerShape(999.dp)).background(Color(0xFFF6F2F2))
-                        .border(1.dp, PoInk.copy(alpha = 0.08f), RoundedCornerShape(999.dp))
-                        .padding(horizontal = 12.dp, vertical = 9.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
+                        .clip(RoundedCornerShape(999.dp)).background(Color(0xFFE3EEFD))
+                        .border(1.dp, PoRed.copy(alpha = 0.15f), RoundedCornerShape(999.dp))
+                        .padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFF128C7E), modifier = Modifier.size(13.dp))
+                    Icon(Icons.Filled.Lock, contentDescription = null, tint = PoRed, modifier = Modifier.size(13.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(PORTAL_URL, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PoGray, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                }
-                // Header row: chhota link tab (left) + dropdown + three-dot (right).
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Color(0xFFF6F2F2))
-                            .border(1.dp, PoInk.copy(alpha = 0.08f), RoundedCornerShape(999.dp))
-                            .clickable { openBrowser() }.padding(horizontal = 12.dp, vertical = 7.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.Language, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("GCS Portal", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PoInk)
-                    }
+                    Text(PORTAL_URL, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PoInk, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                    // Link darmiyan tak: ye khaali jagah link ko aadhe par rokti hai.
                     Spacer(modifier = Modifier.weight(1f))
-                    Box {
-                        PoHeaderBtn({ Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Tabs", tint = PoInk, modifier = Modifier.size(18.dp)) }) { tabMenuOpen = true }
-                        DropdownMenu(expanded = tabMenuOpen, onDismissRequest = { tabMenuOpen = false }) {
-                            DropdownMenuItem(text = { Text("GCS Portal") }, onClick = { tabMenuOpen = false; openBrowser() })
-                            DropdownMenuItem(text = { Text("Fill Today's Data") }, onClick = { tabMenuOpen = false; showFill = true })
-                            DropdownMenuItem(text = { Text("Saved Login") }, onClick = { tabMenuOpen = false; showLogin = true })
-                        }
-                    }
+                    PoHeaderBtn({ Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Quick Fill", tint = PoRed, modifier = Modifier.size(18.dp)) }) { quickOpen = !quickOpen }
                     Spacer(modifier = Modifier.width(8.dp))
                     Box {
-                        PoHeaderBtn({ Icon(Icons.Filled.MoreVert, contentDescription = "More", tint = PoInk, modifier = Modifier.size(18.dp)) }) { dotMenuOpen = true }
+                        Box(
+                            modifier = Modifier.size(38.dp).clip(CircleShape).background(PoRed).clickable { dotMenuOpen = true },
+                            contentAlignment = Alignment.Center
+                        ) { Icon(Icons.Filled.MoreVert, contentDescription = "More", tint = Color.White, modifier = Modifier.size(18.dp)) }
                         DropdownMenu(expanded = dotMenuOpen, onDismissRequest = { dotMenuOpen = false }) {
+                            DropdownMenuItem(text = { Text("Open Portal Login") }, onClick = { dotMenuOpen = false; showLogin = true })
+                            DropdownMenuItem(text = { Text("Settings") }, onClick = { dotMenuOpen = false; onOpenSettings() })
+                            DropdownMenuItem(text = { Text("Fill Today's Data") }, onClick = { dotMenuOpen = false; showFill = true })
                             DropdownMenuItem(text = { Text("Reload") }, onClick = { dotMenuOpen = false; openBrowser() })
                             DropdownMenuItem(text = { Text("Copy Link") }, onClick = { dotMenuOpen = false; copyLink() })
                             DropdownMenuItem(text = { Text("Open in Browser") }, onClick = { dotMenuOpen = false; openBrowser() })
+                        }
+                    }
+                }
+                // Dropdown panel: Quick Fill ka sara kuch EK card me (header ke neeche).
+                androidx.compose.animation.AnimatedVisibility(visible = quickOpen) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp)) {
+                        PoCard("QUICK FILL") {
+                            PoQuickRow(Color(0xFF22C55E), "Auto Fill", "Fill saved login") { onGuiNote("Portal Auto Fill") }
+                            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
+                            PoQuickRow(Color(0xFFF97316), "TOM A", "Fill data") { onGuiNote("Portal Fill TOM A") }
+                            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
+                            PoQuickRow(Color(0xFF3B82F6), "TOM B", "Fill data") { onGuiNote("Portal Fill TOM B") }
+                            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
+                            PoQuickRow(BrandRedDark, "TKM", "Fill card sale") { onGuiNote("Portal Fill TKM") }
+                            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
+                            PoQuickRow(Color(0xFF0EA5E9), "ASKARI", "Fill voucher") { onGuiNote("Portal Fill ASKARI") }
                         }
                     }
                 }
@@ -310,35 +311,9 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         }
                     }
                 }
-                // 63 ka FAB menu, card ki shakal me: Quick Fill actions.
-                PoCard("QUICK FILL") {
-                    PoQuickRow(Color(0xFF22C55E), "Auto Fill", "Fill saved login") { onGuiNote("Portal Auto Fill") }
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                    PoQuickRow(Color(0xFFF97316), "TOM A", "Fill data") { onGuiNote("Portal Fill TOM A") }
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                    PoQuickRow(Color(0xFF3B82F6), "TOM B", "Fill data") { onGuiNote("Portal Fill TOM B") }
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                    PoQuickRow(BrandRedDark, "TKM", "Fill card sale") { onGuiNote("Portal Fill TKM") }
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                    PoQuickRow(Color(0xFF0EA5E9), "ASKARI", "Fill voucher") { onGuiNote("Portal Fill ASKARI") }
-                }
-                // Saved Login ka khulasa (poori sheet Key button se khulti hai).
-                PoCard("SAVED LOGIN") {
-                    Text("Portal Gmail, Username and Password are saved only on this device — open the sheet with the Key button to save or copy.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Box(
-                        modifier = Modifier.fillMaxWidth().height(46.dp).clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFF6F2F2)).border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
-                            .clickable { showLogin = true },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.Key, contentDescription = null, tint = PoRed, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Open Portal Login", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PoInk)
-                        }
-                    }
-                }
+                // v1.79: neeche sirf browser wali jagah (preview card) bachi
+                // hai — Quick Fill dropdown panel me hai, Open Portal Login
+                // three-dot menu me hai (neeche wale cards hata diye).
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }

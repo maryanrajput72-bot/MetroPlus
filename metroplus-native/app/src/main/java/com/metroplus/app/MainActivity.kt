@@ -289,6 +289,12 @@ fun MetroPlusApp() {
     val scope = rememberCoroutineScope()
     var activeNav by remember { mutableStateOf(NavTab.HOME) }
     var screen by remember { mutableStateOf(AppScreen.HOME) }
+    // v1.79 (uska order): dock/home se section khule to uska HOME aaye,
+    // pichhla sub-page nahi (Opening ka tab ViewModel me rehta tha is liye
+    // Staff tab wapas aa jata tha). Har dock/tile entry par counter badhta
+    // hai; OpeningScreen us par tab MENU par reset karta hai. Back sequence
+    // (goBack) is se mutasir nahi — wahan tab wahi rehta hai.
+    var openingReset by remember { mutableStateOf(0) }
     // v1.64 swipe-back state — yahan upar taake neeche LaunchedEffect bhi use kar sake.
     var swipeOffsetX by remember { mutableStateOf(0f) }
     var swipeClosing by remember { mutableStateOf(false) }
@@ -390,7 +396,7 @@ fun MetroPlusApp() {
                 onChatClick = { screen = AppScreen.GROUP_CHAT },
                 onFeatureClick = {
                     if (it == "Money Calc" || it == "Money Calculator") screen = AppScreen.MONEY
-                    else if (it == "Opening") { activeNav = NavTab.OPENING; screen = AppScreen.OPENING }
+                    else if (it == "Opening") { activeNav = NavTab.OPENING; openingReset++; screen = AppScreen.OPENING }
                     else if (it == "Closing") { activeNav = NavTab.CLOSING; screen = AppScreen.CLOSING }
                     else if (it == "GPS Camera") { cameraFrom = AppScreen.HOME; screen = AppScreen.CAMERA }
                     else if (it == "Settings") { activeNav = NavTab.SETTINGS; screen = AppScreen.SETTINGS }
@@ -505,7 +511,7 @@ fun MetroPlusApp() {
                 Box(modifier = Modifier.fillMaxSize().background(HomeBackground)) {
                 when (page) {
                     AppScreen.MONEY -> MoneyCalculatorScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
-                    AppScreen.OPENING -> OpeningScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; go(AppScreen.CAMERA) }, onOpenViewer = { go(AppScreen.PHOTO_VIEWER) })
+                    AppScreen.OPENING -> OpeningScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; go(AppScreen.CAMERA) }, onOpenViewer = { go(AppScreen.PHOTO_VIEWER) }, resetSignal = openingReset)
                     AppScreen.CLOSING -> ClosingScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.CAMERA -> GpsCameraScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.SETTINGS -> SettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenPage = {
@@ -530,7 +536,7 @@ fun MetroPlusApp() {
                     AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { goBack() })
                     AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenLogin = { go(AppScreen.TL_LOCK) })
-                    AppScreen.PORTAL -> PortalScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.PORTAL -> PortalScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenSettings = { go(AppScreen.SETTINGS) })
                     AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { goBack() })
                     AppScreen.TL_LOCK -> TlLockScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.CHAT_SETTINGS -> ChatSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenWaFormat = { go(AppScreen.WA_FORMAT) })
@@ -566,7 +572,7 @@ fun MetroPlusApp() {
                     navBack = false
                     when (tab) {
                         NavTab.HOME -> screen = AppScreen.HOME
-                        NavTab.OPENING -> screen = AppScreen.OPENING
+                        NavTab.OPENING -> { openingReset++; screen = AppScreen.OPENING }
                         NavTab.CLOSING -> screen = AppScreen.CLOSING
                         NavTab.PORTAL -> screen = AppScreen.PORTAL
                         // SETTINGS dock se hat gaya hai — drawer/Home se aaye to
@@ -798,7 +804,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.78", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.79", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
