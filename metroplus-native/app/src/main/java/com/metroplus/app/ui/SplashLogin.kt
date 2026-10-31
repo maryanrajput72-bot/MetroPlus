@@ -83,7 +83,7 @@ import com.metroplus.app.R
 // pages — SIRF GUI (asli login/Firebase baad me). Login drawer/Settings ke
 // "Log Out" se khulta hai, Sign Up Login ke neeche wale link se.
 
-const val SPLASH_MS = 5000
+const val SPLASH_MS = 6500
 
 private val SpLines = listOf(
     "Preparing your shift dashboard…",

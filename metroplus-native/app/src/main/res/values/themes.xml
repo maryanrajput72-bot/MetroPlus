@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Window theme only; the visible theme is defined in Compose (Theme.kt). -->
+    <!-- v1.70 (uska order): app khulte hi koi SAFED screen + logo nahi — sirf
+         RED. windowBackground safed tha is liye cold open par system splash
+         safed + launcher icon dikhta tha. Ab background red hai aur system
+         splash ka icon bhi solid red hai (red par red = nazar nahi aata),
+         taake shuru se aakhir tak sirf red dikhe. -->
     <style name="Theme.MetroPlus" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">#B02A31</item>
+        <item name="android:windowSplashScreenBackground">#B02A31</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_red</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#B02A31</item>
     </style>
 </resources>

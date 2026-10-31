@@ -1,4 +1,25 @@
-# Metro+ Native App — Handoff (v1.69 / versionCode 70) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.70 / versionCode 71) — DEBUG build (non-debuggable)
+
+## v1.70 change (31 Oct 2026) — icon M yellow + drawer reset + splash 6.5s, no white (uska order, DEBUG)
+- Icon: M ka rang YELLOW kar diya (dark + light yellow) — HSV hue shift
+  (S,V wahi, is liye 3D shading/gloss wahi raha; halka gloss safed hi
+  raha). Background red-black gradient: badge wahi original (dark red),
+  crop ke baad corners red-black vertical gradient (#4A0D16 → #120507)
+  par composite — poora opaque, full-bleed (v1.69 wale sabak barkarar).
+  Gold fringe + glow wahi. logo_hd NAHI chheda (sirf mipmap icons).
+  Backup: icon-backup-v169/ (project root).
+- Drawer: band hote hi scroll TOP par reset — ProfileDrawer ka scroll
+  state hoist kiya (drawerScroll), MetroPlusApp me drawerState.currentValue
+  par LaunchedEffect: Closed hote hi drawerReset++ aur ProfileDrawer me
+  scrollTo(0). Dobara khulne par profile upar se poori nazar aayegi;
+  swipe se upar karna ab bhi usi waqt hoga jab user khud swipe kare.
+- Splash: SPLASH_MS 5000 → 6500 (takreeban 6-7 second). White flash ki
+  wajah: themes.xml me windowBackground SAFED tha + system splash
+  (Android 12+) launcher icon safed par dikhata tha. Fix: windowBackground
+  #B02A31, windowSplashScreenBackground #B02A31, animatedIcon =
+  splash_red.xml (solid red — red par red = nazar nahi aata),
+  iconBackgroundColor #B02A31. Ab cold open se intro tak sirf red.
+- Verify: TODO build ke baad (APK icon bytes + cert + dex).
 
 ## v1.69 change (31 Oct 2026) — icon dobara: full-bleed + opaque + wazeh yellow (uska order, DEBUG)
 - Uska verdict v1.68 par: koi color change nazar nahi aaya, icon aur
@@ -17,7 +38,12 @@
   dikhta hai, koi safed nahi. (4) Round icons wahi opaque master ka
   circular mask (round ke liye transparent corners normal hain).
 - Purane v1.68 icons ka backup: icon-backup-v168/ (project root).
-- Verify: TODO build ke baad (APK icon bytes + cert + dex).
+- Verify (build 18:23 PKT): APK 12,535,199 bytes, SHA 4a451ff1…, cert
+  b13501ef EXACT match, dex me "Version 1.69", naya icon APK me
+  byte-identical (res/o-.png), disk icon alpha sirf 255 (poora opaque).
+- GitHub code head: d637592e (HANDOFF, build.gradle, UpdateCheck,
+  MainActivity — icons binary, push nahi hui). Manifest LIVE: vc70/1.69
+  JSON, commit e265d815, get_file_contents se verify.
 
 ## v1.68 change (31 Oct 2026) — launcher icon: red-yellow gradient + yellow glow (uska order, DEBUG)
 - Shikayat: phone par app ka icon blur type lagta tha, jabke splash/main

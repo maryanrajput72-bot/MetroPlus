@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v1.70: system splash screen ke liye solid red icon — red background par
+     red icon nazar nahi aata, is liye cold open par sirf red screen dikhti
+     hai, koi logo nahi. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#B02A31" />
+</shape>

@@ -213,7 +213,7 @@ fun MetroPlusApp() {
     var showConfetti by remember { mutableStateOf(false) }
     // v1.62: splash GUI — cold open pe 1.5s, phir Home (sirf GUI, koi login nahi).
     var showSplash by remember { mutableStateOf(true) }
-    // v1.66: intro ab 5 second (uska order) — progress bar + badalti lines SplashScreen me.
+    // v1.70: intro ab 6.5 second (uska order: takreeban 6-7 second) — progress bar + badalti lines SplashScreen me.
     LaunchedEffect(Unit) { kotlinx.coroutines.delay(SPLASH_MS.toLong()); showSplash = false }
     fun startDownload(apkUrl: String) {
         // Double download se bacho (do check ek sath mile to bhi ek hi download).
@@ -271,6 +271,13 @@ fun MetroPlusApp() {
         }
     }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    // v1.70 (uska order): drawer band hote hi uska scroll TOP par wapas —
+    // dobara khulne par profile upar se poori nazar aaye, na ke usi jagah
+    // se jahan chhoda tha. Drawer band hone par counter barhta hai.
+    var drawerReset by remember { mutableStateOf(0) }
+    LaunchedEffect(drawerState.currentValue) {
+        if (drawerState.currentValue == DrawerValue.Closed) drawerReset++
+    }
     val scope = rememberCoroutineScope()
     var activeNav by remember { mutableStateOf(NavTab.HOME) }
     var screen by remember { mutableStateOf(AppScreen.HOME) }
@@ -351,6 +358,7 @@ fun MetroPlusApp() {
                 drawerShape = RoundedCornerShape(0.dp)
             ) {
                 ProfileDrawer(
+                    drawerReset = drawerReset,
                     onClose = { closeDrawer() },
                     onEdit = { closeDrawer(); screen = AppScreen.EDIT_PROFILE },
                     onMenu = { name ->
@@ -666,6 +674,7 @@ private fun BottomNavItem(icon: DockIcon, label: String, selected: Boolean, onCl
 // Width 80% (na half, na full); ModalNavigationDrawer ka swipe finger ke sath chalta hai.
 @Composable
 private fun ProfileDrawer(
+    drawerReset: Int = 0,
     onClose: () -> Unit,
     onEdit: () -> Unit,
     onMenu: (String) -> Unit,
@@ -674,7 +683,10 @@ private fun ProfileDrawer(
 ) {
     var myAccountExpanded by remember { mutableStateOf(false) }
     val ink = Color(0xFF14181C)
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF6F0F0)).verticalScroll(rememberScrollState())) {
+    // v1.70: drawer ka scroll state yahan hoist — band hone par top par reset.
+    val drawerScroll = rememberScrollState()
+    LaunchedEffect(drawerReset) { if (drawerReset > 0) drawerScroll.scrollTo(0) }
+    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF6F0F0)).verticalScroll(drawerScroll)) {
         // Header: kala \u2192 gehra laal \u2192 laal \u2192 gulabi diagonal gradient, chamak ke gole + do lakeer-gole.
         Box(modifier = Modifier.fillMaxWidth()) {
             Box(
@@ -778,7 +790,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.69", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.70", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
