@@ -573,7 +573,7 @@ private fun MapCard(name: String, selected: Boolean, colors: List<Color>, modifi
 // ---------------- Tl/Rp access setting ----------------
 
 @Composable
-fun TlRpSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
+fun TlRpSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenLogin: () -> Unit = {}) {
     BackHandler { onBack() }
     var gmail by pageState("tlrp_gmail", "")
     var password by pageState("tlrp_password", "")
@@ -609,7 +609,10 @@ fun TlRpSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 Spacer(modifier = Modifier.height(10.dp))
                 DpField("Password", Icons.Filled.Lock, password, { password = it }, "TL password", purple, password = true)
                 Spacer(modifier = Modifier.height(14.dp))
-                DpBigButton("Login", Icons.Filled.Check, TlGrad) { onGuiNote("TL Login") }
+                // v1.71 (uska order): drawer se aane wala TL LOGIN bhi WAHI lock
+                // screen kholega jo Settings ki "TL / RP Login" row kholti hai —
+                // dono jagah ek hi screen, sirf note nahi.
+                DpBigButton("Login", Icons.Filled.Check, TlGrad) { onOpenLogin() }
             }
             DpSection("ROLE ACCESS", Icons.Filled.SupervisorAccount, Color(0xFF3A7BEF)) {
                 RoleRow(Icons.Filled.Person, Color(0xFF3A7BEF), "Operator", "Only GPS Camera + Calculator", listOf("GPS", "Calc"))

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
@@ -47,7 +48,10 @@ import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -98,6 +102,11 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenPage: 
     var dark by vm.darkMode
     var push by vm.pushNotifications
     var sound by vm.sounds
+    // v1.71: supervisor naam (63 wala card) — pageState taake page band
+    // karke dobara kholo to naam wahi rahe.
+    var supName by pageState("supervisor_name", "")
+    var showSupDialog by remember { mutableStateOf(false) }
+    var supInput by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxSize().background(SetBg).verticalScroll(rememberScrollState())) {
         // Hero: indigo → jamni → gulabi, chamak ke gole, back + done, title + sub,
@@ -145,11 +154,11 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenPage: 
 
             GroupTitle("ACCOUNT", Color(0xFF0D9488))
             SetList(Color(0xFF0D9488)) {
-                SetRow(Icons.Filled.Badge, Color(0xFF0D9488), "Supervisor Name", "Not set", divider = true,
-                    onClick = { onGuiNote("Supervisor Name") }) {
+                SetRow(Icons.Filled.Badge, Color(0xFF0D9488), "Supervisor Name", supName.ifEmpty { "Not set" }, divider = true,
+                    onClick = { supInput = supName; showSupDialog = true }) {
                     Box(
                         modifier = Modifier.size(34.dp).clip(CircleShape)
-                            .background(Brush.linearGradient(listOf(Color(0xFFFFD166), Color(0xFFFF6B8B)))).clickable { onGuiNote("Supervisor Name") },
+                            .background(Brush.linearGradient(listOf(Color(0xFFFFD166), Color(0xFFFF6B8B)))).clickable { supInput = supName; showSupDialog = true },
                         contentAlignment = Alignment.Center
                     ) { Icon(Icons.Filled.Edit, contentDescription = "Edit", tint = Color.White, modifier = Modifier.size(15.dp)) }
                 }
@@ -212,6 +221,54 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenPage: 
                 Text("Logout from Metro Plus app", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             }
             Spacer(modifier = Modifier.height(20.dp))
+        }
+    }
+    // v1.71 (uska order): 63 wala chhota supervisor card — pencil par khulta
+    // hai, naam likh kar Save karo to row me aa jata hai. 63 se pyara UI:
+    // safed gol card, teal tile + band karne ka gola, gol text field.
+    if (showSupDialog) {
+        Dialog(onDismissRequest = { showSupDialog = false }) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .cssShadow(16.dp, RoundedCornerShape(24.dp), Color(0xFF3C1419).copy(alpha = 0.25f))
+                    .background(Color.White, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp))
+                    .padding(20.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon3DTile(Icons.Filled.Badge, Color(0xFF0D9488))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("Supervisor Name", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = SetInk, modifier = Modifier.weight(1f))
+                    Box(modifier = Modifier.size(30.dp).background(SetAccent.copy(alpha = 0.08f), CircleShape).clickable { showSupDialog = false }, contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.Close, contentDescription = "Close", tint = SetAccent, modifier = Modifier.size(17.dp))
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Apne supervisor ka naam likhein — ye Settings me nazar aayega.", fontSize = 13.sp, color = SetMuted, lineHeight = 18.sp)
+                Spacer(modifier = Modifier.height(14.dp))
+                OutlinedTextField(
+                    value = supInput, onValueChange = { supInput = it }, singleLine = true,
+                    placeholder = { Text("Supervisor ka naam", color = SetMuted) },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = TextFieldDefaults.colors(focusedContainerColor = Color(0xFFF8F7FC), unfocusedContainerColor = Color(0xFFF8F7FC), focusedIndicatorColor = Color(0xFF0D9488), unfocusedIndicatorColor = Color(0xFFE4DEDE)),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(
+                        modifier = Modifier.weight(1f).height(48.dp)
+                            .cssShadow(8.dp, RoundedCornerShape(14.dp), Color(0xFF0D9488).copy(alpha = 0.35f)).clip(RoundedCornerShape(14.dp))
+                            .background(cssLinear(120f, 0f to Color(0xFF2DD4BF), 1f to Color(0xFF0D9488)))
+                            .clickable { supName = supInput.trim(); showSupDialog = false },
+                        contentAlignment = Alignment.Center
+                    ) { Text("Save", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                    Box(
+                        modifier = Modifier.height(48.dp).clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF1EEF6)).clickable { showSupDialog = false }
+                            .padding(horizontal = 20.dp),
+                        contentAlignment = Alignment.Center
+                    ) { Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = SetInk) }
+                }
+            }
         }
     }
 }

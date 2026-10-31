@@ -147,10 +147,8 @@ private data class MiniCard(
 private val GpsBlue = Color(0xFF0891B2)
 
 // v1.60 (uska order "colors pyare karo"): v1.58 ke halke ek-rang dabbe phike lagte
-// the. Ab har section ka 3-rang (hue badalta) gradient — halka → beech → gehra:
-// Money peela→narangi, Tom aadoo→coral→gulabi, GPS aqua→neela, Complaints
-// lavender→jamni→gulabi, Portal neela→indigo, Opening sunehra→narangi, Closing
-// lavender→jamni. Banners sab se halke, minis sab se rangeen, hubs beech me.
+// the. Ab har section ka 3-rang (hue badalta) gradient — halka → beech → gehra.
+// Banners ab bhi 3-rang (vivid) — minis + hubs v1.71 se 2-rang (pretty2, neeche).
 private fun vivid(c: Color): Triple<Color, Color, Color> = when (c) {
     Section.Money -> Triple(Color(0xFFFFF1A8), Color(0xFFFFC94D), Color(0xFFFF8F3D))
     Section.Tom -> Triple(Color(0xFFFFE0CF), Color(0xFFFF9A76), Color(0xFFFF5F86))
@@ -162,8 +160,23 @@ private fun vivid(c: Color): Triple<Color, Color, Color> = when (c) {
     else -> Triple(c.lighter(0.85f), c.lighter(0.5f), c)
 }
 private fun bannerStops(c: Color) = vivid(c).let { (l, m, d) -> arrayOf(0f to l.lighter(0.55f), 0.6f to l, 1f to m.lighter(0.25f)) }
-private fun miniStops(c: Color) = vivid(c).let { (l, m, d) -> arrayOf(0f to l, 0.55f to m, 1f to d) }
-private fun hubStops(c: Color) = vivid(c).let { (l, m, d) -> arrayOf(0f to l.lighter(0.4f), 0.6f to l, 1f to m.lighter(0.1f)) }
+// v1.71 (uska order): minis + hubs ab SIRF 2-rang gradient — 3-rang "three in
+// one" khatam. Halka → darmiyana, taake kaali likhai parhi jaye.
+// Money = yellow, Complaints = purple (uske bataye), GPS = teal, Tom = rose
+// (meri pasand, family se suit karte), hubs: Opening sabz, Closing indigo,
+// Portal sky.
+private fun pretty2(c: Color): Pair<Color, Color> = when (c) {
+    Section.Money -> Color(0xFFFFF3B0) to Color(0xFFFFC93C)
+    Section.Complaints -> Color(0xFFE9D5FF) to Color(0xFFA855F7)
+    GpsBlue -> Color(0xFFCCFBF1) to Color(0xFF2DD4BF)
+    Section.Tom -> Color(0xFFFFE4E6) to Color(0xFFFB7185)
+    Section.Opening -> Color(0xFFDCFCE7) to Color(0xFF4ADE80)
+    Section.Closing -> Color(0xFFE0E7FF) to Color(0xFF818CF8)
+    Section.Portal -> Color(0xFFE0F2FE) to Color(0xFF38BDF8)
+    else -> c.lighter(0.85f) to c
+}
+private fun miniStops(c: Color) = pretty2(c).let { (l, d) -> arrayOf(0f to l, 1f to d) }
+private fun hubStops(c: Color) = pretty2(c).let { (l, d) -> arrayOf(0f to l, 1f to d) }
 private data class Hub(
     val tag: String, val tagColor: Color, val title: String, val sub: String,
     val iconRes: Int, val stops: Array<Pair<Float, Color>>
@@ -220,10 +233,10 @@ fun HomeScreen(
     // har tile apne section rang se — chaaron ek parivar jaise.
     val minis = remember {
         listOf(
-            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, miniStops(GpsBlue), GpsBlue.copy(alpha = 0.25f), GpsBlue),
+            MiniCard("PHOTOS & MAP", "GPS Camera", "Tap to open camera", "gps camera map location", R.drawable.img_gps, miniStops(GpsBlue), Color(0xFF0D9488).copy(alpha = 0.25f), Color(0xFF0D9488)),
             MiniCard("FARES & FINANCE", "Money Calc", "Tap to calculate", "money calc fares finance cash", R.drawable.img_money, miniStops(Section.Money), Section.Money.copy(alpha = 0.25f), Section.Money),
             MiniCard("REPORTS", "Complaints", "Tap to open complaints", "complaints tom agm tkm reports", R.drawable.img_complaint, miniStops(Section.Complaints), Section.Complaints.copy(alpha = 0.25f), Section.Complaints),
-            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, miniStops(Section.Tom), Section.Tom.copy(alpha = 0.25f), Section.Tom)
+            MiniCard("DAILY REGISTER", "Tom Data", "Tap to open register", "tom data register sales", R.drawable.img_tom, miniStops(Section.Tom), Color(0xFFE11D48).copy(alpha = 0.25f), Color(0xFFE11D48))
         )
     }
     val hubs = remember {
@@ -231,9 +244,9 @@ fun HomeScreen(
             // Settings hub khatam (uska order) — sirf pehle 3 hubs rahenge.
             // Baaki 3 ke colors waazeh dark (halka step nazar nahi aata tha).
             // v1.57: tag + arrow tile us section ke rang me.
-            Hub("START SHIFT", Section.Opening, "Opening", "Opening data, staff & GPS", R.drawable.ic_dock_opening, hubStops(Section.Opening)),
-            Hub("END SHIFT", Section.Closing, "Closing", "End-of-shift reports", R.drawable.ic_dock_closing, hubStops(Section.Closing)),
-            Hub("ONLINE", Section.Portal, "Online Portal", "Central online portal", R.drawable.ic_dock_portal, hubStops(Section.Portal))
+            Hub("START SHIFT", Color(0xFF16A34A), "Opening", "Opening data, staff & GPS", R.drawable.ic_dock_opening, hubStops(Section.Opening)),
+            Hub("END SHIFT", Color(0xFF4F46E5), "Closing", "End-of-shift reports", R.drawable.ic_dock_closing, hubStops(Section.Closing)),
+            Hub("ONLINE", Color(0xFF0284C7), "Online Portal", "Central online portal", R.drawable.ic_dock_portal, hubStops(Section.Portal))
         )
     }
     val pagerState = rememberPagerState(pageCount = { banners.size })

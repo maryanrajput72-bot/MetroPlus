@@ -1,4 +1,27 @@
-# Metro+ Native App — Handoff (v1.70 / versionCode 71) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.71 / versionCode 72) — DEBUG build (non-debuggable)
+
+## v1.71 change (31 Oct 2026) — supervisor card + TL login ek + 2-rang cards (uska order, DEBUG)
+- Supervisor: Settings ACCOUNT me "Supervisor Name" row + pencil ab chhota
+  pyara popup card kholte hain (63 ka tlNameModal, usse behtar UI: safed
+  gol card, teal tile, gol text field, teal Save + Cancel). Naam Save karo
+  to row me aa jata hai; pageState("supervisor_name") is liye page band
+  karke dobara kholo to naam wahi rahega. 63 me do tareeqe the (inline
+  input + modal) — native me sirf modal card.
+- TL/RP Login ek: drawer se Tl/Rp access setting me "TL LOGIN" ka Login
+  button pehle sirf note dikhata tha; ab WAHI TlLockScreen kholta hai jo
+  Settings ki "TL / RP Login" row kholti hai (5-digit PIN lock). Dono
+  jagah ek hi screen. (Settings wali row pehle se TL_LOCK par thi.)
+- More with Metro (4 minis) + Hubs ab SIRF 2-rang gradient (3-rang "three
+  in one" khatam, pretty2()): Money yellow #FFF3B0→#FFC93C, Complaints
+  purple #E9D5FF→#A855F7 (uske bataye), GPS teal #CCFBF1→#2DD4BF, Tom
+  rose #FFE4E6→#FB7185 (meri pasand); hubs Opening sabz #DCFCE7→#4ADE80,
+  Closing indigo #E0E7FF→#818CF8, Portal sky #E0F2FE→#38BDF8. Halka →
+  darmiyana taake kaali likhai parhi jaye. Banners wahi 3-rang (vivid).
+  Minis ke accent/shadow + hubs ke tag rang naye gradients se milaye.
+- OPEN: uska "create new" wala jumla poora samajh nahi aaya (usne kaha wo
+  aur check karke batayega) — is liye us par kuch nahi banaya; uske
+  agle message ka intezar hai.
+- Verify: TODO build ke baad.
 
 ## v1.70 change (31 Oct 2026) — icon M yellow + drawer reset + splash 6.5s, no white (uska order, DEBUG)
 - Icon: M ka rang YELLOW kar diya (dark + light yellow) — HSV hue shift
@@ -19,7 +42,12 @@
   #B02A31, windowSplashScreenBackground #B02A31, animatedIcon =
   splash_red.xml (solid red — red par red = nazar nahi aata),
   iconBackgroundColor #B02A31. Ab cold open se intro tak sirf red.
-- Verify: TODO build ke baad (APK icon bytes + cert + dex).
+- Verify (2026-10-31 ~18:52 PKT): APK 12,536,683 bytes, SHA 88b53eef;
+  cert apksigner se b13501ef MATCH (Python v2 parse ne ghalat hash diya
+  tha — aage se apksigner use karo: build-tools/34.0.0/apksigner + JDK17);
+  dex "Version 1.70", naya icon APK me byte-identical (res/o-.png).
+  GitHub code head bc2865f2, MANIFEST LIVE vc71 JSON commit e8005667
+  (blob e2ecf864, RAW JSON verify). Updater se update aani chahiye.
 
 ## v1.69 change (31 Oct 2026) — icon dobara: full-bleed + opaque + wazeh yellow (uska order, DEBUG)
 - Uska verdict v1.68 par: koi color change nazar nahi aaya, icon aur

@@ -521,7 +521,7 @@ fun MetroPlusApp() {
                     AppScreen.EDIT_PROFILE -> EditProfileScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { goBack() })
                     AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
-                    AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
+                    AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { goBack() }, onGuiNote = { notYet(it) }, onOpenLogin = { go(AppScreen.TL_LOCK) })
                     AppScreen.PORTAL -> PortalScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
                     AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { goBack() })
                     AppScreen.TL_LOCK -> TlLockScreen(onBack = { goBack() }, onGuiNote = { notYet(it) })
@@ -790,7 +790,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.70", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.71", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
