@@ -1,4 +1,23 @@
-# Metro+ Native App — Handoff (v1.68 / versionCode 69) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.69 / versionCode 70) — DEBUG build (non-debuggable)
+
+## v1.69 change (31 Oct 2026) — icon dobara: full-bleed + opaque + wazeh yellow (uska order, DEBUG)
+- Uska verdict v1.68 par: koi color change nazar nahi aaya, icon aur
+  chhota lag raha hai, background white ho gaya hai. Wajah samjhi: v1.68
+  ka gold halo safed background par nazar hi nahi aata (gold on white =
+  white) is liye badge ka kinara ghum ho gaya aur badge chhota + background
+  safed laga; M ka golden top bhi halka tha (0.42 mix) is liye change
+  nazar nahi aaya. (Purana icon bhi transparent tha — farq sirf halo ka
+  rang tha: black fringe safed par dikhta tha, gold nahi.)
+- Fix: (1) M gradient BOLD — 0.65 mix upar, dheere khatam, taake chhoti
+  nazar me bhi gold-red farq saaf dikhe. (2) Badge ko frame bhar me
+  crop kiya (bbox + 2% padding, 512 resize) taake bara lage. (3) Poora
+  canvas solid dark red (#5E0B16) par composite kiya — alpha sirf 255,
+  ZERO transparency: ab koi launcher/chat background (safed ya kuch bhi)
+  kabhi nahi dikhega. White-bg simulation par bhi check kiya: icon wahi
+  dikhta hai, koi safed nahi. (4) Round icons wahi opaque master ka
+  circular mask (round ke liye transparent corners normal hain).
+- Purane v1.68 icons ka backup: icon-backup-v168/ (project root).
+- Verify: TODO build ke baad (APK icon bytes + cert + dex).
 
 ## v1.68 change (31 Oct 2026) — launcher icon: red-yellow gradient + yellow glow (uska order, DEBUG)
 - Shikayat: phone par app ka icon blur type lagta tha, jabke splash/main
@@ -21,7 +40,13 @@
 - NOTE: mipmap PNGs binary hain — GitHub text-only push me NAHI jati
   (pehle wali binaries ki tarah); naye icons workspace + APK me hain.
   Agli zip sync me res/mipmap-* zaroor shamil karna.
-- Verify: TODO build ke baad (APK ke andar mipmap-xxxhdpi hash + cert + dex).
+- Verify (build 18:12 PKT): APK 12,537,063 bytes, SHA 1656a1a1…, cert
+  b13501ef EXACT match, dex me "Version 1.68". APK ke res naam obfuscate
+  hain (aapt2) — naya icon byte-identical mila: res/o-.png (square) aur
+  res/Gc.png (round) = nayi mipmap-xxxhdpi files.
+- GitHub code head: fc55b68f (HANDOFF, build.gradle, UpdateCheck,
+  MainActivity — icons binary hain is liye push nahi hui). Manifest LIVE:
+  vc69/1.68 JSON, commit 22eb6296, get_file_contents se verify.
 
 ## v1.67 change (31 Oct 2026) — Login/SignUp form update (uska order, DEBUG)
 - Login: Employee ID/Gmail field + Password field hata diye. Ab do fields:
