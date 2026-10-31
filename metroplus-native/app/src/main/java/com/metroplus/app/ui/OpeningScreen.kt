@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -215,12 +216,14 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
                 Text("${demoShift()} shift · $heroDate", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
         }
-        PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF1C2), Color(0xFFFFA94D)), { open(OpTab.DATA) }) {
+        // v1.74 (uska order): menu cards ab hub style — poora 2-rang
+        // gradient background + safed border (pehle safed card + halki tint).
+        PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF1C2), Color(0xFFFFA94D)), listOf(Color(0xFFFFF3B0), Color(0xFFFFC93C)), { open(OpTab.DATA) }) {
             Image(painterResource(id = R.drawable.ic_dock_opening), contentDescription = null, modifier = Modifier.size(46.dp))
         }
-        FancyTile("Staff Attendance", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
-        FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFF7EF0C1), Color(0xFF0F766E)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
-        PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), { open(OpTab.GPS) }) {
+        FancyTile("Staff Attendance", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), listOf(Color(0xFFFFE4E6), Color(0xFFFB7185)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
+        FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFF7EF0C1), Color(0xFF0F766E)), listOf(Color(0xFFCCFBF1), Color(0xFF2DD4BF)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
+        PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), listOf(Color(0xFFE0F2FE), Color(0xFF38BDF8)), { open(OpTab.GPS) }) {
             Icon(Icons.Filled.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
         }
     }
@@ -229,13 +232,13 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
 // Opening Data / GPS tile: white, kona 22, padding 14, 58dp gradient icon, 16sp title, 32dp grey arrow,
 // height FIXED 86dp (trial .op-tile jaisi — har font size pe chaaron tiles barabar).
 @Composable
-private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: () -> Unit, icon: @Composable () -> Unit) {
+private fun PlainTile(title: String, sub: String, iconBg: List<Color>, bg: List<Color>, onClick: () -> Unit, icon: @Composable () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        // v1.61: safed ki jagah icon ke rang ka halka gradient + rangeen saya; arrow 3D tile.
+        // v1.74: hub style — poora 2-rang gradient + safed border.
         modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(8.dp, shape, iconBg.last().copy(alpha = 0.18f)).clip(shape)
-            .background(Brush.horizontalGradient(listOf(iconBg.last().lighter(0.9f), Color.White)))
-            .border(1.dp, iconBg.last().copy(alpha = 0.16f), shape).clickable { onClick() }
+            .background(cssLinear(120f, 0f to bg[0], 1f to bg[1]))
+            .border(1.dp, Color.White.copy(alpha = 0.7f), shape).clickable { onClick() }
     ) {
         Watermark(132.dp, x = 232.dp, y = (-22).dp, alpha = 0.075f)
         Row(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -253,12 +256,13 @@ private fun PlainTile(title: String, sub: String, iconBg: List<Color>, onClick: 
 // Staff / Leave tile: trial .op-tile jaisa — white, kona 22, padding 14, 3D image tile,
 // 18sp heavy title, 38dp white arrow, height FIXED 86dp (har font size pe barabar).
 @Composable
-private fun FancyTile(title: String, sub: String, iconBg: List<Color>, image: Int, onClick: () -> Unit) {
+private fun FancyTile(title: String, sub: String, iconBg: List<Color>, bg: List<Color>, image: Int, onClick: () -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
+        // v1.74: hub style — poora 2-rang gradient + safed border.
         modifier = Modifier.fillMaxWidth().height(86.dp).cssShadow(8.dp, shape, iconBg.last().copy(alpha = 0.18f)).clip(shape)
-            .background(Brush.horizontalGradient(listOf(iconBg.last().lighter(0.9f), Color.White)))
-            .border(1.dp, iconBg.last().copy(alpha = 0.16f), shape)
+            .background(cssLinear(120f, 0f to bg[0], 1f to bg[1]))
+            .border(1.dp, Color.White.copy(alpha = 0.7f), shape)
             .clickable { onClick() }
     ) {
         Watermark(138.dp, x = 228.dp, y = (-23).dp, alpha = 0.075f)
@@ -530,7 +534,20 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, o
                 Text("Edit", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             }
         }
-        demoStaff.forEachIndexed { i, (name, id) -> OperatorCard(vm, i, name, id) }
+        // v1.74 trial idea (uska order): har banda apne SQUARE card me,
+        // 2-column grid. Upar ID + naam, neeche ek line me duty pill +
+        // time changer (sirf ON DUTY par). Restore ke liye OperatorCardRow
+        // wapas lagana hai (upar mehfooz hai).
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            demoStaff.chunked(2).forEachIndexed { r, row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    row.forEachIndexed { c, (name, id) ->
+                        SquareOperatorCard(vm, r * 2 + c, name, id, Modifier.weight(1f))
+                    }
+                    if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
         // Report actions: WhatsApp (green gradient) | Copy (white).
         Row(modifier = Modifier.fillMaxWidth().padding(top = 1.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
@@ -570,7 +587,9 @@ private fun HeroStat(label: String, value: Int, dot: Color?, modifier: Modifier)
 // Operator card: tint→white gradient, baein 4dp rang ki patti, ID badge, naam, status pill (menu),
 // ON DUTY ho to neeche −/time/+ (purple).
 @Composable
-private fun OperatorCard(vm: OpeningViewModel, i: Int, name: String, id: String) {
+// v1.74 trial se pehle wala lamba card — MEHFOOZ hai. Agar square idea
+// pasand na aaye to sirf neeche grid ki jagah wapas isi ka forEach lagao.
+private fun OperatorCardRow(vm: OpeningViewModel, i: Int, name: String, id: String) {
     val (accent, tint, badge) = OperatorAccents[i % OperatorAccents.size]
     val status = vm.status[i]
     var menuOpen by remember { mutableStateOf(false) }
@@ -625,6 +644,74 @@ private fun OperatorCard(vm: OpeningViewModel, i: Int, name: String, id: String)
             }
         }
     }
+}
+
+// v1.74 trial idea: SQUARE staff card (2-column grid me). Upar ID badge +
+// naam; neeche ek line me duty pill + time changer (sirf ON DUTY par).
+// Duty pill par tap = wahi status options (arrow jagah bachane ke liye
+// hataya hai — pill poori tap hoti hai). State wiring wahi purani
+// (vm.status / vm.dutyMinutes, index wahi).
+@Composable
+private fun SquareOperatorCard(vm: OpeningViewModel, i: Int, name: String, id: String, modifier: Modifier) {
+    val (accent, tint, badge) = OperatorAccents[i % OperatorAccents.size]
+    val status = vm.status[i]
+    var menuOpen by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(20.dp)
+    Box(
+        modifier = modifier.aspectRatio(1f)
+            .cssShadow(5.dp, shape, Color(0xFF361E4B).copy(alpha = 0.09f)).clip(shape)
+            .background(cssLinear(135f, 0f to tint, 1f to Color.White)).border(1.dp, tint, shape)
+    ) {
+        Box(modifier = Modifier.width(4.dp).fillMaxHeight().background(accent))
+        Column(modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 10.dp, top = 12.dp, bottom = 12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(46.dp, 30.dp).background(cssLinear(135f, 0f to badge[0], 1f to badge[1]), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) { Text(id, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = if (i % 6 == 4) Color(0xFF4B2800) else Color.White) }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(name, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box {
+                    Row(
+                        modifier = Modifier.height(32.dp).clip(RoundedCornerShape(10.dp))
+                            .background(cssLinear(135f, 0f to status.pill[0], 1f to status.pill[1]))
+                            .border(1.dp, status.pillBorder, RoundedCornerShape(10.dp))
+                            .clickable { menuOpen = true }.padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) { Text(status.label, fontSize = 8.5.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                    if (menuOpen) OptionPickerSheet(
+                        "Select Status",
+                        StaffStatus.values().map { PickerOption(it.label, it.opt, it.optBorder, it.optText) },
+                        { opt -> vm.status[i] = StaffStatus.values().first { it.label == opt.label }; menuOpen = false },
+                        { menuOpen = false }
+                    )
+                }
+                if (status == StaffStatus.ON_DUTY) {
+                    Spacer(modifier = Modifier.width(6.dp))
+                    val m = vm.dutyMinutes[i]
+                    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                        SquareStep("−") { vm.dutyMinutes[i] = (vm.dutyMinutes[i] - 10).coerceAtLeast(0) }
+                        Box(
+                            modifier = Modifier.weight(1f).height(32.dp).background(Color.White, RoundedCornerShape(10.dp)).border(1.dp, Color(0xFFDCC5F5), RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) { Text(String.format(Locale.US, "%02d:%02d", m / 60, m % 60), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1) }
+                        SquareStep("+") { vm.dutyMinutes[i] = (vm.dutyMinutes[i] + 10).coerceAtMost(24 * 60) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SquareStep(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier.size(24.dp).background(Color.White, RoundedCornerShape(8.dp)).border(1.dp, Color(0xFFDCC5F5), RoundedCornerShape(8.dp)).clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) { Text(label, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black) }
 }
 
 @Composable

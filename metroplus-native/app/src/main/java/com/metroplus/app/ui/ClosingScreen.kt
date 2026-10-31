@@ -138,13 +138,15 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
             }
             ClSection("SHIFT CLOSINGS", top = 22.dp)
-            ClCard(watermark = 125.dp) {
+            // v1.74 (uska order): Closing cards bhi hub style — har card ka
+            // apna 2-rang gradient (pehle sab pe ek hi lavender tint tha).
+            ClCard(watermark = 125.dp, colors = listOf(Color(0xFFFFE4E6), Color(0xFFFB7185))) {
                 ClIconTile(Icons.Filled.ConfirmationNumber, BrandRedLight, BrandRedDark)
                 ClText("TOM · TKM · POS", "Ticket machines, TKM & POS closing", Modifier.weight(1f))
                 ClWa { onGuiNote("TOM · TKM · POS") }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            ClCard(watermark = 122.dp) {
+            ClCard(watermark = 122.dp, colors = listOf(Color(0xFFFFF3B0), Color(0xFFFFC93C))) {
                 ClIconTile(Icons.Filled.DirectionsBus, Color(0xFFFFC04D), Color(0xFFF08C00))
                 ClText("RMBS Closing", "Red line station closing format", Modifier.weight(1f))
                 ClWa { onGuiNote("RMBS Closing") }
@@ -154,8 +156,9 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             // Height FIXED 140dp (trial jaisi — 14 + 52 + 12 + 48 + 14).
             val shape = RoundedCornerShape(22.dp)
             Box(
+                // v1.74: hub style — poora 2-rang mint gradient + safed border.
                 modifier = Modifier.fillMaxWidth().height(140.dp).cssShadow(8.dp, shape, Color(0xFF0F8F80).copy(alpha = 0.16f)).clip(shape)
-                    .background(Brush.horizontalGradient(listOf(Color(0xFFE6FAF5), Color.White))).border(1.dp, Color(0xFF0F8F80).copy(alpha = 0.14f), shape)
+                    .background(cssLinear(120f, 0f to Color(0xFFD1FAE5), 1f to Color(0xFF34D399))).border(1.dp, Color.White.copy(alpha = 0.7f), shape)
             ) {
                 Watermark(219.dp, x = 200.dp, y = (-32).dp, alpha = 0.075f)
                 Column(modifier = Modifier.padding(14.dp)) {
@@ -185,7 +188,7 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            ClCard(watermark = 122.dp, onClick = { pmbsOpen = true }) {
+            ClCard(watermark = 122.dp, colors = listOf(Color(0xFFE9D5FF), Color(0xFFA855F7)), onClick = { pmbsOpen = true }) {
                 ClIconTile(Icons.Filled.EditNote, Color(0xFFFF7A7A), Color(0xFFE53935))
                 ClText("PMBS Complaint", "Write an incident complaint letter", Modifier.weight(1f))
                 Icon3DTile(Icons.Filled.ChevronRight, Color(0xFFE53935), size = 34.dp, iconSize = 18.dp, corner = 11.dp)
@@ -218,12 +221,12 @@ private fun ClSection(title: String, top: Dp) {
 // White card: kona 22, padding 14, halki border + saya, watermark daein,
 // height FIXED 80dp (trial .cl-card jaisi — icon 52 + padding 28, har font size pe barabar).
 @Composable
-private fun ClCard(watermark: Dp, onClick: (() -> Unit)? = null, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
+private fun ClCard(watermark: Dp, colors: List<Color> = listOf(Color(0xFFF3EEFF), Color.White), onClick: (() -> Unit)? = null, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Box(
-        // v1.61: safed ki jagah halka lavender → safed gradient + jamni saya.
-        modifier = Modifier.fillMaxWidth().height(80.dp).cssShadow(8.dp, shape, Color(0xFF7C3AED).copy(alpha = 0.14f)).clip(shape)
-            .background(Brush.horizontalGradient(listOf(Color(0xFFF3EEFF), Color.White))).border(1.dp, Color(0xFF7C3AED).copy(alpha = 0.12f), shape)
+        // v1.74: hub style — poora 2-rang gradient + safed border.
+        modifier = Modifier.fillMaxWidth().height(80.dp).cssShadow(8.dp, shape, colors.last().copy(alpha = 0.14f)).clip(shape)
+            .background(cssLinear(120f, 0f to colors[0], 1f to colors[1])).border(1.dp, Color.White.copy(alpha = 0.7f), shape)
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
     ) {
         Watermark(watermark, x = 270.dp, y = (-21).dp, alpha = 0.075f)

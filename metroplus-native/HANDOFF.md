@@ -1,4 +1,21 @@
-# Metro+ Native App — Handoff (v1.73 / versionCode 74) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.74 / versionCode 75) — DEBUG build (non-debuggable)
+
+## v1.74 change (31 Oct 2026) — hub-style cards + square staff trial (uska order, DEBUG)
+- Opening menu ke 4 cards (Opening Data, Staff Attendance, Leave Form,
+  GPS Picture) ab hub style: poora 2-rang gradient + safed border
+  (pehle safed card + halki tint). Rang: Data yellow, Staff rose, Leave
+  teal, GPS sky. Hero NAHI chheda.
+- Closing cards bhi hub style (Closing me koi tab nahi hai — cards hi
+  hain): TOM·TKM·POS rose, RMBS yellow, Card Claim mint-green, PMBS
+  purple; ClCard ko colors param mila, shadow/border card ke rang se.
+- Staff Attendance TRIAL IDEA: har banda apne SQUARE card me (2-column
+  grid, aspectRatio 1). Upar ID badge + naam; neeche ek line me duty
+  pill + time changer (sirf ON DUTY par; chhota stepper 24dp + time box).
+  Duty pill par tap = wahi status options (arrow jagah bachane ke liye
+  hataya). State wiring wahi (vm.status/dutyMinutes). PURANA design
+  OperatorCardRow ke naam se file me MEHFOOZ hai — restore ke liye
+  sirf grid ki jagah wapas uska forEach lagana hai.
+- Verify: TODO build ke baad.
 
 ## v1.73 change (31 Oct 2026) — minis tartib (uska order, DEBUG)
 - More with Metro ke 4 cards ki tartib: pehla Tom Data, doosra
@@ -12,7 +29,9 @@
   links. Reliable rakhne ke liye foreground service + BOOT receiver
   chahiye; Android 13+ par notification permission ek dafa leni hogi.
   Buttons ki list uske batane par banegi.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~20:09 PKT): APK 12,541,199 bytes, SHA d63ef28a;
+  cert apksigner se b13501ef MATCH; dex "Version 1.73", 1.72 gayab.
+  GitHub code head e708827d, MANIFEST LIVE vc74 JSON verify (RAW JSON).
 
 ## v1.72 change (31 Oct 2026) — Staff Edit theek + week strip naya (uska order, DEBUG)
 - Staff Edit: hero status bar ke upar/andar ja raha tha (statusBarsPadding
