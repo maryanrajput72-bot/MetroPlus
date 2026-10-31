@@ -23,6 +23,14 @@ import androidx.compose.material.icons.filled.Refresh
 import com.metroplus.app.ui.DockIcon
 import com.metroplus.app.ui.SettingsScreen
 import com.metroplus.app.ui.TomDataScreen
+import com.metroplus.app.ui.TlLockScreen
+import com.metroplus.app.ui.ChatSettingsScreen
+import com.metroplus.app.ui.AppInfoScreen
+import com.metroplus.app.ui.SystemStorageScreen
+import com.metroplus.app.ui.WaFormatScreen
+import com.metroplus.app.ui.TomCountScreen
+import com.metroplus.app.ui.PhotoViewerScreen
+import com.metroplus.app.ui.SplashScreen
 import com.metroplus.app.ui.rememberDockIcon
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -148,7 +156,7 @@ import kotlinx.coroutines.launch
 enum class NavTab { SETTINGS, OPENING, HOME, CLOSING, PORTAL }
 
 // Sub-screens: HOME se aage jo bhi page khulega, right se left slide hoke aayega.
-enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL, GROUP_CHAT }
+enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL, GROUP_CHAT, TL_LOCK, CHAT_SETTINGS, APP_INFO, SYSTEM_STORAGE, WA_FORMAT, TOM_COUNT, PHOTO_VIEWER }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,6 +198,9 @@ fun MetroPlusApp() {
     var downloadProgress by remember { mutableStateOf<Int?>(null) }
     // Batch item 13: update pe confetti (63 wali) — 100% hote hi dikhegi.
     var showConfetti by remember { mutableStateOf(false) }
+    // v1.62: splash GUI — cold open pe 1.5s, phir Home (sirf GUI, koi login nahi).
+    var showSplash by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { kotlinx.coroutines.delay(1500); showSplash = false }
     fun startDownload(apkUrl: String) {
         // Double download se bacho (do check ek sath mile to bhi ek hi download).
         if (downloadProgress != null) return
@@ -354,11 +365,20 @@ fun MetroPlusApp() {
                 Box(modifier = Modifier.fillMaxSize().background(HomeBackground)) {
                 when (page) {
                     AppScreen.MONEY -> MoneyCalculatorScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.OPENING -> OpeningScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; screen = AppScreen.CAMERA })
+                    AppScreen.OPENING -> OpeningScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; screen = AppScreen.CAMERA }, onOpenViewer = { screen = AppScreen.PHOTO_VIEWER })
                     AppScreen.CLOSING -> ClosingScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.CAMERA -> GpsCameraScreen(onBack = { if (cameraFrom == AppScreen.OPENING) screen = AppScreen.OPENING else backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.SETTINGS -> SettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
-                    AppScreen.TOM -> TomDataScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.SETTINGS -> SettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenPage = {
+                        when (it) {
+                            "TL / RP Login" -> screen = AppScreen.TL_LOCK
+                            "Chat Settings" -> screen = AppScreen.CHAT_SETTINGS
+                            "System & Storage" -> screen = AppScreen.SYSTEM_STORAGE
+                            "WhatsApp Report Format" -> screen = AppScreen.WA_FORMAT
+                            "App Info" -> screen = AppScreen.APP_INFO
+                            else -> notYet(it)
+                        }
+                    })
+                    AppScreen.TOM -> TomDataScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenTomCount = { screen = AppScreen.TOM_COUNT })
                     AppScreen.COMPLAINTS -> ComplaintScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.EDIT_PROFILE -> EditProfileScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.CALC_SETTINGS -> CalculatorSettingsScreen(onBack = { backHome() })
@@ -366,6 +386,13 @@ fun MetroPlusApp() {
                     AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.PORTAL -> PortalScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { backHome() })
+                    AppScreen.TL_LOCK -> TlLockScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.CHAT_SETTINGS -> ChatSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenWaFormat = { screen = AppScreen.WA_FORMAT })
+                    AppScreen.APP_INFO -> AppInfoScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onCheckUpdate = { manualCheck() }, onOpenSystemStorage = { screen = AppScreen.SYSTEM_STORAGE })
+                    AppScreen.SYSTEM_STORAGE -> SystemStorageScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.WA_FORMAT -> WaFormatScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.TOM_COUNT -> TomCountScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.PHOTO_VIEWER -> PhotoViewerScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.HOME -> Unit
                 }
                 }
@@ -417,6 +444,8 @@ fun MetroPlusApp() {
         }
         // Batch item 13: update pe confetti — sab se upar, touch nahi rokti.
         if (showConfetti) ConfettiOverlay { showConfetti = false }
+        // v1.62: splash sab se upar (cold open pe 1.5s).
+        if (showSplash) SplashScreen()
     }
 
     dialog?.let { body ->
@@ -602,7 +631,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.61", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.62", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
