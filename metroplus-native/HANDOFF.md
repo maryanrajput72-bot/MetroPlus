@@ -1,4 +1,35 @@
-# Metro+ Native App — Handoff (v1.80 / versionCode 81) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.81 / versionCode 82) — DEBUG build (non-debuggable)
+
+## v1.81 change (1 Nov 2026) — Portal preload + keep-alive, rounded header, attached dropdown, login persist, keyboard (uska order, DEBUG)
+- PRELOAD + KEEP-ALIVE (white screen + 6 second wait ki asal wajah):
+  WebView ab PortalScreen ka nahi — `PortalWeb` singleton ka hai. App
+  khulte hi (splash ke dauran, 800ms baad) peeche se load hona shuru;
+  Portal kholo to wahi WebView attach hota hai, Portal band par sirf
+  detach hota hai (destroy NAHI) — dobara kholo to site pehle se khuli
+  + login (cookies) pehle se laga hua. WebView ka apna background bhi
+  neela (#EAF2FE) aur pehli load tak halka neela loading area
+  (CircularProgressIndicator + "Portal load ho raha hai…") — safed
+  flash ki koi jagah nahi. Header hamesha upar rehta hai (WebView sirf
+  uske neeche wale Box me hai).
+- KEYBOARD: Manifest me `adjustResize` pehle se tha (app ke control me
+  hi khulta hai). Asal susti + page kheenchna thande WebView se tha —
+  garam WebView par keyboard jaldi aayega; keyboard khulne par sirf
+  site wali jagah chhoti hogi (taake likhi hui jagah nazar aaye),
+  header/dropdown/Portal layout wahi rahega. `adjustNothing` nahi
+  lagaya — us me likhne wali jagah keyboard ke peeche chhup jati.
+- HEADER ROUNDED CARD: gradient container ab poori chaudai ka
+  rectangle nahi — kinaron se 12dp hata hua, 22dp radius wala card.
+- DROPDOWN ATTACHED (aadha upar/aadha neeche fix): panel header ke
+  neeche 6dp overlap par khulta hai (header ke andar se nikalta hua
+  lage), kinare header card se mile hue (12dp), 20dp radius, upar se
+  expand + fade animation; headerH naapne se pehle panel nahi khulta
+  (pehli-frame jump khatam). Three-dot card bhi isi topPad + 12dp par.
+- LOGIN PERSIST: Saved Login sheet me Gmail + username
+  SharedPreferences ("portal_login") me save — sheet kholo to pehle se
+  bhare milenge. Password save NAHI hota (security).
+- GitHub APK RULE: is release me v1.81 upload + v1.79 delete (1.80 +
+  1.81 rahengi); manifest apkUrl = GitHub raw v1.81.
+- Verify: TODO build ke baad.
 
 ## v1.80 change (31 Oct 2026) — Portal WebView + overlay menus + full blue theme (uska order, DEBUG)
 - WEBVIEW (uska wazeh order — STRICT RULE #1 ka Portal-only exception):
@@ -35,7 +66,15 @@
   wali baat).
 - GitHub APK RULE: is release me v1.80 upload + v1.78 delete (1.79 +
   1.80 rahengi); manifest apkUrl = GitHub raw v1.80.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~23:55 PKT): APK 12,560,775 bytes, SHA 13283ac2;
+  cert apksigner se b13501ef MATCH; dex "Version 1.80" + portal link +
+  "QUICK FILL" + "Open Portal Login", 1.79 gayab. GitHub code push
+  commit bb28caac; APK GitHub par (browser upload, commit f3e6a0e,
+  size exact verify); v1.78 delete (apk folder me sirf 1.79 + 1.80 =
+  latest 2); MANIFEST LIVE vc81 JSON verify — apkUrl GitHub raw v1.80.
+  NOTE: build ki pehli koshish runtime restart se mari, dobara chalayi;
+  uske baad ek extra brace compile error aaya (cut ke baad bacha tha)
+  — hata kar dobara build kamyab hui.
 
 ## v1.79 change (31 Oct 2026) — Portal ek-line bar + nav reset + roster tweaks (uska order, DEBUG)
 - PORTAL: header ab EK pill line hai (halka neela #E3EEFD bg + blue

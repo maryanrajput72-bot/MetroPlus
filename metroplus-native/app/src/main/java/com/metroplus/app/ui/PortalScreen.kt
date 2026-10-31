@@ -1,11 +1,18 @@
 package com.metroplus.app.ui
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,10 +48,12 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.viewinterop.AndroidView
@@ -73,6 +83,9 @@ import java.util.Locale
 // overlay; three-dot = Open Portal Login / Settings (Portal wali, main
 // Settings nahi — uska content wo baad me batayega) / Reload. Save/fill
 // ki wiring agle step me hogi.
+// v1.81: WebView preload + keep-alive (PortalWeb object), header gol
+// card, dropdown header se chipka hua, load par neela area (safed nahi),
+// Saved Login me Gmail/username device par save.
 
 private val PoRed = Section.Portal // v1.56: Portal section ka neela
 // v1.80 BLUE THEME (uska order): Portal ka sara interface sirf neelay
@@ -80,6 +93,66 @@ private val PoRed = Section.Portal // v1.56: Portal section ka neela
 private val PoInk = Color(0xFF0B2A5B)
 private val PoGray = Color(0xFF3D5A80)
 private const val PORTAL_URL = "https://shababulmohsinapp.ai.studio/"
+
+// v1.81: Portal ka WebView AB EK HI dafa banta hai aur zinda rehta hai
+// (uska order — white screen + 6 second wait khatam). App khulte hi
+// peeche se load hona shuru (MainActivity preload), Portal kholo to wahi
+// WebView attach hota hai, Portal band par destroy NAHI hota — dobara
+// kholo to site pehle se khuli + login (cookies) pehle se laga hua.
+// Keyboard bhi isi garam WebView par jaldi khulta hai (thanda WebView hi
+// susti + page kheenchne ki asal wajah tha).
+object PortalWeb {
+    var webView: WebView? = null
+        private set
+    var lastUrl: String = PORTAL_URL
+        private set
+    var loading: Boolean = true
+        private set
+    var everLoaded: Boolean = false
+        private set
+    var onUrl: ((String) -> Unit)? = null
+    var onLoading: ((Boolean) -> Unit)? = null
+
+    fun preload(ctx: Context) { getOrCreate(ctx) }
+
+    fun getOrCreate(ctx: Context): WebView {
+        webView?.let { return it }
+        val wv = WebView(ctx.applicationContext)
+        // WebView ka apna background bhi neela — load se pehle safed na aaye.
+        wv.setBackgroundColor(android.graphics.Color.parseColor("#EAF2FE"))
+        wv.settings.javaScriptEnabled = true
+        wv.settings.domStorageEnabled = true
+        wv.settings.loadsImagesAutomatically = true
+        wv.settings.useWideViewPort = true
+        wv.settings.loadWithOverviewMode = true
+        CookieManager.getInstance().setAcceptCookie(true)
+        CookieManager.getInstance().setAcceptThirdPartyCookies(wv, true)
+        wv.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = false
+            override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
+                loading = true
+                url?.let { lastUrl = it; onUrl?.invoke(it) }
+                onLoading?.invoke(true)
+            }
+            override fun onPageFinished(view: WebView, url: String?) {
+                loading = false
+                everLoaded = true
+                url?.let { lastUrl = it; onUrl?.invoke(it) }
+                onLoading?.invoke(false)
+            }
+        }
+        wv.loadUrl(PORTAL_URL)
+        webView = wv
+        return wv
+    }
+
+    // Purane parent se hata kar wahi WebView wapas do (dobara banega nahi).
+    fun attach(ctx: Context): WebView {
+        val wv = getOrCreate(ctx)
+        (wv.parent as? ViewGroup)?.removeView(wv)
+        return wv
+    }
+}
 
 @Composable
 private fun PoHeaderBtn(icon: @Composable () -> Unit, onClick: () -> Unit) {
@@ -182,11 +255,21 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     // v1.80: dropdown Quick Fill overlay + three-dot card.
     var quickOpen by remember { mutableStateOf(false) }
     var dotMenuOpen by remember { mutableStateOf(false) }
-    // WebView SIRF Portal ke andar (uska order, 2026-10-31): Portal khule to
-    // chale, band ho to destroy — poori app me nahi, aur kisi screen me nahi.
-    var currentUrl by remember { mutableStateOf(PORTAL_URL) }
-    var pageLoading by remember { mutableStateOf(true) }
-    val webHolder = remember { object { var w: WebView? = null } }
+    // v1.81: WebView ab PortalScreen ka nahi — PortalWeb (ek hi, zinda
+    // rehne wala) ka hai. Portal khule to attach, band ho to sirf detach
+    // (destroy nahi) — dobara kholo to site + login pehle se maujood.
+    val ctx = LocalContext.current
+    var currentUrl by remember { mutableStateOf(PortalWeb.lastUrl) }
+    var pageLoading by remember { mutableStateOf(PortalWeb.loading) }
+    var everLoaded by remember { mutableStateOf(PortalWeb.everLoaded) }
+    DisposableEffect(Unit) {
+        PortalWeb.onUrl = { currentUrl = it }
+        PortalWeb.onLoading = { pageLoading = it; if (!it) everLoaded = true }
+        currentUrl = PortalWeb.lastUrl
+        pageLoading = PortalWeb.loading
+        everLoaded = PortalWeb.everLoaded
+        onDispose { PortalWeb.onUrl = null; PortalWeb.onLoading = null }
+    }
     val density = LocalDensity.current
     var headerH by remember { mutableStateOf(0) }
     // Back: pehle menus/panel/sheets, phir WebView history, phir page.
@@ -195,69 +278,71 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         else if (dotMenuOpen) dotMenuOpen = false
         else if (showLogin) showLogin = false
         else if (showFill) showFill = false
-        else if (webHolder.w?.canGoBack() == true) webHolder.w?.goBack()
+        else if (PortalWeb.webView?.canGoBack() == true) PortalWeb.webView?.goBack()
         else onBack()
     }
-    fun reloadPage() { webHolder.w?.reload() }
+    fun reloadPage() { PortalWeb.webView?.reload() }
     Box(
         modifier = Modifier.fillMaxSize().background(Color(0xFFEAF2FE))
             .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // v1.80 header (uska order): blue gradient container, uske andar
-            // safed pill — EK hi line: lock + link (thoda lamba, darmiyan se
-            // aage tak) + dropdown + gehra neela three-dot. GCS tab nahi hai.
+            // v1.81 header (uska order): gol kinaron wala card — gradient
+            // container ab poori chaudai ka rectangle nahi, 22dp radius ke
+            // sath kinaron se hata hua card hai. Pill + progress uske andar.
+            // Header hamesha upar rehta hai — WebView sirf uske neeche hai.
             Column(
                 modifier = Modifier.fillMaxWidth()
-                    .background(cssLinear(135f, 0f to Color(0xFF0B5BD3), 1f to Color(0xFF38BDF8)))
                     .statusBarsPadding()
                     .onSizeChanged { headerH = it.height }
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
-                        .clip(RoundedCornerShape(999.dp)).background(Color.White.copy(alpha = 0.96f))
-                        .padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(cssLinear(135f, 0f to Color(0xFF0B5BD3), 1f to Color(0xFF38BDF8)))
                 ) {
-                    Icon(Icons.Filled.Lock, contentDescription = null, tint = PoRed, modifier = Modifier.size(13.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(currentUrl, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PoInk, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(2f))
-                    // Link darmiyan se aage tak (pehle aadha tha, ab 2/3).
-                    Spacer(modifier = Modifier.weight(1f))
-                    PoHeaderBtn({ Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Quick Fill", tint = PoRed, modifier = Modifier.size(18.dp)) }) { dotMenuOpen = false; quickOpen = !quickOpen }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier.size(38.dp).clip(CircleShape).background(Color(0xFF0B2A5B)).clickable { quickOpen = false; dotMenuOpen = true },
-                        contentAlignment = Alignment.Center
-                    ) { Icon(Icons.Filled.MoreVert, contentDescription = "More", tint = Color.White, modifier = Modifier.size(18.dp)) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)
+                            .clip(RoundedCornerShape(999.dp)).background(Color.White.copy(alpha = 0.96f))
+                            .padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Filled.Lock, contentDescription = null, tint = PoRed, modifier = Modifier.size(13.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(currentUrl, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PoInk, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(2f))
+                        // Link darmiyan se aage tak (pehle aadha tha, ab 2/3).
+                        Spacer(modifier = Modifier.weight(1f))
+                        PoHeaderBtn({ Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Quick Fill", tint = PoRed, modifier = Modifier.size(18.dp)) }) { dotMenuOpen = false; quickOpen = !quickOpen }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier.size(38.dp).clip(CircleShape).background(Color(0xFF0B2A5B)).clickable { quickOpen = false; dotMenuOpen = true },
+                            contentAlignment = Alignment.Center
+                        ) { Icon(Icons.Filled.MoreVert, contentDescription = "More", tint = Color.White, modifier = Modifier.size(18.dp)) }
+                    }
+                    if (pageLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(3.dp), color = Color.White, trackColor = Color.White.copy(alpha = 0.3f))
                 }
-                if (pageLoading) LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(3.dp), color = Color.White, trackColor = Color.White.copy(alpha = 0.3f))
             }
-            // Neeche wali jagah = WebView (link ke neeche ka area, SIRF yahan).
+            // Neeche wali jagah = wahi zinda WebView (preload + keep-alive).
             // Session cookies WebView sambhalta hai — ek dafa login to phir
             // laga rahega (jab tak site logout na kare ya data clear na ho).
-            AndroidView(
-                factory = { c ->
-                    WebView(c).also { wv ->
-                        webHolder.w = wv
-                        wv.settings.javaScriptEnabled = true
-                        wv.settings.domStorageEnabled = true
-                        wv.settings.loadsImagesAutomatically = true
-                        wv.settings.useWideViewPort = true
-                        wv.settings.loadWithOverviewMode = true
-                        CookieManager.getInstance().setAcceptCookie(true)
-                        CookieManager.getInstance().setAcceptThirdPartyCookies(wv, true)
-                        wv.webViewClient = object : WebViewClient() {
-                            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean = false
-                            override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) { pageLoading = true; url?.let { currentUrl = it } }
-                            override fun onPageFinished(view: WebView, url: String?) { pageLoading = false; url?.let { currentUrl = it } }
+            // Pehli load tak safed NAHI — halka neela loading area.
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                AndroidView(
+                    factory = { c -> PortalWeb.attach(c) },
+                    onRelease = { /* destroy NAHI — WebView zinda rehta hai */ },
+                    modifier = Modifier.fillMaxSize()
+                )
+                if (pageLoading && !everLoaded) {
+                    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFEAF2FE)), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(color = PoRed, modifier = Modifier.size(36.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text("Portal load ho raha hai…", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PoGray)
                         }
-                        wv.loadUrl(PORTAL_URL)
                     }
-                },
-                onRelease = { it.stopLoading(); it.destroy(); webHolder.w = null },
-                modifier = Modifier.weight(1f).fillMaxWidth()
-            )
+                }
+            }
         }
         // ---- Overlays: dropdown grid + three-dot card. Ye content ko
         // neeche NAHI dhakelte (v1.79 wali shikayat) — header ke neeche
@@ -265,13 +350,23 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         if (quickOpen || dotMenuOpen) {
             Box(modifier = Modifier.fillMaxSize().clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { quickOpen = false; dotMenuOpen = false })
         }
-        val topPad = with(density) { headerH.toDp() } + 8.dp
-        if (quickOpen) {
+        // v1.81: panel header se CHIPKA hua — 6dp overlap taake header ke
+        // andar se nikalta hua lage; headerH naapne se pehle panel nahi
+        // khulta (aadha upar/aadha neeche wali pehli-frame ghalti khatam).
+        // Panel ke kinare header card ke kinaron se mile hue (12dp) taake
+        // ye screen pe extra cheez na lage, header ka hissa lage.
+        val topPad = if (headerH > 0) with(density) { headerH.toDp() } - 6.dp else 0.dp
+        if (quickOpen && headerH > 0) {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = topPad)
+                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = topPad)
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { },
             ) {
-                val cardShape = RoundedCornerShape(18.dp)
+                val cardShape = RoundedCornerShape(20.dp)
+                AnimatedVisibility(
+                    visible = true,
+                    enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+                    exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+                ) {
                 Column(modifier = Modifier.fillMaxWidth().cssShadow(10.dp, cardShape, PoInk.copy(alpha = 0.18f)).background(Color.White, cardShape).padding(12.dp)) {
                     Text("QUICK FILL", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = PoInk.copy(alpha = 0.55f), letterSpacing = 1.2.sp)
                     Spacer(modifier = Modifier.height(10.dp))
@@ -289,11 +384,12 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         Spacer(modifier = Modifier.weight(0.5f))
                     }
                 }
+                }
             }
         }
-        if (dotMenuOpen) {
+        if (dotMenuOpen && headerH > 0) {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(end = 16.dp, top = topPad)
+                modifier = Modifier.fillMaxWidth().padding(end = 12.dp, top = topPad)
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { },
             ) {
                 val cardShape = RoundedCornerShape(18.dp)
@@ -308,8 +404,11 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         }
         // ---- 63 ki Saved Login sheet (nested overlay) ----
         if (showLogin) {
-            var email by pageState("portal_email", "")
-            var username by pageState("portal_username", "")
+            // v1.81: Gmail/username device par save (SharedPreferences) —
+            // sheet kholo to pehle se bhare milenge. Password save nahi hota.
+            val loginPrefs = remember { ctx.getSharedPreferences("portal_login", Context.MODE_PRIVATE) }
+            var email by pageState("portal_email", loginPrefs.getString("portal_email", "") ?: "")
+            var username by pageState("portal_username", loginPrefs.getString("portal_username", "") ?: "")
             var password by pageState("portal_password", "")
             Box(
                 modifier = Modifier.fillMaxSize().background(Color(0xFFEAF2FE))
@@ -333,11 +432,11 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                             Spacer(modifier = Modifier.height(12.dp))
                             Box(
                                 modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), PoRed.copy(alpha = 0.25f))
-                                    .clip(RoundedCornerShape(14.dp)).background(PoRed).clickable { onGuiNote("Save Portal Login") },
+                                    .clip(RoundedCornerShape(14.dp)).background(PoRed).clickable { loginPrefs.edit().putString("portal_email", email).putString("portal_username", username).apply(); onGuiNote("Save Portal Login") },
                                 contentAlignment = Alignment.Center
                             ) { Text("Save Login", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
                             Spacer(modifier = Modifier.height(10.dp))
-                            Text("After saving, the site keeps you logged in inside Portal (cookies) — if the session ever ends, copy the login from here.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
+                            Text("Gmail aur username ab save rahenge — sheet kholo to pehle se bhare milenge. Site ka login cookies se laga rehta hai; session khatam ho to yahan se copy kar lo.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
