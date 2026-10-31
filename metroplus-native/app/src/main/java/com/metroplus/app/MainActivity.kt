@@ -74,7 +74,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
@@ -86,7 +85,14 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -96,6 +102,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.rememberDrawerState
 import com.metroplus.app.ui.ClosingScreen
 import com.metroplus.app.ui.ComplaintScreen
+import com.metroplus.app.ui.ConfettiOverlay
+import com.metroplus.app.ui.GroupChatScreen
 import com.metroplus.app.ui.CalculatorSettingsScreen
 import com.metroplus.app.ui.EditProfileScreen
 import com.metroplus.app.ui.GpsCameraScreen
@@ -140,7 +148,7 @@ import kotlinx.coroutines.launch
 enum class NavTab { SETTINGS, OPENING, HOME, CLOSING, PORTAL }
 
 // Sub-screens: HOME se aage jo bhi page khulega, right se left slide hoke aayega.
-enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL }
+enum class AppScreen { HOME, MONEY, OPENING, CLOSING, CAMERA, SETTINGS, TOM, COMPLAINTS, EDIT_PROFILE, CALC_SETTINGS, GPS_SETTINGS, TLRP_SETTINGS, PORTAL, GROUP_CHAT }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -180,6 +188,8 @@ fun MetroPlusApp() {
     // Update mile to khud download shuru, progress upar pill me, 100% pe khud install
     // screen — app ke andar koi dialog, koi button nahi (trial 63 ka silent system).
     var downloadProgress by remember { mutableStateOf<Int?>(null) }
+    // Batch item 13: update pe confetti (63 wali) — 100% hote hi dikhegi.
+    var showConfetti by remember { mutableStateOf(false) }
     fun startDownload(apkUrl: String) {
         // Double download se bacho (do check ek sath mile to bhi ek hi download).
         if (downloadProgress != null) return
@@ -188,11 +198,14 @@ fun MetroPlusApp() {
             context.applicationContext, apkUrl,
             onProgress = { pct -> downloadProgress = pct },
             onComplete = { file ->
-                // Pehle 100% dikhao (shikayat thi: 100 kabhi nazar nahi aata tha),
-                // phir silent install — koi button, koi dialog nahi.
+                // Pehle 100% dikhao + confetti (63 wali), phir silent install —
+                // koi button, koi dialog nahi. Install 2.7s baad khulta hai taake
+                // confetti nazar aa jaye (confetti 2.6s chalti hai).
                 downloadProgress = 100
+                showConfetti = true
                 Handler(Looper.getMainLooper()).postDelayed({
                     downloadProgress = null
+                    showConfetti = false
                     if (UpdateManager.canInstall(context.applicationContext)) {
                         UpdateManager.installUpdate(context.applicationContext, file)
                     } else {
@@ -202,7 +215,7 @@ fun MetroPlusApp() {
                         UpdateManager.pendingInstallFile = file
                         UpdateManager.openUnknownSourcesSettings(context.applicationContext)
                     }
-                }, 900)
+                }, 2700)
             },
             onError = {
                 // Error par bar chhup jata hai, koi error popup nahi.
@@ -237,18 +250,22 @@ fun MetroPlusApp() {
     fun backHome() { screen = AppScreen.HOME; activeNav = NavTab.HOME }
     var dialog by remember { mutableStateOf<String?>(null) }
     fun toast(msg: String) { Toast.makeText(context, msg, Toast.LENGTH_SHORT).show() }
-    fun notYet(name: String) { dialog = "$name\n\nGUI phase: ye screen abhi sirf design me hai, iska feature agle step me banega." }
+    fun notYet(name: String) { dialog = "$name\n\nGUI phase: this screen is design-only for now, its feature comes in a later step." }
     fun manualCheck() {
         UpdateManager.checkForUpdate(
             context.applicationContext,
             onUpdate = { versionName, apkUrl -> startDownload(apkUrl) },
-            onNoUpdate = { toast("App pehle hi latest version pe hai") },
-            onError = { toast("Update check nahi ho saka, internet check karein") }
+            onNoUpdate = { toast("App is already on the latest version") },
+            onError = { toast("Update check failed, please check your internet") }
         )
     }
     fun closeDrawer() { scope.launch { drawerState.close() } }
 
     BackHandler(enabled = drawerState.isOpen) { closeDrawer() }
+
+    val density = LocalDensity.current
+    val imeBottom = with(density) { WindowInsets.ime.getBottom(density).toDp() }
+    val navBottom = with(density) { WindowInsets.navigationBars.getBottom(density).toDp() }
 
     Box(modifier = Modifier.fillMaxSize()) {
     ModalNavigationDrawer(
@@ -273,7 +290,7 @@ fun MetroPlusApp() {
                         else notYet(name)
                     },
                     onCheckUpdate = { closeDrawer(); manualCheck() },
-                    onLogout = { closeDrawer(); toast("GUI phase: logout ka feature baad me") }
+                    onLogout = { closeDrawer(); toast("GUI phase: logout feature comes later") }
                 )
             }
         }
@@ -281,8 +298,7 @@ fun MetroPlusApp() {
         Box(modifier = Modifier.fillMaxSize().background(HomeBackground)) {
             HomeScreen(
                 onProfileClick = { scope.launch { drawerState.open() } },
-                onChatClick = { notYet("Group Chat") },
-                onRefreshClick = { manualCheck() },
+                onChatClick = { screen = AppScreen.GROUP_CHAT },
                 onFeatureClick = {
                     if (it == "Money Calc" || it == "Money Calculator") screen = AppScreen.MONEY
                     else if (it == "Opening") { activeNav = NavTab.OPENING; screen = AppScreen.OPENING }
@@ -297,24 +313,46 @@ fun MetroPlusApp() {
             )
         }
     }
-        // Sub-screen overlay: page right se left smooth slide hoke aata hai (350ms),
-        // back pe wapas right ki taraf slide hoke jata hai. Aage ke sab pages isi tareeqe se khulenge.
+        // Sub-screen overlay: normal pages right se left slide hoke aate hain
+        // (350ms), back pe wapas right ki taraf slide hoke jate hain.
+        // Batch item 8: DRAWER pages ULTE hain — khulna left→right, band hona
+        // right→left. Exit ke waqt screen HOME hota hai, is liye direction
+        // lastSubScreen se tay hoti hai (warna drawer page bhi right ko nikalta).
+        val animScreen = if (screen != AppScreen.HOME) screen else lastSubScreen
+        val isDrawerPage = animScreen == AppScreen.EDIT_PROFILE || animScreen == AppScreen.CALC_SETTINGS ||
+            animScreen == AppScreen.GPS_SETTINGS || animScreen == AppScreen.TLRP_SETTINGS
         AnimatedVisibility(
             visible = screen != AppScreen.HOME,
-            enter = slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { it } + fadeIn(animationSpec = tween(350)),
-            exit = slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { it } + fadeOut(animationSpec = tween(350)),
+            enter = slideInHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { if (isDrawerPage) -it else it } + fadeIn(animationSpec = tween(350)),
+            exit = slideOutHorizontally(animationSpec = tween(350, easing = FastOutSlowInEasing)) { if (isDrawerPage) -it else it } + fadeOut(animationSpec = tween(350)),
             modifier = Modifier.fillMaxSize()
         ) {
             val shown = if (screen != AppScreen.HOME) screen else lastSubScreen
             // Dock har page pe samne rehta hai — is liye page ka content dock ke upar khatam hota hai
-            // (camera full-screen hai, wahan dock nahi).
-            val dockSpace = if (shown == AppScreen.CAMERA) Modifier else Modifier.navigationBarsPadding().padding(bottom = 76.dp)
+            // (camera full-screen hai, wahan dock nahi). Keyboard khula ho to content keyboard ke
+            // upar khatam hota hai (edge-to-edge me warna chat/form ka neeche wala field keyboard
+            // ke peeche chhup jata tha).
+            val bottomSpace = if (shown == AppScreen.CAMERA) 0.dp else maxOf(imeBottom, navBottom + 76.dp)
             // FIX (v1.42): overlay ke khaali area ke tap Home tak na pahunchein —
             // pehle overlay ki background tap nahi rokti thi, is liye khula page
             // ke neeche wale home tiles bhi dab jate the.
-            Box(modifier = Modifier.fillMaxSize().background(HomeBackground).then(dockSpace)
+            Box(modifier = Modifier.fillMaxSize().background(HomeBackground).padding(bottom = bottomSpace)
                 .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
-                when (shown) {
+                // Ek khule page se doosre pe (dock se, ya camera se wapas) bhi slide: naya page
+                // right se aata hai, purana left ko jata hai; camera se wapas aate hue ulta.
+                AnimatedContent(
+                    targetState = shown,
+                    transitionSpec = {
+                        val back = initialState == AppScreen.CAMERA
+                        val spec = tween<IntOffset>(350, easing = FastOutSlowInEasing)
+                        (slideInHorizontally(spec) { if (back) -it else it } + fadeIn(tween(350))) togetherWith
+                            (slideOutHorizontally(spec) { if (back) it else -it } + fadeOut(tween(350)))
+                    },
+                    label = "pageSwitch",
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                Box(modifier = Modifier.fillMaxSize().background(HomeBackground)) {
+                when (page) {
                     AppScreen.MONEY -> MoneyCalculatorScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.OPENING -> OpeningScreen(onBack = { backHome() }, onGuiNote = { notYet(it) }, onOpenCamera = { cameraFrom = AppScreen.OPENING; screen = AppScreen.CAMERA })
                     AppScreen.CLOSING -> ClosingScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
@@ -327,14 +365,18 @@ fun MetroPlusApp() {
                     AppScreen.GPS_SETTINGS -> GpsSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.TLRP_SETTINGS -> TlRpSettingsScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
                     AppScreen.PORTAL -> PortalScreen(onBack = { backHome() }, onGuiNote = { notYet(it) })
+                    AppScreen.GROUP_CHAT -> GroupChatScreen(onBack = { backHome() })
                     AppScreen.HOME -> Unit
+                }
+                }
                 }
             }
         }
         // Dock sab pages ke UPAR (naya page khulne pe bhi samne rehta hai). Sirf drawer khula ho
         // ya full-screen camera ho to neeche khisak jata hai.
         AnimatedVisibility(
-            visible = drawerState.targetValue == DrawerValue.Closed && screen != AppScreen.CAMERA,
+            // Keyboard khula ho to bhi dock chhup jata hai (wo keyboard ke peeche hota).
+            visible = drawerState.targetValue == DrawerValue.Closed && screen != AppScreen.CAMERA && imeBottom == 0.dp,
             enter = slideInVertically(tween(250)) { it } + fadeIn(tween(250)),
             exit = slideOutVertically(tween(250)) { it } + fadeOut(tween(250)),
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -352,27 +394,29 @@ fun MetroPlusApp() {
                 }
             )
         }
-        // Item 6 (updater fix): progress UI SAB SE UPAR — pehle ye home layer ke
-        // andar tha, is liye koi page khula hota to sub-screen overlay isay chhupa
-        // deta tha aur download nazar aaye baghair installer khul jata tha.
-        // Ab: upar patli line (% ke barabar bharti hai) + "Updating…%" pill,
+        // Batch item 7: 63 jaisa silent update bar — 3px gradient line +
+        // poori chaurai wali "Updating… X%" strip (safed 94%, laal bold text).
         // 100% par install screen khud khul jati hai, app ka koi button nahi.
         downloadProgress?.let { pct ->
             Column(modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().statusBarsPadding()) {
-                if (pct >= 0) LinearProgressIndicator(progress = { pct / 100f }, modifier = Modifier.fillMaxWidth().height(3.dp), color = Color(0xFF9E1F25), trackColor = Color(0xFFB02A31).copy(alpha = 0.25f))
-                else LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(3.dp), color = Color(0xFF9E1F25), trackColor = Color(0xFFB02A31).copy(alpha = 0.25f))
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Surface(shape = RoundedCornerShape(999.dp), color = Color.White.copy(alpha = 0.94f), shadowElevation = 4.dp) {
-                        Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = if (pct >= 0) "Updating\u2026 $pct%" else "Updating\u2026",
-                                fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9E1F25)
-                            )
-                        }
+                Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(Color(0xFFB02A31).copy(alpha = 0.25f))) {
+                    if (pct >= 0) Box(
+                        modifier = Modifier.fillMaxWidth(pct / 100f).height(3.dp)
+                            .background(Brush.horizontalGradient(listOf(Color(0xFFB02A31), Color(0xFF9E1F25))))
+                    ) else Box(modifier = Modifier.fillMaxWidth().height(3.dp).background(Color(0xFF9E1F25)))
+                }
+                Surface(color = Color.White.copy(alpha = 0.94f), shadowElevation = 4.dp) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = if (pct >= 0) "Updating\u2026 $pct%" else "Updating\u2026",
+                            fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9E1F25)
+                        )
                     }
                 }
             }
         }
+        // Batch item 13: update pe confetti — sab se upar, touch nahi rokti.
+        if (showConfetti) ConfettiOverlay { showConfetti = false }
     }
 
     dialog?.let { body ->
@@ -442,7 +486,7 @@ private fun BottomNavItem(icon: DockIcon, label: String, selected: Boolean, onCl
     }
 }
 
-// JazzCash-style slider — user ki screenshot ke mutabiq: green gradient header,
+// JazzCash-style slider — user ki screenshot ke mutabiq: kala→laal→gulabi gradient header,
 // gol photo, naam + ID + station, My Account dropdown, 4 settings rows.
 // Width 80% (na half, na full); ModalNavigationDrawer ka swipe finger ke sath chalta hai.
 @Composable
@@ -490,7 +534,7 @@ private fun ProfileDrawer(
                     modifier = Modifier.size(108.dp).shadow(10.dp, CircleShape)
                         .background(Color.White, CircleShape).padding(4.dp).clip(CircleShape).background(Color.Black),
                     contentAlignment = Alignment.Center
-                ) { Image(painterResource(id = R.drawable.logo_hd), contentDescription = "Profile", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+                ) { Image(painterResource(id = R.drawable.logo_hd), contentDescription = "Profile", contentScale = ContentScale.Crop, colorFilter = com.metroplus.app.ui.LogoEnhance, modifier = Modifier.fillMaxSize()) }
                 Box(
                     modifier = Modifier.align(Alignment.BottomEnd).size(32.dp).shadow(4.dp, CircleShape)
                         .background(Brush.linearGradient(listOf(Color(0xFFE0454D), Color(0xFF9E1F25))), CircleShape)
@@ -558,7 +602,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.53", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.61", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))
@@ -600,11 +644,8 @@ private fun DrawerDivider() {
 // Rangeen gradient tile me safed icon (har row ka apna rang).
 @Composable
 private fun DrawerIconTile(icon: androidx.compose.ui.graphics.vector.ImageVector, colors: List<Color>) {
-    Box(
-        modifier = Modifier.size(38.dp).shadow(3.dp, RoundedCornerShape(12.dp), ambientColor = colors.last(), spotColor = colors.last())
-            .background(Brush.linearGradient(colors), RoundedCornerShape(12.dp)),
-        contentAlignment = Alignment.Center
-    ) { Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) }
+    // v1.56: shared 3D tile (upar chamak + kinari), wahi rang.
+    com.metroplus.app.ui.Icon3DTile(icon, colors.last(), colors = colors)
 }
 
 @Composable
