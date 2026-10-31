@@ -1,9 +1,111 @@
-# Metro+ Native App — Handoff (v1.54 / versionCode 55) — DEBUG build
+# Metro+ Native App — Handoff (v1.61 / versionCode 62) — DEBUG build (non-debuggable)
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
 > Store password `android`, alias `androiddebugkey`, key password `android`.
 > Cert SHA-256: `b13501ef91dd30d621c645ea596010d57446a26e2aa5ce26215cc7dc28019302`.
+
+## v1.61 change (31 Oct 2026) — drawer settings pages advance GUI + rang (DEBUG, phone pe NAHI gayi)
+- Uska order: drawer ki har setting (profile, Gps, Calculator, app Setting) ki GUI
+  advance, cards, sab enhance, pyare gradient; baaki screens ke rang bhi.
+- DrawerPages.kt poora naya: DpHero (gradient hero + bara 3D icon), DpSection
+  (header pe 3D tile), gradient DpToggle/DpChoice/DpBigButton, DpStat.
+  Edit Profile: avatar+naam+role/shift chips hero me, "Profile complete" %
+  bar. Calculator: summary (enabled/notes/coins) + Enable all / Notes only +
+  2-column denomination cards. Gps: status stats, Photo stamp (station +
+  NAYE GUI toggles date/time, coordinates), accuracy Balanced/High/Max, map
+  style preview cards. Tl/Rp: wahi content (contact + WhatsApp, TL login,
+  role access with tags) naye cards me. Saari values pageState keys wahi.
+- SettingsScreen: sabz gradient header, profile card teal→lime, group titles
+  pe sabz patti. Opening: hero sunehra→narangi→gulabi, tiles pe halka rangeen
+  gradient + 3D arrow. Closing: hero neela→jamni→magenta, cards lavender,
+  section titles pe patti, PMBS arrow 3D.
+- Sabak: Glow/Watermark ko hero me matchParentSize Box me rakho, warna hero
+  lamba ho jata hai (Opening/drawer heroes me hua tha, theek kiya).
+- Verify: build kamyab; emulator pe drawer pages + Opening dekhe. Settings/
+  Closing ka aakhri screenshot session band hone se reh gaya.
+
+## v1.60 change (31 Oct 2026) — hang fix + Home rang khile hue
+- Uska order: poori app me hang/stuck ki kami theek karo; Home + rang pyare.
+- HANG: emulator pe napa (scratchpad perf.ps1: Home scroll + banner swipe +
+  Tom Data scroll, dumpsys gfxinfo). Wajah: debuggable APK — Android isko
+  optimize nahi karta. Fix: debug buildType me isDebuggable = false (R8 ab bhi
+  band, wahi keystore, assembleDebug hi). Natija: app khulna 6.0s → 2.2s,
+  janky frames 30.7% → 21.6%, p90 61ms → 36ms; APK 17.6 MB → 12.4 MB.
+  (Emulator software GPU pe hai — phone pe aur behtar. Aur behtari: final pe
+  R8 release.) Note: ab debugger attach nahi hota — zaroorat ho to flag hatao.
+- RANG: Home banners/minis/hubs ab vivid() 3-rang gradients (hue badalta),
+  v1.58 ke phike ek-rang tint ki jagah.
+
+## v1.59 change (31 Oct 2026) — purane logos hi, M logo enhance, shine hata, DEBUG build
+- LOGO FAISLA (uska): saare feature/hub logos PURANE hi rahenge (img_money,
+  img_tom, img_gps, img_portal, img_complaint, staff/leave 3d, padlock, Tom
+  icons, ic_dock_* hubs). Rad kiye hue: haath ke bane vector 3D logos (2 dafa,
+  "simple/ajeeb"), naya vector M, aur Microsoft Fluent Emoji 3D options —
+  in me se kuch bhi app me NAHI. Dobara logo badalne ka mashwara na dena jab
+  tak wo khud na kahe.
+- Main M logo: asal logo_hd hi, sirf LogoEnhance ColorFilter (saturation 1.28,
+  contrast 1.12, halki roshni) header + drawer pe; header me 46 → 50dp.
+- Modifier.shine poori tarah hata di (calls + function) — logos pe koi
+  animation nahi.
+
+## v1.58 change (31 Oct 2026) — Home rang ek parivar + logos pe shine, DEBUG build
+- Uska order: logos pyare + shine, Home ke alag alag rang achhe karo.
+- Home banners/minis/hubs ab tintStops(section rang) se (bannerStops /
+  miniStops / hubStops) — pehle har dabbe ke alag haath ke stops the. GPS
+  accent teal 0891B2 (Portal neele se alag). Purane Yellow/Peach/Blue/Purple
+  stops hata diye.
+- Modifier.shine() (ui/Icon3D.kt): upar halki chamak + har ~4s tirchhi
+  safed lakeer, SrcAtop offscreen (sirf tasveer pe). Laga: Home logo, banner
+  art, mini images, hub icons, drawer avatar, Opening tiles/bus/leave, Money
+  image, Settings padlock, Portal logos, Tom Data card icons.
+- Logos ki nayi tasveerein NAHI banayi (asal art wahi) — sirf chamak/rang.
+
+## v1.57 change (31 Oct 2026) — Home pe rang + 3D, DEBUG build, no R8
+- Uska order: Home pe bhi overall rang + 3D icons.
+- Banners/minis/hubs ko accent (section rang): kicker usi rang me, banner ka
+  kala "Open" ab section rang ka 3D pill, minis + hubs ke safed arrow gole ab
+  Icon3DTile. Hub tags Section.Opening/Closing/Portal. GPS = 2563EB.
+- Section titles (More with Metro, Hubs) se pehle laal gradient patti; Home
+  background safed → #F3EDED → halka gulabi gradient; chat button pe chamak
+  + laal saya (63 wala bubble wahi).
+- Section.Money B7791F → E29A0C (bhoora lagta tha).
+- Welcome card, mascot, dock, tile gradients NAHI badle.
+- Emulator (Medium_Phone_API_37) pe install + screenshot se dekha.
+
+## v1.56 change (31 Oct 2026) — rang-nizaam + 3D icon tiles, DEBUG build, no R8
+- Uska "ok kroo" (ideas 1, 2, 6): nayi file ui/Icon3D.kt.
+- Brand laal: BrandRedLight E0454D, BrandRed B02A31, BrandRedDark 9E1F25,
+  BrandRedDeep 7A1A1F. 11 ui files me ~20 milte-julte laal (E11D2E, C6434A,
+  B91018, A32228, D93C44 ...) inhi tokens pe. NAHI chheda: Home welcome card,
+  DockIcons, Confetti, MainActivity drawer header (user ke manzoor shuda).
+- Section rang (object Section): Opening narangi, Closing purple, Money
+  sunehra, Tom narangi-peach, Portal neela, Complaints violet, Settings sabz.
+  Lage: Settings toggles sabz + har row ka apna rang; Portal buttons/icons
+  neele; Money "TODAY'S TOM CLOSING" sunehra; Tom Data header icon + shift
+  chip + History accents narangi. Heroes jo user ne khud chune the (Tom Data
+  neela/gulabi, Money total card) NAHI badle.
+- Icon3DTile (squircle gradient + upar chamak + kinari + rangeen saya):
+  Settings rows, drawer rows, drawer pages ki Gps rows, Closing tiles,
+  Complaint type cards.
+
+## v1.55 change (31 Oct 2026) — code review fixes, DEBUG build, no R8
+- Keyboard: edge-to-edge me koi imePadding nahi tha — chat/form ka neeche wala
+  field keyboard ke peeche chhupta tha. Ab overlay ka neeche ka gap =
+  max(keyboard, nav bar + 76dp dock), manifest me adjustResize, keyboard khula
+  ho to dock chhup jata hai.
+- Values page band karne pe mit jati thin: nayi file ui/PageState.kt
+  (PageStateViewModel + pageState/pageList/pageMap) — chat messages, Edit
+  Profile, Calculator/Gps/TlRp settings, Staff Edit, Complaint form, Portal
+  login ab Activity ViewModel me.
+- TL/RP WhatsApp button + Tom Data WhatsApp buttons ab img_icon_whatsapp_clean
+  (grey dabba khatam; Tom Data pe chat icon ki jagah WhatsApp logo).
+- Dock se page→page (aur camera se wapas) ab AnimatedContent slide; pehle
+  content achanak badal jata tha.
+- TL RP Chat tab me send ke baad scroll filtered list ke aakhri item tak.
+- Home shift/date chip foreground pe dobara banta hai.
+- Verify: vc56/1.55, DEBUG, cert b13501ef, SHA fbaa92ea, 17,647,876 bytes.
+  Updater/manifest pe NAHI dala (user confirm ke baghair nahi).
 
 ## v1.53 change (30 Oct 2026) — 63 ke picker poori app me, DEBUG build, no R8
 - Uska order: station selection wali har jagah pe 63 APK jaisa interface

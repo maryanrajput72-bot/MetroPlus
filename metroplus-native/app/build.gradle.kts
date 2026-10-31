@@ -11,8 +11,8 @@ android {
         applicationId = "com.metroplus.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 54
-        versionName = "1.53"
+        versionCode = 62
+        versionName = "1.61"
     }
 
     signingConfigs {
@@ -29,6 +29,10 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("debug")
+            // HANG FIX (v1.60): "debuggable" APK me Android code ko optimize nahi
+            // karta (har frame dheema, ~30% frames atakte the). R8 ab bhi band hai
+            // (uska rule: R8 sirf final pe) — sirf debugger wala flag band kiya.
+            isDebuggable = false
         }
         // Release: R8 se chhoti aur tez APK (debug build me Compose khud slow chalta hai).
         // Wahi key, taake phone wali app ke upar in-place install ho.
