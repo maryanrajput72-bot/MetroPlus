@@ -3,6 +3,7 @@ package com.metroplus.app.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,7 +48,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -57,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.metroplus.app.R
 
 // 63 ka Portal interface, native Compose me (GUI phase).
 // 63 me Portal ek iframe tha (GCS site app ke andar khulti thi). Native me
@@ -66,7 +70,7 @@ import java.util.Locale
 // Saved Login sheet, Data-Fill sheet aur Quick Fill actions (Auto Fill,
 // TOM A/B, TKM, ASKARI). Save/fill ki wiring agle step me hogi.
 
-private val PoRed = Color(0xFF9E1F25)
+private val PoRed = Section.Portal // v1.56: Portal section ka neela
 private val PoInk = Color(0xFF14181C)
 private val PoGray = Color(0xFF5B6470)
 private const val PORTAL_URL = "https://shababulmohsinapp.ai.studio/"
@@ -174,6 +178,12 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             ) {
                 PoHeaderBtn({ Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = PoInk, modifier = Modifier.size(18.dp)) }, onBack)
                 Spacer(modifier = Modifier.width(12.dp))
+                // Batch item 1: 63 ke portal header jaisa — portal logo + title.
+                Image(
+                    painterResource(id = R.drawable.img_portal), contentDescription = "Portal logo",
+                    contentScale = ContentScale.Fit, modifier = Modifier.size(34.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
                 Text("Online Portal", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, letterSpacing = (-0.3).sp, modifier = Modifier.weight(1f))
                 PoHeaderBtn({ Icon(Icons.Filled.List, contentDescription = "Fill today's data", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showFill = true }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -182,11 +192,57 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 PoHeaderBtn({ Icon(Icons.Filled.Refresh, contentDescription = "Reload", tint = PoInk, modifier = Modifier.size(18.dp)) }) { openBrowser() }
             }
             Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                // Portal kholo (63 me yahan iframe tha — native me browser).
+                // Batch item 1: 63 me yahan website (iframe) khulti thi. Native me
+                // WebView band hai — is liye yahan portal site ka DUMMY preview hai
+                // (us site ke login page jaisa, logos ke sath); asli link baad me
+                // dalenge. Neeche wala button site ko browser me kholta hai.
                 PoCard("GCS PORTAL") {
-                    Text("Portal ki site app ke andar nahi khulti (WebView band hai) — ye button usay browser me kholega.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(PORTAL_URL, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PoRed)
+                    // Dummy browser frame: top strip + andar site ka login page jaisa preview.
+                    Column(
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                            .border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().background(Color(0xFFF6F2F2)).padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(modifier = Modifier.size(8.dp).background(Color(0xFFEF4444), CircleShape))
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Box(modifier = Modifier.size(8.dp).background(Color(0xFFF59E0B), CircleShape))
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Box(modifier = Modifier.size(8.dp).background(Color(0xFF22C55E), CircleShape))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(PORTAL_URL, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = PoGray, modifier = Modifier.weight(1f))
+                        }
+                        Column(
+                            modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painterResource(id = R.drawable.img_portal), contentDescription = "Portal logo",
+                                contentScale = ContentScale.Fit, modifier = Modifier.size(56.dp)
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text("GCS Portal", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = PoInk)
+                            Text("Preview only — live site link will be added later", fontSize = 11.5.sp, color = PoGray)
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Box(
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color(0xFFF6F2F2))
+                                    .border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(10.dp)).padding(horizontal = 12.dp, vertical = 11.dp)
+                            ) { Text("Gmail / Username", fontSize = 13.sp, color = PoInk.copy(alpha = 0.4f)) }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(Color(0xFFF6F2F2))
+                                    .border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(10.dp)).padding(horizontal = 12.dp, vertical = 11.dp)
+                            ) { Text("Password", fontSize = 13.sp, color = PoInk.copy(alpha = 0.4f)) }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Box(
+                                modifier = Modifier.fillMaxWidth().height(44.dp).clip(RoundedCornerShape(12.dp)).background(PoRed)
+                                    .clickable { onGuiNote("Portal Login (Preview)") },
+                                contentAlignment = Alignment.Center
+                            ) { Text("Login", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                     Box(
                         modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), PoRed.copy(alpha = 0.25f))
@@ -202,19 +258,19 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 }
                 // 63 ka FAB menu, card ki shakal me: Quick Fill actions.
                 PoCard("QUICK FILL") {
-                    PoQuickRow(Color(0xFF22C55E), "Auto Fill", "Saved login bharo") { onGuiNote("Portal Auto Fill") }
+                    PoQuickRow(Color(0xFF22C55E), "Auto Fill", "Fill saved login") { onGuiNote("Portal Auto Fill") }
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
                     PoQuickRow(Color(0xFFF97316), "TOM A", "Fill data") { onGuiNote("Portal Fill TOM A") }
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
                     PoQuickRow(Color(0xFF3B82F6), "TOM B", "Fill data") { onGuiNote("Portal Fill TOM B") }
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                    PoQuickRow(Color(0xFFB8141C), "TKM", "Card sale fill") { onGuiNote("Portal Fill TKM") }
+                    PoQuickRow(BrandRedDark, "TKM", "Fill card sale") { onGuiNote("Portal Fill TKM") }
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
-                    PoQuickRow(Color(0xFF0EA5E9), "ASKARI", "Voucher fill") { onGuiNote("Portal Fill ASKARI") }
+                    PoQuickRow(Color(0xFF0EA5E9), "ASKARI", "Fill voucher") { onGuiNote("Portal Fill ASKARI") }
                 }
                 // Saved Login ka khulasa (poori sheet Key button se khulti hai).
                 PoCard("SAVED LOGIN") {
-                    Text("Portal ka Gmail, Username aur Password sirf is device pe save hota hai — Key button se sheet kholo, save karo ya copy karo.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
+                    Text("Portal Gmail, Username and Password are saved only on this device — open the sheet with the Key button to save or copy.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
                     Spacer(modifier = Modifier.height(12.dp))
                     Box(
                         modifier = Modifier.fillMaxWidth().height(46.dp).clip(RoundedCornerShape(14.dp))
@@ -225,7 +281,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Filled.Key, contentDescription = null, tint = PoRed, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Portal Login kholo", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PoInk)
+                            Text("Open Portal Login", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PoInk)
                         }
                     }
                 }
@@ -234,9 +290,9 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         }
         // ---- 63 ki Saved Login sheet (nested overlay) ----
         if (showLogin) {
-            var email by remember { mutableStateOf("") }
-            var username by remember { mutableStateOf("") }
-            var password by remember { mutableStateOf("") }
+            var email by pageState("portal_email", "")
+            var username by pageState("portal_username", "")
+            var password by pageState("portal_password", "")
             Box(
                 modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
                     .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
@@ -263,7 +319,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                                 contentAlignment = Alignment.Center
                             ) { Text("Save Login", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
                             Spacer(modifier = Modifier.height(10.dp))
-                            Text("Save hone ke baad yahan se copy bhi kar sakoge — Auto-fill browser wale portal me kaam nahi karega (iframe nahi hai).", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
+                            Text("After saving you can copy from here too — auto-fill does not work in the browser portal (no in-app view).", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -306,7 +362,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                                 if (i < fillRows.size - 1) Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(PoInk.copy(alpha = 0.06f)))
                             }
                         }
-                        Text("Aaj ki closing Tom Data me save hote hi yahan values aayengi — Save ki wiring agle step me hogi.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp, modifier = Modifier.padding(horizontal = 4.dp))
+                        Text("Values will appear here once today's closing is saved in Tom Data — save wiring comes in a later step.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp, modifier = Modifier.padding(horizontal = 4.dp))
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }

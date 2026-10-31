@@ -70,7 +70,7 @@ private val StationPastels = listOf(
     listOf(Color(0xFFDBEAFE), Color(0xFFBFDBFE))
 )
 
-private val PkRed = Color(0xFF9E1F25)
+private val PkRed = BrandRedDark
 private val PkInk = Color(0xFF14181C)
 private val PkGray = Color(0xFF5B6470)
 
@@ -209,13 +209,13 @@ fun DatePickerSheet(initialDmy: String, onPick: (String) -> Unit, onDismiss: () 
                                 modifier = Modifier.weight(1f).clip(dayShape)
                                     .then(
                                         if (isSel) Modifier.background(cssLinear(135f, 0f to Color(0xFF9B35F2), 1f to Color(0xFFD82EDC)))
-                                        else Modifier.background(Color(0xFFFAFBFC)).border(1.dp, if (isToday) Color(0xFFE11D2E) else Color(0xFFEEF1F3), dayShape)
+                                        else Modifier.background(Color(0xFFFAFBFC)).border(1.dp, if (isToday) BrandRed else Color(0xFFEEF1F3), dayShape)
                                     )
                                     .clickable { onPick(dmy); onDismiss() }.padding(vertical = 10.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text("$day", fontSize = 14.sp, fontWeight = FontWeight.Bold,
-                                    color = if (isSel) Color.White else if (isToday) Color(0xFFB91018) else PkInk)
+                                    color = if (isSel) Color.White else if (isToday) BrandRedDark else PkInk)
                             }
                         }
                     }
@@ -228,7 +228,7 @@ fun DatePickerSheet(initialDmy: String, onPick: (String) -> Unit, onDismiss: () 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(
                     modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
-                        .background(cssLinear(135f, 0f to Color(0xFFE11D2E), 1f to Color(0xFFB91018)))
+                        .background(cssLinear(135f, 0f to BrandRed, 1f to BrandRedDark))
                         .clickable { onPick(todayDmy); onDismiss() }.padding(vertical = 11.dp),
                     contentAlignment = Alignment.Center
                 ) { Text("Today", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }

@@ -35,6 +35,8 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Shield
@@ -46,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,14 +67,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.metroplus.app.R
 
 // Settings & Control — trial 2.1.63 ke settingsScreen ki EXACT copy (computed CSS se naapa):
-// bg #F6F2F2, white header (44dp gol buttons, 18sp title), laal profile card (kona 24),
+// bg #F6F2F2, white header (44dp gol buttons, 18sp title), GREEN profile card
+// (batch item 9: green → light green gradient, role + bara naam, pencil nahi),
 // group titles 11.5sp, white lists (kona 20) me 65dp rows, 38dp rangeen icon tiles, laal toggles,
 // neeche laal "Logout" button. GUI phase: rows sirf note dikhate hain, toggles sirf GUI me chalte hain.
 
 private val SetBg = Color(0xFFF6F2F2)
 private val SetInk = Color(0xFF14181C)
 private val SetMuted = Color(0xFF6B7280)
-private val SetRed = Color(0xFF9E1F25)
+private val SetRed = BrandRedDark
 
 // Toggles ki halat ViewModel me (page band karke kholo to wahi rahe).
 class SettingsViewModel : ViewModel() {
@@ -89,28 +93,33 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var sound by vm.sounds
 
     Column(modifier = Modifier.fillMaxSize().background(SetBg)) {
-        // Header: white 92%, padding 16/20, back | "Settings & Control" | check.
-        Column(modifier = Modifier.fillMaxWidth().background(Color.White.copy(alpha = 0.92f))) {
+        // v1.61: header ab Settings section ke sabz gradient me (drawer pages jaisa),
+        // safed likhai + shishe jaise gole buttons. Pehle safed patti thi.
+        val hShape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp)
+        Box(
+            modifier = Modifier.fillMaxWidth().cssShadow(12.dp, hShape, Color(0xFF15803D).copy(alpha = 0.3f)).clip(hShape)
+                .background(cssLinear(135f, 0f to Color(0xFF34D399), 0.55f to Color(0xFF16A34A), 1f to Color(0xFF0F766E)))
+        ) {
+            Box(Modifier.matchParentSize()) { Glow(200.dp, x = 80.dp, y = (-90).dp, alpha = 0.3f, align = Alignment.TopEnd) }
             Row(
-                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 20.dp, vertical = 18.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 HeaderCircle(Icons.Filled.ArrowBack, "Back", onBack)
-                Text("Settings & Control", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = SetInk, letterSpacing = (-0.3).sp)
+                Text("Settings & Control", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = (-0.3).sp)
                 HeaderCircle(Icons.Filled.Check, "Done", onBack)
             }
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(SetInk.copy(alpha = 0.06f)))
         }
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
             ProfileCard { onGuiNote("Edit Profile") }
             Spacer(modifier = Modifier.height(18.dp))
             SetList {
-                SetRow(Icons.Filled.Badge, Color(0xFFF2E2E3), SetRed, "Supervisor Name", "Not set", divider = false,
+                SetRow(Icons.Filled.Badge, Color(0xFFF2E2E3), Color(0xFF0D9488), "Supervisor Name", "Not set", divider = false,
                     onClick = { onGuiNote("Supervisor Name") }) {
                     Box(
-                        modifier = Modifier.size(34.dp).background(Color(0xFFF4F0F0), CircleShape).clickable { onGuiNote("Supervisor Name") },
+                        modifier = Modifier.size(34.dp).background(Color(0xFFE2F7EA), CircleShape).clickable { onGuiNote("Supervisor Name") },
                         contentAlignment = Alignment.Center
-                    ) { Icon(Icons.Filled.Edit, contentDescription = "Edit", tint = Color(0xFFC9C2C2), modifier = Modifier.size(15.dp)) }
+                    ) { Icon(Icons.Filled.Edit, contentDescription = "Edit", tint = Color(0xFF16A34A), modifier = Modifier.size(15.dp)) }
                 }
             }
             GroupTitle("PREMIUM ACCESS")
@@ -118,26 +127,37 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 SetRow(null, Color(0xFFF6EFDF), Color.Unspecified, "TL / RP Login", "Log in for premium access", divider = false,
                     onClick = { onGuiNote("TL / RP Login") }, image = R.drawable.img_tl_padlock) { Chevron() }
             }
-            GroupTitle("GENERAL PREFERENCES")
+            // Batch item 9b: General Preference — dropdown wala section (tap karo to khule).
+            var genExpanded by remember { mutableStateOf(false) }
+            GroupTitle("GENERAL PREFERENCE")
             SetList {
-                SetRow(Icons.Filled.DarkMode, Color(0xFFE0E1E3), Color(0xFF111827), "Dark mode", "Red & black theme (off = white & red)",
-                    onClick = { dark = !dark }) { Toggle(dark) { dark = it } }
-                SetRow(Icons.Filled.Notifications, Color(0xFFF2E2E3), SetRed, "Push Notifications", "Chat messages & alerts",
-                    onClick = { push = !push }) { Toggle(push) { push = it } }
-                SetRow(Icons.Filled.VolumeUp, Color(0xFFF2E2E3), SetRed, "Sounds & Vibration", "Notification sound + vibration", divider = false,
-                    onClick = { sound = !sound }) { Toggle(sound) { sound = it } }
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable { genExpanded = !genExpanded }.padding(horizontal = 14.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("General Preference", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = SetInk, modifier = Modifier.weight(1f))
+                    Text("Dark mode, notifications, sound", fontSize = 12.5.sp, color = SetMuted)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        if (genExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null, tint = Color(0xFFB4BCB2), modifier = Modifier.size(20.dp)
+                    )
+                }
+                if (genExpanded) {
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF2F0F0)))
+                    SetRow(Icons.Filled.DarkMode, Color(0xFFE0E1E3), Color(0xFF334155), "Dark mode", "Red & black theme (off = white & red)",
+                        onClick = { dark = !dark }) { Toggle(dark) { dark = it } }
+                    SetRow(Icons.Filled.Notifications, Color(0xFFF2E2E3), Color(0xFFF59E0B), "Push Notifications", "Chat messages & alerts",
+                        onClick = { push = !push }) { Toggle(push) { push = it } }
+                    SetRow(Icons.Filled.VolumeUp, Color(0xFFF2E2E3), Color(0xFFDB2777), "Sounds & Vibration", "Notification sound + vibration", divider = false,
+                        onClick = { sound = !sound }) { Toggle(sound) { sound = it } }
+                }
             }
             GroupTitle("APP")
             SetList {
-                SetRow(Icons.Filled.GpsFixed, Color(0xFFDEF8FF), Color(0xFF00C6FF), "Metro & GPS Settings", "GPS accuracy, refresh rate, currency",
-                    onClick = { onGuiNote("Metro & GPS Settings") }) { Chevron() }
-                SetRow(Icons.Filled.Storage, Color(0xFFF4E9FE), Color(0xFFA855F7), "System & Storage", "Sync data, clear cache",
-                    onClick = { onGuiNote("System & Storage") }) { Chevron() }
                 SetRow(Icons.Filled.Sms, Color(0xFFE2F7EA), Color(0xFF22C55E), "Chat Settings", "Bubble size, colors, background",
                     onClick = { onGuiNote("Chat Settings") }) { Chevron() }
-                SetRow(Icons.Filled.Chat, Color(0xFFE3F9EB), Color(0xFF25D366), "WhatsApp Report Format", "Edit opening & closing templates",
-                    onClick = { onGuiNote("WhatsApp Report Format") }) { Chevron() }
-                SetRow(Icons.Filled.Info, Color(0xFFF2E2E3), SetRed, "App Info", "Version, about", divider = false,
+                SetRow(Icons.Filled.Info, Color(0xFFF2E2E3), Color(0xFF2563EB), "App Info", "Version, about", divider = false,
                     onClick = { onGuiNote("App Info") }) { Chevron() }
             }
             Spacer(modifier = Modifier.height(18.dp))
@@ -162,56 +182,50 @@ fun SettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
 @Composable
 private fun HeaderCircle(icon: ImageVector, desc: String, onClick: () -> Unit) {
     Box(
-        modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFF4F0F0)).clickable { onClick() },
+        modifier = Modifier.size(44.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.22f))
+            .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape).clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) { Icon(icon, contentDescription = desc, tint = SetInk, modifier = Modifier.size(19.dp)) }
+    ) { Icon(icon, contentDescription = desc, tint = Color.White, modifier = Modifier.size(19.dp)) }
 }
 
-// Laal profile card: 135° gradient #BF2E35→#9E1F25→#7A171C, kona 24, padding 18, watermark.
+// Batch item 9a: GREEN profile card (green → light green gradient), 63 jaisa
+// thora chhota, pehle ROLE ka word phir BARA naam — aur is card pe pencil NAHI.
 @Composable
 private fun ProfileCard(onEdit: () -> Unit) {
     val shape = RoundedCornerShape(24.dp)
     Box(
         modifier = Modifier.fillMaxWidth()
-            .cssShadow(14.dp, shape, SetRed.copy(alpha = 0.3f)).clip(shape)
-            .background(cssLinear(135f, 0f to Color(0xFFBF2E35), 0.55f to SetRed, 1f to Color(0xFF7A171C)))
+            .cssShadow(14.dp, shape, Color(0xFF16A34A).copy(alpha = 0.3f)).clip(shape)
+            // v1.61: kai-rang (teal → sabz → lime) taake header ke sabz se alag dikhe.
+            .background(cssLinear(135f, 0f to Color(0xFF0EA5A4), 0.5f to Color(0xFF22C55E), 1f to Color(0xFFBEF264)))
     ) {
-        Watermark(143.dp, x = 257.dp, y = (-25).dp, alpha = 0.2f)
-        Row(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+        Watermark(120.dp, x = 257.dp, y = (-25).dp, alpha = 0.2f)
+        Row(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(58.dp).background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
-                    .border(2.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(18.dp)),
+                modifier = Modifier.size(50.dp).background(Color.White.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                    .border(2.dp, Color.White.copy(alpha = 0.45f), RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
-            ) { Text("OP", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+            ) { Text("OP", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
-                // GUI demo naam; Login step me asli profile se aayega.
-                Text("Aryan", fontSize = 19.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(20.dp)).padding(horizontal = 10.dp, vertical = 3.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Filled.Shield, contentDescription = null, tint = Color(0xFF7A171C), modifier = Modifier.size(11.dp))
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text("Staff Account", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF7A171C))
-                }
+                // Role ka pehla word, phir bara naam (uska order). Login step me
+                // asli role + naam yahan aayenge (abhi GUI demo).
+                Text("Operator", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White.copy(alpha = 0.85f), letterSpacing = 0.8.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text("Aryan", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             }
-            Box(
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.18f))
-                    .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(14.dp)).clickable { onEdit() },
-                contentAlignment = Alignment.Center
-            ) { Icon(Icons.Filled.Edit, contentDescription = "Edit Profile", tint = Color.White, modifier = Modifier.size(16.dp)) }
         }
     }
 }
 
 @Composable
 private fun GroupTitle(text: String) {
-    Text(
-        text, fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = SetMuted, letterSpacing = 1.sp,
-        modifier = Modifier.padding(start = 6.dp, top = 18.dp, bottom = 8.dp)
-    )
+    // v1.61: title se pehle sabz gradient patti.
+    Row(modifier = Modifier.padding(start = 4.dp, top = 18.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(width = 4.dp, height = 14.dp).background(Brush.verticalGradient(listOf(Color(0xFF34D399), Color(0xFF0F766E))), RoundedCornerShape(2.dp)))
+        Spacer(modifier = Modifier.width(7.dp))
+        Text(text, fontSize = 11.5.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF166534), letterSpacing = 1.sp)
+    }
 }
 
 @Composable
@@ -236,10 +250,11 @@ private fun SetRow(
             modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 14.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(38.dp).background(tileBg, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
-                if (image != null) Image(painterResource(id = image), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(28.dp))
-                else if (icon != null) Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(18.dp))
+            // v1.56: icon ab 3D tile me (rangeen gradient + chamak); tasveer wali row wahi.
+            if (image != null) Box(modifier = Modifier.size(38.dp).background(tileBg, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+                Image(painterResource(id = image), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.size(28.dp))
             }
+            else if (icon != null) Icon3DTile(icon, iconTint)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(label, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = SetInk)
@@ -257,13 +272,14 @@ private fun Chevron() {
     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color(0xFFB4BCB2), modifier = Modifier.size(20.dp))
 }
 
-// Trial toggle: 44x24, off #E4DEDE, on 135° #D93C44→#9E1F25, 18dp safed knob (saya), 20dp khiskta hai.
+// Trial toggle: 44x24, off #E4DEDE, 18dp safed knob (saya), 20dp khiskta hai.
+// v1.56: "on" ab Settings section ke sabz rang me (pehle laal #D93C44→#9E1F25).
 @Composable
 private fun Toggle(on: Boolean, onChange: (Boolean) -> Unit) {
     val knob by animateDpAsState(if (on) 20.dp else 0.dp, tween(200), label = "toggleKnob")
     Box(
         modifier = Modifier.size(44.dp, 24.dp).clip(RoundedCornerShape(24.dp))
-            .background(if (on) cssLinear(135f, 0f to Color(0xFFD93C44), 1f to SetRed) else Brush.linearGradient(listOf(Color(0xFFE4DEDE), Color(0xFFE4DEDE))))
+            .background(if (on) cssLinear(135f, 0f to Section.Settings.lighter(), 1f to Section.Settings) else Brush.linearGradient(listOf(Color(0xFFE4DEDE), Color(0xFFE4DEDE))))
             .clickable { onChange(!on) }
     ) {
         Box(
