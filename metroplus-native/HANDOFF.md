@@ -1,4 +1,25 @@
-# Metro+ Native App — Handoff (v1.87 / versionCode 88) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.88 / versionCode 89) — DEBUG build (non-debuggable)
+
+## v1.88 change (1 Nov 2026) — ASKARI Auto-Fill dialog (uska order, DEBUG)
+- ASKARI dialog (63 ke stlFillModal se — "3 slip numbers"): title
+  "Askari Auto-Fill" (bank icon #0EA5E9), note "Enter these 3
+  things — then tap Auto-Fill:", fields Voucher Slip Number
+  (numeric), Seal Number (default "N-", editable, text keyboard),
+  BOP Deposit Slip Number (numeric); Auto-Fill (sky-blue gradient)
+  + Cancel. DARMIYAN (center) me square jaisa card, TKM dialog
+  jaisa. ASKARI dropdown card ab ye dialog kholta hai (khulte
+  waqt Voucher/BOP saaf, Seal "N-"). GUI phase: Auto-Fill abhi
+  note dikhata hai (site-fill agla step). TL Name field NAHI —
+  63 me wo Settings se aata tha, native me Portal Settings abhi
+  placeholder hai.
+- NOTE ONLY (uska order, is version me BUILD NAHI): Opening theme
+  GREEN (dark + light green, hub jaisa) — dock Opening pill (pehle
+  se v1.87 me sabz), Opening hub, Opening par click se khulne
+  wale pages, andar wali tabs, neeche wale items, GPS wale bhi.
+  Ye note MEMORY me hai; banega jab wo aage wali cheezein bataye.
+- GitHub APK RULE: is release me v1.88 upload + v1.86 delete (1.87 +
+  1.88 rahengi); manifest apkUrl = GitHub raw v1.88.
+- Verify: TODO build ke baad.
 
 ## v1.87 change (1 Nov 2026) — dialogs DARMIYAN me + ASKARI card wapas apni jagah (uski correction, DEBUG)
 - ASKARI card WAPAS APNI JAGAH (dropdown me aakhir) — v1.86 wali
@@ -27,9 +48,13 @@
   aur TomData bhi use karte hain).
 - GitHub APK RULE: is release me v1.87 upload + v1.85 delete (1.86 +
   1.87 rahengi); manifest apkUrl = GitHub raw v1.87.
-- Verify: TODO dobara build ke baad (pehli v1.87 build dialogs-only
-  thi, SHA 505f40f6 — wo ship NAHI hogi; final v1.87 me dock +
-  closing polish bhi hoga).
+- Verify (2026-11-01 ~02:03 PKT): FINAL APK 12,568,475 bytes, SHA
+  c932ed13, cert b13501ef; dex me "Version 1.87" + "TKM Auto-Fill"
+  + "Portal Login" + "Incident Info" maujood, "Version 1.86"
+  ghayab. Code head e80adaab, APK commit ca12dee, v1.85 delete OK
+  (read = does not exist), MANIFEST LIVE vc88 (JSON verify).
+  GitHub latest-2: 1.86 + 1.87. (Beech ki do builds ship NAHI hui:
+  dialogs-only 505f40f6, bar-gradient wali 38b30ef0.)
 
 ## v1.86 change (1 Nov 2026) — TKM GUI (63 se) + side lines white-blue + ASKARI darmiyan + Closing purple (uska order, DEBUG)
 - TKM GUI (63 ke TKM Auto-Fill dialog se — trial263-ref: title, note,

@@ -37,6 +37,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ConfirmationNumber
@@ -47,6 +49,8 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
@@ -332,6 +336,13 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
     var showTkm by remember { mutableStateOf(false) }
     var tkmCardCount by remember { mutableStateOf("") }
     var tkmSaleAmount by remember { mutableStateOf("") }
+    // v1.88: ASKARI Auto-Fill dialog (63 ke stlFillModal se) — 3 slip
+    // numbers; TL Name 63 me Settings se aata tha, native me Portal
+    // Settings abhi placeholder hai is liye sirf 3 fields.
+    var showAskari by remember { mutableStateOf(false) }
+    var askVoucher by remember { mutableStateOf("") }
+    var askSeal by remember { mutableStateOf("N-") }
+    var askBop by remember { mutableStateOf("") }
     // v1.80: dropdown Quick Fill overlay + three-dot card.
     var quickOpen by remember { mutableStateOf(false) }
     var dotMenuOpen by remember { mutableStateOf(false) }
@@ -356,7 +367,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
     // sirf tab jab Portal waqai khula ho, warna Home ka back kharab hota.
     // Chhupte waqt menus/sheets band (dobara kholo to saaf Portal mile).
     LaunchedEffect(isActive) {
-        if (!isActive) { quickOpen = false; dotMenuOpen = false; showLogin = false; showTkm = false }
+        if (!isActive) { quickOpen = false; dotMenuOpen = false; showLogin = false; showTkm = false; showAskari = false }
     }
     // Back: pehle menus/panel/sheets, phir WebView history, phir page.
     BackHandler(enabled = isActive) {
@@ -364,6 +375,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
         else if (dotMenuOpen) dotMenuOpen = false
         else if (showLogin) showLogin = false
         else if (showTkm) showTkm = false
+        else if (showAskari) showAskari = false
         else if (PortalWeb.webView?.canGoBack() == true) PortalWeb.webView?.goBack()
         else onBack()
     }
@@ -475,7 +487,7 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                         PoQuickCard(Color(0xFF0B5BD3), Color(0xFF60A5FA), "TOM A", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM A") }
                         PoQuickCard(Color(0xFF1E40AF), Color(0xFF3B82F6), "TOM B", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM B") }
                         PoQuickCard(Color(0xFF0B2A5B), Color(0xFF1D6FD8), "TKM", "Card sale", Modifier.weight(1f)) { quickOpen = false; tkmCardCount = ""; tkmSaleAmount = ""; showTkm = true }
-                        PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Voucher", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill ASKARI") }
+                        PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Voucher", Modifier.weight(1f)) { quickOpen = false; askVoucher = ""; askSeal = "N-"; askBop = ""; showAskari = true }
                     }
                 }
                 }
@@ -578,6 +590,52 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                 }
             }
         }
-
+        // ---- ASKARI Auto-Fill dialog (v1.88, 63 ke stlFillModal se) ----
+        // 63 ki tarah: title (bank icon #0EA5E9), note, 3 slip fields
+        // (Voucher, Seal default "N-", BOP Deposit), Auto-Fill + Cancel.
+        // DARMIYAN (center) me, TKM dialog jaisa. GUI phase: Auto-Fill
+        // abhi note dikhata hai (site me asli fill agla step).
+        if (showAskari) {
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)).clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { showAskari = false }) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp)
+                        .clip(RoundedCornerShape(22.dp)).background(Color.White)
+                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
+                        .verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(Color(0xFFE0F2FE)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.AccountBalance, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(18.dp))
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("Askari Auto-Fill", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, modifier = Modifier.weight(1f))
+                        PoHeaderBtn({ Icon(Icons.Filled.Close, contentDescription = "Close", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showAskari = false }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Enter these 3 things — then tap Auto-Fill:", fontSize = 13.sp, color = PoGray, lineHeight = 18.sp)
+                    Spacer(modifier = Modifier.height(14.dp))
+                    PoField("Voucher Slip Number", { Icon(Icons.Filled.Receipt, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(15.dp)) }, askVoucher, { askVoucher = it.filter { ch -> ch.isDigit() } }, "Voucher slip no.", keyboard = KeyboardType.Number)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    PoField("Seal Number", { Icon(Icons.Filled.Tag, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(15.dp)) }, askSeal, { askSeal = it }, "Seal no.")
+                    Spacer(modifier = Modifier.height(12.dp))
+                    PoField("BOP Deposit Slip Number", { Icon(Icons.Filled.AccountBalanceWallet, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(15.dp)) }, askBop, { askBop = it.filter { ch -> ch.isDigit() } }, "BOP deposit slip no.", keyboard = KeyboardType.Number)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(
+                            modifier = Modifier.weight(1f).height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), Color(0xFF0EA5E9).copy(alpha = 0.25f))
+                                .clip(RoundedCornerShape(14.dp)).background(cssLinear(135f, 0f to Color(0xFF38BDF8), 1f to Color(0xFF0EA5E9)))
+                                .clickable { showAskari = false; onGuiNote("Portal Fill ASKARI") },
+                            contentAlignment = Alignment.Center
+                        ) { Text("Auto-Fill", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                        Box(
+                            modifier = Modifier.height(48.dp).clip(RoundedCornerShape(14.dp)).background(Color(0xFFEAF2FE)).border(1.dp, PoInk.copy(alpha = 0.1f), RoundedCornerShape(14.dp))
+                                .clickable { showAskari = false }.padding(horizontal = 18.dp),
+                            contentAlignment = Alignment.Center
+                        ) { Text("Cancel", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PoInk) }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+            }
+        }
     }
 }
