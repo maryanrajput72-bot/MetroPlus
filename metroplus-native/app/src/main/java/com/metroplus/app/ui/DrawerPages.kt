@@ -573,7 +573,9 @@ fun TlRpSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     BackHandler { onBack() }
     var gmail by pageState("tlrp_gmail", "")
     var password by pageState("tlrp_password", "")
+    var showPremium by remember { mutableStateOf(false) }
     val purple = TlGrad[1]
+    Box(modifier = Modifier.fillMaxSize()) {
     DpPage {
         DpHero("Tl/Rp access setting", "Premium access for team leads", Icons.Filled.AdminPanelSettings, TlGrad, onBack)
         DpBody {
@@ -610,8 +612,12 @@ fun TlRpSettingsScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 DpDivider()
                 RoleRow(Icons.Filled.SupervisorAccount, purple, "TL / RP", "Full app access", listOf("TOM", "Closing", "Complaint", "Settings"))
             }
+            // v1.62: Premium request modal ka button (63 ke premium modal ki GUI).
+            DpBigButton("Request Premium Access", Icons.Filled.AdminPanelSettings, TlGrad) { showPremium = true }
             Spacer(modifier = Modifier.height(4.dp))
         }
+    }
+    if (showPremium) PremiumRequestModal(onClose = { showPremium = false }, onGuiNote = onGuiNote)
     }
 }
 
