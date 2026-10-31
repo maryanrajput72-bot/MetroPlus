@@ -142,13 +142,13 @@ fun ClosingScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             ClSection("SHIFT CLOSINGS", top = 22.dp)
             // v1.74 (uska order): Closing cards bhi hub style — har card ka
             // apna 2-rang gradient (pehle sab pe ek hi lavender tint tha).
-            ClCard(watermark = 125.dp, colors = listOf(Color(0xFFEDE9FE), Color(0xFFA78BFA))) {
+            ClCard(watermark = 125.dp, colors = listOf(Color(0xFFF5F3FF), Color(0xFFA78BFA))) {
                 ClIconTile(Icons.Filled.ConfirmationNumber, Color(0xFFC4B5FD), Color(0xFF7C3AED))
                 ClText("TOM · TKM · POS", "Ticket machines, TKM & POS closing", Modifier.weight(1f))
                 ClWa { onGuiNote("TOM · TKM · POS") }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            ClCard(watermark = 122.dp, colors = listOf(Color(0xFFF3F0FF), Color(0xFFDDD6FE))) {
+            ClCard(watermark = 122.dp, colors = listOf(Color(0xFFEDE9FE), Color(0xFFC4B5FD))) {
                 ClIconTile(Icons.Filled.DirectionsBus, Color(0xFF8B5CF6), Color(0xFF5B21B6))
                 ClText("RMBS Closing", "Red line station closing format", Modifier.weight(1f))
                 ClWa { onGuiNote("RMBS Closing") }

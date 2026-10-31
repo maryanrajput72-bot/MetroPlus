@@ -466,15 +466,16 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                     Text("QUICK FILL", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = PoInk.copy(alpha = 0.55f), letterSpacing = 1.2.sp)
                     Spacer(modifier = Modifier.height(10.dp))
                     // v1.84: paanchon chhote cards EK hi line me, header se
-                    // neeche (gap + dark border wahi). v1.86 (uska order):
-                    // ASKARI card DARMIYAN (teesri position) me; TKM card
-                    // nayi TKM GUI (dialog) kholta hai.
+                    // neeche (gap + dark border wahi). v1.87 (uski
+                    // correction): ASKARI card WAPAS APNI JAGAH (aakhir) me —
+                    // darmiyan sirf uske DIALOG ki jagah hai, card ki nahi;
+                    // TKM card nayi TKM GUI (dialog) kholta hai.
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         PoQuickCard(Color(0xFF1D6FD8), Color(0xFF38BDF8), "Auto Fill", "Login", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Auto Fill") }
                         PoQuickCard(Color(0xFF0B5BD3), Color(0xFF60A5FA), "TOM A", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM A") }
-                        PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Voucher", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill ASKARI") }
                         PoQuickCard(Color(0xFF1E40AF), Color(0xFF3B82F6), "TOM B", "Data", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill TOM B") }
                         PoQuickCard(Color(0xFF0B2A5B), Color(0xFF1D6FD8), "TKM", "Card sale", Modifier.weight(1f)) { quickOpen = false; tkmCardCount = ""; tkmSaleAmount = ""; showTkm = true }
+                        PoQuickCard(Color(0xFF2563EB), Color(0xFF93C5FD), "ASKARI", "Voucher", Modifier.weight(1f)) { quickOpen = false; onGuiNote("Portal Fill ASKARI") }
                     }
                 }
                 }
@@ -495,61 +496,56 @@ fun PortalScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, isActive: Bool
                 }
             }
         }
-        // ---- 63 ki Saved Login sheet (nested overlay) ----
+        // ---- Saved Login dialog (v1.87: DARMIYAN me square jaisa card) ----
+        // Pehle full-screen sheet thi — uski correction par ab ye bhi
+        // darmiyan me khulta hai (scrim + safed card). Gmail/username
+        // device par save (SharedPreferences) — sheet kholo to pehle se
+        // bhare milenge. Password save nahi hota.
         if (showLogin) {
-            // v1.81: Gmail/username device par save (SharedPreferences) —
-            // sheet kholo to pehle se bhare milenge. Password save nahi hota.
             val loginPrefs = remember { ctx.getSharedPreferences("portal_login", Context.MODE_PRIVATE) }
             var email by pageState("portal_email", loginPrefs.getString("portal_email", "") ?: "")
             var username by pageState("portal_username", loginPrefs.getString("portal_username", "") ?: "")
             var password by pageState("portal_password", "")
             Box(
-                modifier = Modifier.fillMaxSize().background(Color(0xFFEAF2FE))
-                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f))
+                    .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { showLogin = false }
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().background(Color(0xFFEAF2FE)).statusBarsPadding().padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp)
+                        .clip(RoundedCornerShape(22.dp)).background(Color.White)
+                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
+                        .verticalScroll(rememberScrollState()).padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Portal Login", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = PoInk, letterSpacing = (-0.3).sp, modifier = Modifier.weight(1f))
                         PoHeaderBtn({ Icon(Icons.Filled.Close, contentDescription = "Close", tint = PoInk, modifier = Modifier.size(18.dp)) }) { showLogin = false }
                     }
-                    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        PoCard(null) {
-                            PoField("Gmail", { Icon(Icons.Filled.Person, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp)) }, email, { email = it }, "Portal Gmail")
-                            Spacer(modifier = Modifier.height(10.dp))
-                            PoField("Username", { Icon(Icons.Filled.Person, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp)) }, username, { username = it }, "User ID")
-                            Spacer(modifier = Modifier.height(10.dp))
-                            PoField("Password", { Icon(Icons.Filled.Lock, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp)) }, password, { password = it }, "Password", password = true)
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Box(
-                                modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), PoRed.copy(alpha = 0.25f))
-                                    .clip(RoundedCornerShape(14.dp)).background(PoRed).clickable { loginPrefs.edit().putString("portal_email", email).putString("portal_username", username).apply(); onGuiNote("Save Portal Login") },
-                                contentAlignment = Alignment.Center
-                            ) { Text("Save Login", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text("Gmail aur username ab save rahenge — sheet kholo to pehle se bhare milenge. Site ka login cookies se laga rehta hai; session khatam ho to yahan se copy kar lo.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                    PoField("Gmail", { Icon(Icons.Filled.Person, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp)) }, email, { email = it }, "Portal Gmail")
+                    PoField("Username", { Icon(Icons.Filled.Person, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp)) }, username, { username = it }, "User ID")
+                    PoField("Password", { Icon(Icons.Filled.Lock, contentDescription = null, tint = PoRed, modifier = Modifier.size(15.dp)) }, password, { password = it }, "Password", password = true)
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), PoRed.copy(alpha = 0.25f))
+                            .clip(RoundedCornerShape(14.dp)).background(PoRed).clickable { loginPrefs.edit().putString("portal_email", email).putString("portal_username", username).apply(); onGuiNote("Save Portal Login") },
+                        contentAlignment = Alignment.Center
+                    ) { Text("Save Login", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                    Text("Gmail aur username ab save rahenge — sheet kholo to pehle se bhare milenge. Site ka login cookies se laga rehta hai; session khatam ho to yahan se copy kar lo.", fontSize = 12.5.sp, color = PoGray, lineHeight = 18.sp)
                 }
             }
         }
         // ---- NAYI TKM GUI (v1.86, 63 ke TKM Auto-Fill dialog se, sky blue) ----
-        // Purani full-screen Fill sheet ki jagah bottom-sheet card — 63 ki
-        // tarah: drag bar, title, note, 2 number fields, Auto-Fill + Cancel.
-        // GUI phase: Auto-Fill abhi note dikhata hai (site me asli fill agla step).
+        // v1.87 (uski correction): neeche wali sheet NAHI — DARMIYAN
+        // (center) me square jaisa compact card. 63 ki tarah: title, note,
+        // 2 number fields, Auto-Fill + Cancel. GUI phase: Auto-Fill abhi
+        // note dikhata hai (site me asli fill agla step).
         if (showTkm) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f)).clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { showTkm = false }) {
                 Column(
-                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                        .clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(Color.White)
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 24.dp)
+                        .clip(RoundedCornerShape(22.dp)).background(Color.White)
                         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }
                         .padding(horizontal = 16.dp, vertical = 14.dp)
                 ) {
-                    Box(modifier = Modifier.width(44.dp).height(4.dp).clip(RoundedCornerShape(2.dp)).background(Color(0xFFE2E8F0)).align(Alignment.CenterHorizontally))
-                    Spacer(modifier = Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(modifier = Modifier.size(34.dp).clip(CircleShape).background(Color(0xFFE0F2FE)), contentAlignment = Alignment.Center) {
                             Icon(Icons.Filled.ConfirmationNumber, contentDescription = null, tint = Color(0xFF0EA5E9), modifier = Modifier.size(18.dp))

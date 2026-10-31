@@ -671,7 +671,11 @@ fun MetroPlusApp() {
 @Composable
 private fun BottomNavBar(modifier: Modifier = Modifier, activeNav: NavTab, onNavClick: (NavTab) -> Unit) {
     // Dock (user ka diya design): SAFED pill bar, baaki items sirf rangeen 3D icon; jo select ho
-    // wo LAAL pill ban jata hai — safed gol me 3D icon + poora naam — pill smooth phail/simat jati hai.
+    // wo rang wali pill ban jata hai — safed gol me 3D icon + poora naam — pill smooth phail/simat jati hai.
+    // v1.87 (uska order + correction): bar WAHI SAFED rehti hai — sirf
+    // SELECTED PILL ka rang section ke hisab se badalta hai: OPENING pe
+    // hub wala sabz (halka #4ADE80 → gehra #16A34A), CLOSING pe purple,
+    // PORTAL pe sky blue, HOME pe wahi laal.
     // v1.63: dock se Settings hata diya (uska order) — sirf 4 rahenge.
     // Settings ab bhi drawer ki "app Setting" row aur Home ki Settings entry se khulti hai.
     // v1.64 (uska order): Home pehle, phir Opening, phir Closing, aakhir me Portal.
@@ -693,19 +697,25 @@ private fun BottomNavBar(modifier: Modifier = Modifier, activeNav: NavTab, onNav
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         tabs.forEach { (tab, icon, label) ->
-            BottomNavItem(icon = icon, label = label, selected = activeNav == tab, onClick = { onNavClick(tab) })
+            val (pillTop, pillBottom, pillShadow) = when (tab) {
+                NavTab.OPENING -> Triple(Color(0xFF4ADE80), Color(0xFF16A34A), Color(0xFF16A34A))
+                NavTab.CLOSING -> Triple(Color(0xFFA78BFA), Color(0xFF6D28D9), Color(0xFF6D28D9))
+                NavTab.PORTAL -> Triple(Color(0xFF38BDF8), Color(0xFF0284C7), Color(0xFF0284C7))
+                else -> Triple(Color(0xFFE0454D), Color(0xFFA81E26), Color(0xFFB02A31))
+            }
+            BottomNavItem(icon = icon, label = label, selected = activeNav == tab, onClick = { onNavClick(tab) }, pillTop = pillTop, pillBottom = pillBottom, pillShadow = pillShadow)
         }
     }
 }
 
 @Composable
-private fun BottomNavItem(icon: DockIcon, label: String, selected: Boolean, onClick: () -> Unit) {
+private fun BottomNavItem(icon: DockIcon, label: String, selected: Boolean, onClick: () -> Unit, pillTop: Color = Color(0xFFE0454D), pillBottom: Color = Color(0xFFA81E26), pillShadow: Color = Color(0xFFB02A31)) {
     val pillAlpha by animateFloatAsState(if (selected) 1f else 0f, tween(300), label = "dockPill")
     val elevation by animateDpAsState(if (selected) 6.dp else 0.dp, tween(300), label = "dockElev")
     Row(
         modifier = Modifier.height(46.dp)
-            .shadow(elevation, CircleShape, ambientColor = Color(0xFFB02A31).copy(alpha = 0.45f), spotColor = Color(0xFFB02A31).copy(alpha = 0.45f))
-            .background(Brush.verticalGradient(listOf(Color(0xFFE0454D).copy(alpha = pillAlpha), Color(0xFFA81E26).copy(alpha = pillAlpha))), CircleShape)
+            .shadow(elevation, CircleShape, ambientColor = pillShadow.copy(alpha = 0.45f), spotColor = pillShadow.copy(alpha = 0.45f))
+            .background(Brush.verticalGradient(listOf(pillTop.copy(alpha = pillAlpha), pillBottom.copy(alpha = pillAlpha))), CircleShape)
             .clip(CircleShape)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { onClick() }
             .animateContentSize(tween(300, easing = FastOutSlowInEasing))
@@ -713,7 +723,7 @@ private fun BottomNavItem(icon: DockIcon, label: String, selected: Boolean, onCl
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (selected) {
-            // Laal pill me icon safed gol plate pe (ghar ki laal chhat laal pe na chhupe).
+            // Rang wali pill me icon safed gol plate pe (ghar ki laal chhat laal pe na chhupe).
             Box(
                 modifier = Modifier.size(36.dp).shadow(3.dp, CircleShape)
                     .background(Brush.radialGradient(0f to Color.White, 0.6f to Color(0xFFFFF4F4), 1f to Color(0xFFF1DADB)), CircleShape),
@@ -848,7 +858,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.86", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.87", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

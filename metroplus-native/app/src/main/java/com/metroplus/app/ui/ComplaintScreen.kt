@@ -174,11 +174,12 @@ private fun RowScope.CmpTypeCard(
 // Batch item 10b: andar wale cards ke bhi colour hon — har type ka apna
 // accent: upar 4dp accent strip + kicker accent rang me.
 @Composable
-private fun CmpCard(title: String, kicker: String, accent: Color, content: @Composable ColumnScope.() -> Unit) {
+private fun CmpCard(title: String, kicker: String, accent: Color, purpleMix: Boolean = false, content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Column(
-        modifier = Modifier.fillMaxWidth().cssShadow(5.dp, shape, CmpInk.copy(alpha = 0.08f))
-            .background(Color.White, shape).border(1.dp, CmpInk.copy(alpha = 0.06f), shape).clip(shape)
+        modifier = Modifier.fillMaxWidth().cssShadow(5.dp, shape, if (purpleMix) Color(0xFF6D28D9).copy(alpha = 0.12f) else CmpInk.copy(alpha = 0.08f))
+            .background(if (purpleMix) cssLinear(135f, 0f to Color(0xFFF5F3FF), 1f to Color(0xFFDDD6FE)) else Brush.linearGradient(listOf(Color.White, Color.White)), shape)
+            .border(1.dp, if (purpleMix) Color(0xFF7C3AED).copy(alpha = 0.18f) else CmpInk.copy(alpha = 0.06f), shape).clip(shape)
     ) {
         Box(modifier = Modifier.fillMaxWidth().height(4.dp).background(accent))
         Column(modifier = Modifier.padding(16.dp)) {
@@ -200,7 +201,7 @@ private fun CmpInfoRow(label: String, value: String) {
 }
 
 @Composable
-private fun ColumnScope.CmpField(label: String, value: String, onValue: (String) -> Unit, placeholder: String, lines: Int = 1) {
+private fun ColumnScope.CmpField(label: String, value: String, onValue: (String) -> Unit, placeholder: String, lines: Int = 1, purpleMix: Boolean = false) {
     Text(label, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
     val shape = RoundedCornerShape(12.dp)
     BasicTextField(
@@ -209,7 +210,7 @@ private fun ColumnScope.CmpField(label: String, value: String, onValue: (String)
         modifier = Modifier.fillMaxWidth(),
         decorationBox = { inner ->
             Box(
-                modifier = Modifier.fillMaxWidth().clip(shape).background(Color(0xFFF6F2F2)).border(1.dp, CmpInk.copy(alpha = 0.1f), shape)
+                modifier = Modifier.fillMaxWidth().clip(shape).background(if (purpleMix) Color(0xFFEDE9FE) else Color(0xFFF6F2F2)).border(1.dp, if (purpleMix) Color(0xFF7C3AED).copy(alpha = 0.18f) else CmpInk.copy(alpha = 0.1f), shape)
                     .padding(horizontal = 10.dp, vertical = 9.dp),
                 contentAlignment = Alignment.TopStart
             ) {
@@ -273,30 +274,33 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
     var incCasualties by pageState("cmp_incCasualties", "")
     var incStatus by pageState("cmp_incStatus", "")
     // Batch item 10b: har type ka accent (andar wale cards + letter button).
+    // v1.87 (uska order — Closing ke andar PMBS): PMBS ka accent laal se
+    // purple; uske cards/fields bhi purple mix. Baaki types wahi.
     val accent = when (type) {
         CmpType.TOM -> Color(0xFF8B5CF6)
         CmpType.AGM -> Color(0xFFB45309)
         CmpType.TKM -> Color(0xFF2563EB)
         CmpType.OTHER -> Color(0xFF059669)
-        CmpType.PMBS -> CmpRed
+        CmpType.PMBS -> Color(0xFF6D28D9)
         CmpType.POS -> Color(0xFFEA580C)
     }
+    val isPmbs = type == CmpType.PMBS
 
     // FIX (v1.42): form ka apna poora opaque background + click-consumer —
     // pehle background nahi tha, is liye list peeche se nazar aati thi aur
     // khaali jagah ke tap list tak pahunch jate the.
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
+    Column(modifier = Modifier.fillMaxSize().background(if (isPmbs) Color(0xFFF3F0FF) else Color(0xFFF3EDED))
         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
         CmpHeader(type.title, onBack)
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            CmpCard("Report Info", "AUTO DETAILS", accent) {
+            CmpCard("Report Info", "AUTO DETAILS", accent, purpleMix = isPmbs) {
                 CmpInfoRow("Date", today)
                 CmpInfoRow("Station", "Shaheed-e-Millat")
                 CmpInfoRow("Shift", shift)
                 CmpInfoRow("Supervisor", "—")
             }
             when (type) {
-                CmpType.TOM -> CmpCard("TOM Info", "COMPLAINT DETAILS", accent) {
+                CmpType.TOM -> CmpCard("TOM Info", "COMPLAINT DETAILS", accent, purpleMix = isPmbs) {
                     Text("Which TOM has the issue? (select multiple)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
                     CmpChipsRow(listOf("TOM 1", "TOM 2", "TOM 3"), tomSelected) { tomSelected = if (it in tomSelected) tomSelected - it else tomSelected + it }
                     Text("Equipment No (select printer)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
@@ -310,7 +314,7 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     Spacer(modifier = Modifier.height(8.dp))
                     CmpChipsRow(listOf("Internet Issue", "Jumping Issue", "App Not Working", "Ticket Miss Print", "Miss Print", "Slips Stuck in Printer"), setOf(tomIssue)) { tomIssue = it }
                 }
-                CmpType.AGM -> CmpCard("AGM Info", "COMPLAINT DETAILS", accent) {
+                CmpType.AGM -> CmpCard("AGM Info", "COMPLAINT DETAILS", accent, purpleMix = isPmbs) {
                     CmpField("Equipment Name", agmEquipName, { agmEquipName = it }, "e.g. Turnstile")
                     Text("Equipment No", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
                     CmpChipsRow(listOf("AGM 1", "AGM 2", "AGM 3"), agmEquipSelected) { agmEquipSelected = if (it in agmEquipSelected) agmEquipSelected - it else agmEquipSelected + it }
@@ -323,13 +327,13 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     Spacer(modifier = Modifier.height(8.dp))
                     CmpChipsRow(listOf("Internet Issue", "Slip Notes Scanning", "Display Not Working", "App Not Open", "T-Cash Card Not Working", "Debit and T-Cash Card Not Working", "Debit Card Not Working"), setOf(agmIssue)) { agmIssue = it }
                 }
-                CmpType.TKM -> CmpCard("TKM Info", "COMPLAINT DETAILS", accent) {
+                CmpType.TKM -> CmpCard("TKM Info", "COMPLAINT DETAILS", accent, purpleMix = isPmbs) {
                     CmpField("Equipment No (auto by station)", tkmEquip, { tkmEquip = it }, "e.g. tkm 01")
                     CmpField("Issue", tkmIssue, { tkmIssue = it }, "Type the issue or pick one below", lines = 3)
                     Spacer(modifier = Modifier.height(8.dp))
                     CmpChipsRow(listOf("Debit Card Not Working", "Debit and T-Cash Card Not Working", "T-Card Not Working", "Display Error", "Printer Roll Issue", "Roll Not Available"), setOf(tkmIssue)) { tkmIssue = it }
                 }
-                CmpType.OTHER -> CmpCard("Other Info", "COMPLAINT DETAILS", accent) {
+                CmpType.OTHER -> CmpCard("Other Info", "COMPLAINT DETAILS", accent, purpleMix = isPmbs) {
                     CmpField("Equipment Name", otherEquipName, { otherEquipName = it }, "e.g. AC")
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -341,18 +345,18 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     CmpField("Issue", otherIssue, { otherIssue = it }, "Type the issue", lines = 3)
                 }
                 // Batch item 10c: POS shell — andar ki cheezein baad me ayengi.
-                CmpType.POS -> CmpCard("POS Card Complaint", "COMING SOON", accent) {
+                CmpType.POS -> CmpCard("POS Card Complaint", "COMING SOON", accent, purpleMix = isPmbs) {
                     Text("POS Card Complaint details will be added later.", fontSize = 13.5.sp, color = CmpGray, lineHeight = 20.sp)
                 }
-                CmpType.PMBS -> CmpCard("Incident Info", "COMPLAINT DETAILS", accent) {
-                    CmpField("Incident Time", incTime, { incTime = it }, "e.g. 14:30")
-                    CmpField("Employee Name", incEmpName, { incEmpName = it }, "Employee name")
-                    CmpField("Employee ID", incEmpId, { incEmpId = it }, "Employee ID")
-                    CmpField("Incident Type", incType, { incType = it }, "Incident type")
-                    CmpField("Incident Details", incDetails, { incDetails = it }, "Incident details", lines = 3)
-                    CmpField("Physical Injury", incInjury, { incInjury = it }, "Nill")
-                    CmpField("Any Casualties Reported", incCasualties, { incCasualties = it }, "Nill")
-                    CmpField("Status", incStatus, { incStatus = it }, "Nill")
+                CmpType.PMBS -> CmpCard("Incident Info", "COMPLAINT DETAILS", accent, purpleMix = isPmbs) {
+                    CmpField("Incident Time", incTime, { incTime = it }, "e.g. 14:30", purpleMix = isPmbs)
+                    CmpField("Employee Name", incEmpName, { incEmpName = it }, "Employee name", purpleMix = isPmbs)
+                    CmpField("Employee ID", incEmpId, { incEmpId = it }, "Employee ID", purpleMix = isPmbs)
+                    CmpField("Incident Type", incType, { incType = it }, "Incident type", purpleMix = isPmbs)
+                    CmpField("Incident Details", incDetails, { incDetails = it }, "Incident details", lines = 3, purpleMix = isPmbs)
+                    CmpField("Physical Injury", incInjury, { incInjury = it }, "Nill", purpleMix = isPmbs)
+                    CmpField("Any Casualties Reported", incCasualties, { incCasualties = it }, "Nill", purpleMix = isPmbs)
+                    CmpField("Status", incStatus, { incStatus = it }, "Nill", purpleMix = isPmbs)
                 }
             }
             // Generate Letter (batch item 10: laal ki jagah purple gradient).
@@ -362,7 +366,7 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                 contentAlignment = Alignment.Center
             ) { Text("Generate Letter", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             if (showPreview) {
-                CmpCard("Letter Preview", "LETTER PREVIEW", accent) {
+                CmpCard("Letter Preview", "LETTER PREVIEW", accent, purpleMix = isPmbs) {
                     val issue = when (type) {
                         CmpType.TOM -> tomIssue
                         CmpType.AGM -> agmIssue
@@ -385,8 +389,9 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), Color(0xFF128C7E).copy(alpha = 0.3f))
-                            .clip(RoundedCornerShape(14.dp)).background(cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E))).clickable { onGuiNote("Share on WhatsApp") },
+                        // v1.87: PMBS (Closing ke andar) ka Share bhi purple mix; baaki types ka green wahi.
+                        modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), (if (isPmbs) Color(0xFF5B21B6) else Color(0xFF128C7E)).copy(alpha = 0.3f))
+                            .clip(RoundedCornerShape(14.dp)).background(if (isPmbs) cssLinear(135f, 0f to Color(0xFF8B5CF6), 1f to Color(0xFF5B21B6)) else cssLinear(135f, 0f to Color(0xFF25D366), 1f to Color(0xFF128C7E))).clickable { onGuiNote("Share on WhatsApp") },
                         contentAlignment = Alignment.Center
                     ) { Text("Share on WhatsApp", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
                 }

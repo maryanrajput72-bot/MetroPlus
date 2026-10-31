@@ -1,4 +1,35 @@
-# Metro+ Native App — Handoff (v1.86 / versionCode 87) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.87 / versionCode 88) — DEBUG build (non-debuggable)
+
+## v1.87 change (1 Nov 2026) — dialogs DARMIYAN me + ASKARI card wapas apni jagah (uski correction, DEBUG)
+- ASKARI card WAPAS APNI JAGAH (dropdown me aakhir) — v1.86 wali
+  darmiyan position wapas li. Darmiyan sirf DIALOG ki jagah hai.
+- TKM dialog ab DARMIYAN (center) me square jaisa compact card
+  (pehle neeche wali bottom-sheet thi; drag bar hataya).
+- Saved Login bhi ab DARMIYAN me square jaisa card (pehle
+  full-screen sheet thi) — fields, Save, note wahi; scrim par tap
+  se band. ASKARI ka dialog jab banega wo bhi darmiyan me hi
+  khulega (uski baat note).
+- Dock (uski correction, isi v1.87 me fold): bar WAHI SAFED — sirf
+  SELECTED PILL ka rang section ke hisab se: OPENING pe hub wala
+  sabz (#4ADE80→#16A34A), CLOSING pe purple (#A78BFA→#6D28D9),
+  PORTAL pe sky blue (#38BDF8→#0284C7), HOME pe wahi laal.
+  (Pehli koshish me bar ka rang bhi badal diya tha — uski "neeche
+  wala nahi" wali correction par wapas safed kiya.) activeNav
+  navFor(screen) se aata hai, is liye PMBS form khula ho tab bhi
+  pill purple rehti hai.
+- Closing polish (isi v1.87 me): TOM card top halka (#F5F3FF),
+  RMBS card gehra (#EDE9FE→#C4B5FD); PMBS form (sirf Closing se
+  khulta hai — Complaints list me PMBS type hai hi nahi): bg
+  #F3F0FF, accent laal se purple #6D28D9, cards halke purple
+  gradient (#F5F3FF→#DDD6FE), fields lavender #EDE9FE, Share
+  button bhi purple. Baaki complaint types ke cards/fields/Share
+  wahi (safed/green). Shared DatePickerSheet nahi chheda (Opening
+  aur TomData bhi use karte hain).
+- GitHub APK RULE: is release me v1.87 upload + v1.85 delete (1.86 +
+  1.87 rahengi); manifest apkUrl = GitHub raw v1.87.
+- Verify: TODO dobara build ke baad (pehli v1.87 build dialogs-only
+  thi, SHA 505f40f6 — wo ship NAHI hogi; final v1.87 me dock +
+  closing polish bhi hoga).
 
 ## v1.86 change (1 Nov 2026) — TKM GUI (63 se) + side lines white-blue + ASKARI darmiyan + Closing purple (uska order, DEBUG)
 - TKM GUI (63 ke TKM Auto-Fill dialog se — trial263-ref: title, note,
@@ -25,7 +56,12 @@
   ComplaintFormScreen (shared), baaki screens ke rang wahi.
 - GitHub APK RULE: is release me v1.86 upload + v1.84 delete (1.85 +
   1.86 rahengi); manifest apkUrl = GitHub raw v1.86.
-- Verify: TODO build ke baad.
+- Verify (2026-11-01 ~01:45 PKT): APK 12,567,111 bytes, SHA
+  89ac14a1, cert b13501ef; dex me "Version 1.86" + "TKM Auto-Fill" +
+  "Master card count" maujood, "Version 1.85" + "Fill Today's Data"
+  GHAYAB (purani sheet sach me gayi). Code head a4b14dc6, APK commit
+  c50606d, v1.84 delete OK (read = does not exist), MANIFEST LIVE
+  vc87 (JSON verify). GitHub latest-2: 1.85 + 1.86.
 
 ## v1.85 change (1 Nov 2026) — 63 comparison + Portal always-alive overlay (uska order, DEBUG, SIRF Portal)
 - 63 COMPARISON (trial263-ref se parha, andaza nahi): 63 ka Portal
