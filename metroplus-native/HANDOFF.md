@@ -1,4 +1,32 @@
-# Metro+ Native App — Handoff (v1.76 / versionCode 77) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.77 / versionCode 78) — DEBUG build (non-debuggable)
+
+## v1.77 change (31 Oct 2026) — Station Roster RECREATE (uska order, DEBUG)
+- Gemini se ideas liye (gemini-3.5-flash; pehli call 503, 35s baad retry
+  par mila): "Dark Obsidian & Gold Tiles on Crisp Light Background".
+  Best ideas implement kiye; bottom-sheet wala status selector NAHI
+  liya (dropdown neeche wala v1.75 me pasand hua tha, wahi rakha);
+  time step wahi 10 min (Gemini ne 15 kaha tha, feature wahi rakhna tha).
+- NAAM: "Staff Attendance" -> "Station Roster" (menu tile, page title,
+  ExtraGuiScreens sheet title). Section header "Station Crew • N Members".
+- Page: bg #F6F8FC; hero DARK obsidian #12141D + 1dp gold border
+  (bus image + dots hata diye, koi image nahi) — station safed 20sp,
+  date grey, shift pill dark+gold, stats silver dividers (TOTAL safed,
+  ON DUTY emerald, OFF slate). Week strip: 7 capsule cards (safed +
+  #E2E8F0 border; aaj wala dark gradient + 1.5dp gold border + gold
+  count badge; counts ke rang wahi green/amber/red).
+- Staff cards: 2-col grid KHATAM — full-width stacked RosterCard:
+  dark tile #161923, ON DUTY par 1.5dp gold border; gol avatar (harf)
+  + naam + "ID xxxx"; right status pill + wahi DropdownMenu (option
+  cards status rang me); ON DUTY par recessed stepper bar #0E1017
+  (minus dark circle, time safed, plus gold gradient; AnimatedVisibility
+  glide). Report buttons (WhatsApp green + Copy white) wahi.
+- Edit screen: hero obsidian+gold + gold pen tile, bg #F6F8FC; baaki
+  (list, station card, form, save toast) wahi. SquareOperatorCard
+  (v1.75) + OperatorCardRow file me mehfooz.
+- GitHub APK RULE (uska order): sirf LATEST 2 APKs — nayi aane par sab
+  se purani delete. Is release me: v1.77 upload + v1.75 delete (1.76 +
+  1.77 rahengi); manifest apkUrl = GitHub raw v1.77.
+- Verify: TODO build ke baad.
 
 ## v1.76 change (31 Oct 2026) — 63 wala SILENT install + GitHub APK host (uska order, DEBUG)
 - CORRECTION (pehle wale jawab ki): maine kaha tha aakhri Update wali
@@ -28,7 +56,14 @@
 - Shart saaf: silent sirf SELF-update pe chalta hai; "Install unknown
   apps" ijazat ek dafa on hona lazmi hai, warna system phir bhi
   installer screen dikha dega (receiver fallback).
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~21:07 PKT): APK 12,550,591 bytes, SHA ded699d4;
+  cert apksigner se b13501ef MATCH; dex "Version 1.76" + installUpdate-
+  Silent + UpdateInstallReceiver, 1.75 gayab. GitHub code head 4c87150c;
+  APK GitHub par (browser upload, commit 3bf9a1f, size exact verify);
+  MANIFEST LIVE vc77 JSON verify — apkUrl ab GitHub raw (pehli dafa
+  GitHub host). AHAM: 1.75->1.76 wali update abhi purane ACTION_VIEW
+  se install hogi (silent code 1.76 ke andar hai) — silence 1.76 ke
+  baad ki updates se shuru hogi; % is download pe GitHub size se dikhega.
 
 ## v1.75 change (31 Oct 2026) — square staff card naya design (uska order, DEBUG)
 - Accent line side ki bajaye har card ke UPAR (top stripe, 5dp, accent rang).

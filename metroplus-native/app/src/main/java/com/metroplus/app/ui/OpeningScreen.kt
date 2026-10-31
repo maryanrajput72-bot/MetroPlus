@@ -4,8 +4,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Canvas
@@ -147,7 +149,7 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
     val (titleIcon, titleTint, title) = when (tab) {
         OpTab.MENU -> Triple(Icons.Filled.WbSunny, Color(0xFFF59E0B), "Opening")
         OpTab.DATA -> Triple(Icons.Filled.FolderOpen, Color(0xFFF59E0B), "Opening Data")
-        OpTab.STAFF -> Triple(Icons.Filled.Groups, BrandRedDark, "Staff Attendance")
+        OpTab.STAFF -> Triple(Icons.Filled.Groups, BrandRedDark, "Station Roster")
         OpTab.LEAVE -> Triple(Icons.Filled.CalendarMonth, Color(0xFF0F766E), "Leave Form")
         OpTab.GPS -> Triple(Icons.Filled.PhotoCamera, Color(0xFF1A6FD8), "GPS Picture")
     }
@@ -222,7 +224,7 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
         PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF1C2), Color(0xFFFFA94D)), listOf(Color(0xFFFFF3B0), Color(0xFFFFC93C)), { open(OpTab.DATA) }) {
             Image(painterResource(id = R.drawable.ic_dock_opening), contentDescription = null, modifier = Modifier.size(46.dp))
         }
-        FancyTile("Staff Attendance", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), listOf(Color(0xFFFFE4E6), Color(0xFFFB7185)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
+        FancyTile("Station Roster", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), listOf(Color(0xFFFFE4E6), Color(0xFFFB7185)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
         FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFF7EF0C1), Color(0xFF0F766E)), listOf(Color(0xFFCCFBF1), Color(0xFF2DD4BF)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
         PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), listOf(Color(0xFFE0F2FE), Color(0xFF38BDF8)), { open(OpTab.GPS) }) {
             Icon(Icons.Filled.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
@@ -422,6 +424,14 @@ private val OperatorAccents = listOf(
 // kam). Dots ka matlab kisi ko samajh nahi aata tha; aaj ka din halki
 // laal pill me.
 @Composable
+private fun RosterStat(label: String, value: Int, numColor: Color, labelColor: Color, modifier: Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("$value", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = numColor)
+        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = labelColor)
+    }
+}
+
+@Composable
 private fun StaffWeekStrip() {
     val days = (6 downTo 0).map { back ->
         val c = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -back) }
@@ -431,28 +441,38 @@ private fun StaffWeekStrip() {
             back == 0
         )
     }
+    // v1.77 RECREATE: 7 capsule cards — safed + halki border; aaj wala
+    // dark obsidian gradient + gold border + gold count badge.
     val shape = RoundedCornerShape(18.dp)
     Column(
         modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f))
             .background(Color.White, shape).padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
-        Text("This Week", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430))
+        Text("This Week", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A))
         Spacer(modifier = Modifier.height(10.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             days.forEach { (name, present, isToday) ->
                 val countColor = when { present >= 5 -> Color(0xFF22C55E); present == 4 -> Color(0xFFD9A400); else -> Color(0xFFE53935) }
+                val capShape = RoundedCornerShape(16.dp)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                        .background(if (isToday) BrandRed.copy(alpha = 0.08f) else Color.Transparent, RoundedCornerShape(12.dp))
+                    modifier = Modifier.weight(1f).height(64.dp)
+                        .clip(capShape)
+                        .then(
+                            if (isToday) Modifier.background(cssLinear(135f, 0f to Color(0xFF12141D), 1f to Color(0xFF1E2230))).border(1.5.dp, Color(0xFFE5C158), capShape)
+                            else Modifier.background(Color.White).border(1.dp, Color(0xFFE2E8F0), capShape)
+                        )
                         .padding(vertical = 6.dp)
                 ) {
-                    Text(name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (isToday) BrandRed else Color(0xFF6B7280))
+                    Text(name, fontSize = 10.sp, fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium, color = if (isToday) Color(0xFFE5C158) else Color(0xFF64748B))
                     Spacer(modifier = Modifier.height(5.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Person, contentDescription = null, tint = countColor, modifier = Modifier.size(12.dp))
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text("$present", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = countColor)
+                    if (isToday) {
+                        Box(
+                            modifier = Modifier.background(Color(0xFFE5C158), RoundedCornerShape(999.dp)).padding(horizontal = 8.dp, vertical = 2.dp),
+                            contentAlignment = Alignment.Center
+                        ) { Text("$present", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF12141D)) }
+                    } else {
+                        Text("$present", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = countColor)
                     }
                 }
             }
@@ -465,89 +485,67 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, o
     val total = demoStaff.size
     val onDuty = vm.status.count { it == StaffStatus.ON_DUTY }
     val off = vm.status.count { it == StaffStatus.OFF }
-    Column(modifier = Modifier.fillMaxWidth().background(Color(0xFFFDF1F3)).padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 16.dp)) {
-        // Hero: 135° #FF2E52→#E31837→#C81036, kona 24, upar-daein dots pattern.
+    Column(modifier = Modifier.fillMaxWidth().background(Color(0xFFF6F8FC)).padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 16.dp)) {
+        // v1.77 RECREATE (Gemini idea + apni pasand): Dark Obsidian & Gold
+        // hero — #12141D tile + 1dp gold border, bus image hata di (clean
+        // premium look, koi image asset nahi). Stats silver dividers se.
         val heroShape = RoundedCornerShape(24.dp)
+        val gold = Color(0xFFE5C158)
         Box(
-            modifier = Modifier.fillMaxWidth().cssShadow(12.dp, heroShape, Color(0xFFBF1137).copy(alpha = 0.28f)).clip(heroShape)
-                .background(cssLinear(135f, 0f to Color(0xFFFF2E52), 0.55f to Color(0xFFE31837), 1f to Color(0xFFC81036)))
+            modifier = Modifier.fillMaxWidth().cssShadow(10.dp, heroShape, Color.Black.copy(alpha = 0.25f)).clip(heroShape)
+                .background(Color(0xFF12141D)).border(1.dp, Color(0xFFD4AF37).copy(alpha = 0.3f), heroShape)
         ) {
-            Canvas(modifier = Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 10.dp).size(90.dp, 60.dp)) {
-                val step = 10.dp.toPx()
-                var y = step / 2
-                while (y < size.height) {
-                    var x = step / 2
-                    while (x < size.width) { drawCircle(Color.White.copy(alpha = 0.55f * 0.5f), 1.5.dp.toPx(), Offset(x, y)); x += step }
-                    y += step
-                }
-            }
-            Column(modifier = Modifier.padding(start = 14.dp, end = 14.dp, top = 16.dp, bottom = 14.dp)) {
+            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 14.dp)) {
+                Text("Shaheed-e-Millat", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(painterResource(id = R.drawable.metro_bus), contentDescription = "Metro bus", contentScale = ContentScale.Fit, modifier = Modifier.size(121.dp, 77.dp))
-                    Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
-                        Text("Shaheed-e-Millat", fontSize = 19.7.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = (-0.2).sp, maxLines = 1)
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color.White.copy(alpha = 0.95f), modifier = Modifier.size(13.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(SimpleDateFormat("d MMM, yyyy", Locale.ENGLISH).format(Date()), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.95f))
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(
-                            modifier = Modifier.cssShadow(4.dp, RoundedCornerShape(999.dp), Color.Black.copy(alpha = 0.15f))
-                                .background(Color.White, RoundedCornerShape(999.dp)).padding(horizontal = 12.dp, vertical = 7.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Filled.WbSunny, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(13.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("${demoShift()} Shift", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF2B1B3D))
-                        }
+                    Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(13.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(SimpleDateFormat("d MMM, yyyy", Locale.ENGLISH).format(Date()), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF94A3B8))
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Row(
+                        modifier = Modifier.background(Color(0xFF262010), RoundedCornerShape(999.dp)).border(1.dp, gold, RoundedCornerShape(999.dp)).padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Filled.WbSunny, contentDescription = null, tint = gold, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text("${demoShift()} Shift", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = gold)
                     }
                 }
-                Row(
-                    modifier = Modifier.padding(top = 14.dp).fillMaxWidth().background(Color.White.copy(alpha = 0.96f), RoundedCornerShape(16.dp))
-                        .padding(horizontal = 6.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HeroStat("TOTAL STAFF", total, null, Modifier.weight(1f))
-                    Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFFEFDDE2)))
-                    HeroStat("ON DUTY", onDuty, Color(0xFF22C55E), Modifier.weight(1f))
-                    Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFFEFDDE2)))
-                    HeroStat("OFF", off, Color(0xFF9CA3AF), Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(14.dp))
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    RosterStat("TOTAL", total, Color.White, Color(0xFF64748B), Modifier.weight(1f))
+                    Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFF2A2E3D)))
+                    RosterStat("ON DUTY", onDuty, Color(0xFF10B981), Color(0xFF10B981), Modifier.weight(1f))
+                    Box(modifier = Modifier.width(1.dp).height(32.dp).background(Color(0xFF2A2E3D)))
+                    RosterStat("OFF", off, Color(0xFF94A3B8), Color(0xFF64748B), Modifier.weight(1f))
                 }
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
         StaffWeekStrip()
-        // Staff List heading: 20sp title | "N Operators" laal 18sp | purple Edit button.
+        // v1.77 RECREATE: "Station Crew • N Members" + dark+gold Edit button.
         Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp).padding(horizontal = 3.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("Staff List", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430), modifier = Modifier.weight(1f))
-            Text("$total Operators", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = BrandRed)
+            Text("Station Crew", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF0F172A), modifier = Modifier.weight(1f))
+            Text("$total Members", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B))
             Spacer(modifier = Modifier.width(16.dp))
             Row(
-                modifier = Modifier.height(44.dp).cssShadow(5.dp, RoundedCornerShape(13.dp), Color(0xFF8B24E8).copy(alpha = 0.24f))
-                    .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 1f to Color(0xFFD82EDC)), RoundedCornerShape(13.dp))
+                modifier = Modifier.height(44.dp).cssShadow(5.dp, RoundedCornerShape(13.dp), Color.Black.copy(alpha = 0.2f))
+                    .background(Color(0xFF12141D), RoundedCornerShape(13.dp))
+                    .border(1.dp, Color(0xFFE5C158).copy(alpha = 0.6f), RoundedCornerShape(13.dp))
                     .clip(RoundedCornerShape(13.dp)).clickable { onOpenStaffEdit() }.padding(horizontal = 17.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Filled.EditNote, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(Icons.Filled.EditNote, contentDescription = null, tint = Color(0xFFE5C158), modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Edit", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
             }
         }
-        // v1.74 trial idea (uska order): har banda apne SQUARE card me,
-        // 2-column grid. Upar ID + naam, neeche ek line me duty pill +
-        // time changer (sirf ON DUTY par). Restore ke liye OperatorCardRow
-        // wapas lagana hai (upar mehfooz hai).
+        // v1.77 RECREATE: full-width stacked roster cards (2-column grid
+        // khatam — naam, status dropdown aur stepper ko jagah mili).
+        // SquareOperatorCard (v1.75) file me mehfooz hai, restore ke liye.
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            demoStaff.chunked(2).forEachIndexed { r, row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    row.forEachIndexed { c, (name, id) ->
-                        SquareOperatorCard(vm, r * 2 + c, name, id, Modifier.weight(1f))
-                    }
-                    if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
-                }
-            }
+            demoStaff.forEachIndexed { i, (name, id) -> RosterCard(vm, i, name, id) }
         }
         // Report actions: WhatsApp (green gradient) | Copy (white).
         Row(modifier = Modifier.fillMaxWidth().padding(top = 1.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -647,14 +645,104 @@ private fun OperatorCardRow(vm: OpeningViewModel, i: Int, name: String, id: Stri
     }
 }
 
-// v1.75 (uska order): square card ka naya design — 3 lines.
-// Line 1: ID badge (wahi 46x30) + RIGHT side pe duty pill (dropdown trigger).
-// Line 2: naam poori chaurai me (ID ke start se card ke aakhir tak).
-// Line 3 (sirf ON DUTY): time + pyare chhote +/- — teeno barabar height.
-// Accent line ab side ki bajaye har card ke UPAR (top stripe). Card thoda
-// chaura (aspect 1.12). Card ka rang = uska accent: ID badge, time box
-// border aur +/- buttons sab accent family ke; duty pill ka rang STATUS
-// ka hi rakha hai taake on duty/off pehchana jaye. State wiring wahi.
+// v1.77 RECREATE: full-width ROSTER card (Gemini idea + apni pasand).
+// Dark obsidian tile #161923 + ON DUTY par 1.5dp gold border; left:
+// harf wala gol avatar + naam + "ID xxxx"; right: status pill (wahi
+// neeche khulne wala dropdown — bottom sheet NAHI, kyunki dropdown
+// v1.75 me usne pasand kiya tha). ON DUTY par neeche recessed stepper
+// bar: minus (dark) + time + plus (gold gradient), step wahi 10 min.
+// State wiring wahi (vm.status / vm.dutyMinutes).
+@Composable
+private fun RosterCard(vm: OpeningViewModel, i: Int, name: String, id: String) {
+    val status = vm.status[i]
+    val onDuty = status == StaffStatus.ON_DUTY
+    var menuOpen by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(20.dp)
+    val gold = Color(0xFFE5C158)
+    Box(
+        modifier = Modifier.fillMaxWidth()
+            .cssShadow(6.dp, shape, Color.Black.copy(alpha = 0.12f)).clip(shape)
+            .background(Color(0xFF161923))
+            .border(if (onDuty) 1.5.dp else 1.dp, if (onDuty) gold else Color(0xFF282C3D), shape)
+            .padding(14.dp)
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.size(36.dp).clip(CircleShape).background(Color(0xFF232736)).border(1.dp, Color(0xFF3A3F54), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) { Text(name.first().toString(), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(name, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("ID $id", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFF94A3B8))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Box {
+                    Row(
+                        modifier = Modifier.height(32.dp).clip(RoundedCornerShape(10.dp))
+                            .background(cssLinear(135f, 0f to status.pill[0], 1f to status.pill[1]))
+                            .border(1.dp, status.pillBorder, RoundedCornerShape(10.dp))
+                            .clickable { menuOpen = true }.padding(horizontal = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(status.label, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                    }
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        modifier = Modifier.width(160.dp).background(Color.White, RoundedCornerShape(14.dp))
+                    ) {
+                        StaffStatus.values().forEach { st ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(cssLinear(135f, 0f to st.pill[0], 1f to st.pill[1]))
+                                    .clickable { vm.status[i] = st; menuOpen = false }
+                                    .padding(vertical = 9.dp),
+                                contentAlignment = Alignment.Center
+                            ) { Text(st.label, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                        }
+                    }
+                }
+            }
+            AnimatedVisibility(
+                visible = onDuty,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                val m = vm.dutyMinutes[i]
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp).height(40.dp).clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF0E1017)).padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RosterStep("−", Color(0xFF232736), Color(0xFF94A3B8)) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] - 10).coerceAtLeast(0) }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(String.format(Locale.US, "%02d:%02d", m / 60, m % 60), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, maxLines = 1)
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    RosterStep("+", null, Color(0xFF12141D)) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] + 10).coerceAtMost(24 * 60) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RosterStep(label: String, bg: Color?, textColor: Color, onClick: () -> Unit) {
+    val shape = CircleShape
+    Box(
+        modifier = Modifier.size(28.dp).clip(shape)
+            .then(if (bg != null) Modifier.background(bg, shape) else Modifier.background(cssLinear(135f, 0f to Color(0xFFE5C158), 1f to Color(0xFFC59B27)), shape))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) { Text(label, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = textColor) }
+}
+
+// v1.75 square card design — MEHFOOZ (v1.77 me RosterCard ne jagah li).
 @Composable
 private fun SquareOperatorCard(vm: OpeningViewModel, i: Int, name: String, id: String, modifier: Modifier) {
     val (accent, tint, _) = OperatorAccents[i % OperatorAccents.size]

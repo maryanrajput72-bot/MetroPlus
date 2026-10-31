@@ -580,7 +580,7 @@ fun AttendancePopup(onClose: () -> Unit, onGuiNote: (String) -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Groups, contentDescription = null, tint = Color(0xFFB02A31), modifier = Modifier.size(22.dp))
                 Spacer(modifier = Modifier.width(10.dp))
-                Text("Staff Attendance", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = XInk, modifier = Modifier.weight(1f))
+                Text("Station Roster", fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = XInk, modifier = Modifier.weight(1f))
                 Box(
                     modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFF6F2F2)).clickable { onClose() },
                     contentAlignment = Alignment.Center
