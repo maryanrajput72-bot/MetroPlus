@@ -39,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.ConfirmationNumber
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -51,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
@@ -71,11 +73,11 @@ import java.util.Locale
 
 private val CmpInk = Color(0xFF14181C)
 private val CmpGray = Color(0xFF6B7280)
-private val CmpRed = Color(0xFF9E1F25)
+private val CmpRed = BrandRedDark
 
 internal enum class CmpType(val title: String) {
     TOM("TOM Complaints"), AGM("AGM Complaint"), TKM("TKM Complaint"),
-    OTHER("Other Complaints"), PMBS("PMBS Complaint")
+    OTHER("Other Complaints"), PMBS("PMBS Complaint"), POS("POS Card Complaint")
 }
 
 @Composable
@@ -117,10 +119,11 @@ private fun ComplaintListScreen(onBack: () -> Unit, onOpen: (CmpType) -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         CmpHeader("All Complaints", onBack)
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-            // Trial: grid 2x2, gap 12; card padding 16/14, icon 22, title 16 (margin-top 6).
+            // Batch item 10: cards pyare + colourful (laal ki jagah blue/purple
+            // gradient) — TOM purple, AGM gold, TKM blue, OTHER teal, POS orange.
             Row(modifier = Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CmpTypeCard(CmpType.TOM, Icons.Filled.ConfirmationNumber, Color(0xFF7A1A1F),
-                    listOf(0f to Color(0xFFFAE0E1), 0.6f to Color(0xFFF0B4B7), 1f to Color(0xFFE3868B)), Color(0xFFAA282E).copy(alpha = 0.22f),
+                CmpTypeCard(CmpType.TOM, Icons.Filled.ConfirmationNumber, Color(0xFF6D28D9),
+                    listOf(0f to Color(0xFFEDE9FE), 0.6f to Color(0xFFC4B5FD), 1f to Color(0xFFA78BFA)), Color(0xFF8B5CF6).copy(alpha = 0.25f),
                     Modifier.weight(1f)) { onOpen(CmpType.TOM) }
                 CmpTypeCard(CmpType.AGM, Icons.Filled.Person, Color(0xFF8A6D00),
                     listOf(0f to Color(0xFFFFF6CF), 0.6f to Color(0xFFFFE08A), 1f to Color(0xFFFFCF5C)), Color(0xFFF0AA00).copy(alpha = 0.25f),
@@ -128,12 +131,21 @@ private fun ComplaintListScreen(onBack: () -> Unit, onOpen: (CmpType) -> Unit) {
             }
             Spacer(modifier = Modifier.height(12.dp))
             Row(modifier = Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CmpTypeCard(CmpType.TKM, Icons.Filled.Badge, Color(0xFF6E0B10),
-                    listOf(0f to Color(0xFFF7DBDC), 0.6f to Color(0xFFE9A9AC), 1f to Color(0xFFD6777C)), Color(0xFF0F8C78).copy(alpha = 0.22f),
+                CmpTypeCard(CmpType.TKM, Icons.Filled.Badge, Color(0xFF1D4ED8),
+                    listOf(0f to Color(0xFFDBEAFE), 0.6f to Color(0xFF93C5FD), 1f to Color(0xFF60A5FA)), Color(0xFF3B82F6).copy(alpha = 0.25f),
                     Modifier.weight(1f)) { onOpen(CmpType.TKM) }
-                CmpTypeCard(CmpType.OTHER, Icons.Filled.Description, Color(0xFF1D4FD7),
-                    listOf(0f to Color(0xFFE3EEFF), 0.6f to Color(0xFFBCD5FF), 1f to Color(0xFF93B9FF)), Color(0xFF2864E6).copy(alpha = 0.22f),
+                CmpTypeCard(CmpType.OTHER, Icons.Filled.Description, Color(0xFF047857),
+                    listOf(0f to Color(0xFFD1FAE5), 0.6f to Color(0xFF6EE7B7), 1f to Color(0xFF34D399)), Color(0xFF10B981).copy(alpha = 0.25f),
                     Modifier.weight(1f)) { onOpen(CmpType.OTHER) }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            // Batch item 10c: naya "POS Card Complaint" section (shell — andar ki
+            // cheezein wo baad me batayega).
+            Row(modifier = Modifier.height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                CmpTypeCard(CmpType.POS, Icons.Filled.CreditCard, Color(0xFFC2410C),
+                    listOf(0f to Color(0xFFFFEDD5), 0.6f to Color(0xFFFDBA74), 1f to Color(0xFFFB923C)), Color(0xFFF97316).copy(alpha = 0.25f),
+                    Modifier.weight(1f)) { onOpen(CmpType.POS) }
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
@@ -150,26 +162,32 @@ private fun RowScope.CmpTypeCard(
             .background(cssLinear(135f, *stops.toTypedArray())).clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 16.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.height(6.dp))
+        // v1.56: saade icon ki jagah 3D tile (card ke apne rang me).
+        Icon3DTile(icon, iconTint, size = 42.dp, iconSize = 22.dp, corner = 13.dp)
+        Spacer(modifier = Modifier.height(10.dp))
         Text(type.title, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = CmpInk, letterSpacing = (-0.3).sp)
     }
 }
 
 // ---------------- Form ----------------
 
+// Batch item 10b: andar wale cards ke bhi colour hon — har type ka apna
+// accent: upar 4dp accent strip + kicker accent rang me.
 @Composable
-private fun CmpCard(title: String, kicker: String, content: @Composable ColumnScope.() -> Unit) {
+private fun CmpCard(title: String, kicker: String, accent: Color, content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(22.dp)
     Column(
         modifier = Modifier.fillMaxWidth().cssShadow(5.dp, shape, CmpInk.copy(alpha = 0.08f))
-            .background(Color.White, shape).border(1.dp, CmpInk.copy(alpha = 0.06f), shape).padding(16.dp)
+            .background(Color.White, shape).border(1.dp, CmpInk.copy(alpha = 0.06f), shape).clip(shape)
     ) {
-        Text(kicker, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = CmpInk.copy(alpha = 0.55f), letterSpacing = 1.2.sp)
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(title, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = CmpInk, letterSpacing = (-0.4).sp)
-        Spacer(modifier = Modifier.height(10.dp))
-        content()
+        Box(modifier = Modifier.fillMaxWidth().height(4.dp).background(accent))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(kicker, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = accent, letterSpacing = 1.2.sp)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(title, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = CmpInk, letterSpacing = (-0.4).sp)
+            Spacer(modifier = Modifier.height(10.dp))
+            content()
+        }
     }
 }
 
@@ -205,12 +223,15 @@ private fun ColumnScope.CmpField(label: String, value: String, onValue: (String)
 @Composable
 private fun CmpChip(text: String, selected: Boolean, onClick: () -> Unit) {
     val shape = RoundedCornerShape(999.dp)
+    // Batch item 10b: chips colourful — selected pe purple → indigo gradient.
+    val chipBg: Brush = if (selected) cssLinear(135f, 0f to Color(0xFF8B5CF6), 1f to Color(0xFF6366F1))
+        else Brush.linearGradient(listOf(Color(0xFFF0F3F5), Color(0xFFF0F3F5)))
     Text(
         text, fontSize = 12.5.sp, fontWeight = FontWeight.Bold,
         color = if (selected) Color.White else CmpInk,
         modifier = Modifier.clip(shape)
-            .background(if (selected) CmpRed else Color(0xFFF0F3F5), shape)
-            .border(1.dp, if (selected) CmpRed else CmpInk.copy(alpha = 0.1f), shape)
+            .background(chipBg, shape)
+            .border(1.dp, if (selected) Color(0xFF8B5CF6) else CmpInk.copy(alpha = 0.1f), shape)
             .clickable { onClick() }.padding(horizontal = 12.dp, vertical = 7.dp)
     )
 }
@@ -228,28 +249,38 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
     val today = remember { SimpleDateFormat("EEEE, d MMMM yyyy", Locale.ENGLISH).format(Date()) }
     val shift = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning" else "Evening"
     var showPreview by remember { mutableStateOf(false) }
-    // Type fields (GUI state; save baad me).
-    var tomSelected by remember { mutableStateOf(setOf<String>()) }
-    var printerSelected by remember { mutableStateOf(setOf<String>()) }
-    var tomEquip by remember { mutableStateOf("") }
-    var tomIssue by remember { mutableStateOf("") }
-    var agmEquipName by remember { mutableStateOf("") }
-    var agmEquipSelected by remember { mutableStateOf(setOf<String>()) }
-    var agmDir by remember { mutableStateOf("IN") }
-    var agmIssue by remember { mutableStateOf("") }
-    var tkmEquip by remember { mutableStateOf("") }
-    var tkmIssue by remember { mutableStateOf("") }
-    var otherEquipName by remember { mutableStateOf("") }
-    var otherEquipNo by remember { mutableStateOf("") }
-    var otherIssue by remember { mutableStateOf("") }
-    var incTime by remember { mutableStateOf("") }
-    var incEmpName by remember { mutableStateOf("") }
-    var incEmpId by remember { mutableStateOf("") }
-    var incType by remember { mutableStateOf("") }
-    var incDetails by remember { mutableStateOf("") }
-    var incInjury by remember { mutableStateOf("") }
-    var incCasualties by remember { mutableStateOf("") }
-    var incStatus by remember { mutableStateOf("") }
+    // Type fields ViewModel me (GUI state; save baad me) — form band karke
+    // kholo to likha hua wahi rahe.
+    var tomSelected by pageState("cmp_tomSelected", setOf<String>())
+    var printerSelected by pageState("cmp_printerSelected", setOf<String>())
+    var tomEquip by pageState("cmp_tomEquip", "")
+    var tomIssue by pageState("cmp_tomIssue", "")
+    var agmEquipName by pageState("cmp_agmEquipName", "")
+    var agmEquipSelected by pageState("cmp_agmEquipSelected", setOf<String>())
+    var agmDir by pageState("cmp_agmDir", "IN")
+    var agmIssue by pageState("cmp_agmIssue", "")
+    var tkmEquip by pageState("cmp_tkmEquip", "")
+    var tkmIssue by pageState("cmp_tkmIssue", "")
+    var otherEquipName by pageState("cmp_otherEquipName", "")
+    var otherEquipNo by pageState("cmp_otherEquipNo", "")
+    var otherIssue by pageState("cmp_otherIssue", "")
+    var incTime by pageState("cmp_incTime", "")
+    var incEmpName by pageState("cmp_incEmpName", "")
+    var incEmpId by pageState("cmp_incEmpId", "")
+    var incType by pageState("cmp_incType", "")
+    var incDetails by pageState("cmp_incDetails", "")
+    var incInjury by pageState("cmp_incInjury", "")
+    var incCasualties by pageState("cmp_incCasualties", "")
+    var incStatus by pageState("cmp_incStatus", "")
+    // Batch item 10b: har type ka accent (andar wale cards + letter button).
+    val accent = when (type) {
+        CmpType.TOM -> Color(0xFF8B5CF6)
+        CmpType.AGM -> Color(0xFFB45309)
+        CmpType.TKM -> Color(0xFF2563EB)
+        CmpType.OTHER -> Color(0xFF059669)
+        CmpType.PMBS -> CmpRed
+        CmpType.POS -> Color(0xFFEA580C)
+    }
 
     // FIX (v1.42): form ka apna poora opaque background + click-consumer —
     // pehle background nahi tha, is liye list peeche se nazar aati thi aur
@@ -258,14 +289,14 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
         CmpHeader(type.title, onBack)
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            CmpCard("Report Info", "AUTO DETAILS") {
+            CmpCard("Report Info", "AUTO DETAILS", accent) {
                 CmpInfoRow("Date", today)
                 CmpInfoRow("Station", "Shaheed-e-Millat")
                 CmpInfoRow("Shift", shift)
                 CmpInfoRow("Supervisor", "—")
             }
             when (type) {
-                CmpType.TOM -> CmpCard("TOM Info", "COMPLAINT DETAILS") {
+                CmpType.TOM -> CmpCard("TOM Info", "COMPLAINT DETAILS", accent) {
                     Text("Which TOM has the issue? (select multiple)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
                     CmpChipsRow(listOf("TOM 1", "TOM 2", "TOM 3"), tomSelected) { tomSelected = if (it in tomSelected) tomSelected - it else tomSelected + it }
                     Text("Equipment No (select printer)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
@@ -279,7 +310,7 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     Spacer(modifier = Modifier.height(8.dp))
                     CmpChipsRow(listOf("Internet Issue", "Jumping Issue", "App Not Working", "Ticket Miss Print", "Miss Print", "Slips Stuck in Printer"), setOf(tomIssue)) { tomIssue = it }
                 }
-                CmpType.AGM -> CmpCard("AGM Info", "COMPLAINT DETAILS") {
+                CmpType.AGM -> CmpCard("AGM Info", "COMPLAINT DETAILS", accent) {
                     CmpField("Equipment Name", agmEquipName, { agmEquipName = it }, "e.g. Turnstile")
                     Text("Equipment No", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = CmpInk.copy(alpha = 0.65f), modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
                     CmpChipsRow(listOf("AGM 1", "AGM 2", "AGM 3"), agmEquipSelected) { agmEquipSelected = if (it in agmEquipSelected) agmEquipSelected - it else agmEquipSelected + it }
@@ -292,13 +323,13 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     Spacer(modifier = Modifier.height(8.dp))
                     CmpChipsRow(listOf("Internet Issue", "Slip Notes Scanning", "Display Not Working", "App Not Open", "T-Cash Card Not Working", "Debit and T-Cash Card Not Working", "Debit Card Not Working"), setOf(agmIssue)) { agmIssue = it }
                 }
-                CmpType.TKM -> CmpCard("TKM Info", "COMPLAINT DETAILS") {
-                    CmpField("Equipment No (station ke hisaab se auto)", tkmEquip, { tkmEquip = it }, "e.g. tkm 01")
+                CmpType.TKM -> CmpCard("TKM Info", "COMPLAINT DETAILS", accent) {
+                    CmpField("Equipment No (auto by station)", tkmEquip, { tkmEquip = it }, "e.g. tkm 01")
                     CmpField("Issue", tkmIssue, { tkmIssue = it }, "Type the issue or pick one below", lines = 3)
                     Spacer(modifier = Modifier.height(8.dp))
                     CmpChipsRow(listOf("Debit Card Not Working", "Debit and T-Cash Card Not Working", "T-Card Not Working", "Display Error", "Printer Roll Issue", "Roll Not Available"), setOf(tkmIssue)) { tkmIssue = it }
                 }
-                CmpType.OTHER -> CmpCard("Other Info", "COMPLAINT DETAILS") {
+                CmpType.OTHER -> CmpCard("Other Info", "COMPLAINT DETAILS", accent) {
                     CmpField("Equipment Name", otherEquipName, { otherEquipName = it }, "e.g. AC")
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -309,7 +340,11 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     CmpField("Equipment No", otherEquipNo, { otherEquipNo = it }, "Equipment number")
                     CmpField("Issue", otherIssue, { otherIssue = it }, "Type the issue", lines = 3)
                 }
-                CmpType.PMBS -> CmpCard("Incident Info", "COMPLAINT DETAILS") {
+                // Batch item 10c: POS shell — andar ki cheezein baad me ayengi.
+                CmpType.POS -> CmpCard("POS Card Complaint", "COMING SOON", accent) {
+                    Text("POS Card Complaint details will be added later.", fontSize = 13.5.sp, color = CmpGray, lineHeight = 20.sp)
+                }
+                CmpType.PMBS -> CmpCard("Incident Info", "COMPLAINT DETAILS", accent) {
                     CmpField("Incident Time", incTime, { incTime = it }, "e.g. 14:30")
                     CmpField("Employee Name", incEmpName, { incEmpName = it }, "Employee name")
                     CmpField("Employee ID", incEmpId, { incEmpId = it }, "Employee ID")
@@ -320,20 +355,21 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                     CmpField("Status", incStatus, { incStatus = it }, "Nill")
                 }
             }
-            // Generate Letter (trial: laal #9e1f25 button).
+            // Generate Letter (batch item 10: laal ki jagah purple gradient).
             Box(
-                modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), CmpRed.copy(alpha = 0.25f))
-                    .clip(RoundedCornerShape(14.dp)).background(CmpRed).clickable { showPreview = true },
+                modifier = Modifier.fillMaxWidth().height(48.dp).cssShadow(6.dp, RoundedCornerShape(14.dp), Color(0xFF8B5CF6).copy(alpha = 0.3f))
+                    .clip(RoundedCornerShape(14.dp)).background(cssLinear(135f, 0f to Color(0xFF8B5CF6), 1f to Color(0xFF6D28D9))).clickable { showPreview = true },
                 contentAlignment = Alignment.Center
             ) { Text("Generate Letter", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
             if (showPreview) {
-                CmpCard("Letter Preview", "LETTER PREVIEW") {
+                CmpCard("Letter Preview", "LETTER PREVIEW", accent) {
                     val issue = when (type) {
                         CmpType.TOM -> tomIssue
                         CmpType.AGM -> agmIssue
                         CmpType.TKM -> tkmIssue
                         CmpType.OTHER -> otherIssue
                         CmpType.PMBS -> incDetails
+                        CmpType.POS -> ""
                     }
                     val equip = when (type) {
                         CmpType.TOM -> tomEquip.ifEmpty { tomSelected.joinToString(", ") }
@@ -341,6 +377,7 @@ internal fun ComplaintFormScreen(type: CmpType, onBack: () -> Unit, onGuiNote: (
                         CmpType.TKM -> tkmEquip
                         CmpType.OTHER -> otherEquipNo
                         CmpType.PMBS -> incType
+                        CmpType.POS -> ""
                     }
                     Text(
                         "${type.title}\nDate: $today\nStation: Shaheed-e-Millat\nShift: $shift\nEquipment: ${equip.ifEmpty { "—" }}\nIssue: ${issue.ifEmpty { "—" }}",
