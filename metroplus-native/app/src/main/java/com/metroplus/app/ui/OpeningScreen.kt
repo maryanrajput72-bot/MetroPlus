@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -646,59 +647,86 @@ private fun OperatorCardRow(vm: OpeningViewModel, i: Int, name: String, id: Stri
     }
 }
 
-// v1.74 trial idea: SQUARE staff card (2-column grid me). Upar ID badge +
-// naam; neeche ek line me duty pill + time changer (sirf ON DUTY par).
-// Duty pill par tap = wahi status options (arrow jagah bachane ke liye
-// hataya hai — pill poori tap hoti hai). State wiring wahi purani
-// (vm.status / vm.dutyMinutes, index wahi).
+// v1.75 (uska order): square card ka naya design — 3 lines.
+// Line 1: ID badge (wahi 46x30) + RIGHT side pe duty pill (dropdown trigger).
+// Line 2: naam poori chaurai me (ID ke start se card ke aakhir tak).
+// Line 3 (sirf ON DUTY): time + pyare chhote +/- — teeno barabar height.
+// Accent line ab side ki bajaye har card ke UPAR (top stripe). Card thoda
+// chaura (aspect 1.12). Card ka rang = uska accent: ID badge, time box
+// border aur +/- buttons sab accent family ke; duty pill ka rang STATUS
+// ka hi rakha hai taake on duty/off pehchana jaye. State wiring wahi.
 @Composable
 private fun SquareOperatorCard(vm: OpeningViewModel, i: Int, name: String, id: String, modifier: Modifier) {
-    val (accent, tint, badge) = OperatorAccents[i % OperatorAccents.size]
+    val (accent, tint, _) = OperatorAccents[i % OperatorAccents.size]
     val status = vm.status[i]
     var menuOpen by remember { mutableStateOf(false) }
+    // Halke rang (amber) par gehra text, warna safed — taake ID parhi jaye.
+    val badgeText = if (accent.red * 0.299f + accent.green * 0.587f + accent.blue * 0.114f > 0.5f) Color(0xFF4B2800) else Color.White
     val shape = RoundedCornerShape(20.dp)
     Box(
-        modifier = modifier.aspectRatio(1f)
+        modifier = modifier.aspectRatio(1.12f)
             .cssShadow(5.dp, shape, Color(0xFF361E4B).copy(alpha = 0.09f)).clip(shape)
-            .background(cssLinear(135f, 0f to tint, 1f to Color.White)).border(1.dp, tint, shape)
+            .background(cssLinear(135f, 0f to tint, 1f to Color.White)).border(1.dp, accent.copy(alpha = 0.25f), shape)
     ) {
-        Box(modifier = Modifier.width(4.dp).fillMaxHeight().background(accent))
-        Column(modifier = Modifier.fillMaxSize().padding(start = 14.dp, end = 10.dp, top = 12.dp, bottom = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(46.dp, 30.dp).background(cssLinear(135f, 0f to badge[0], 1f to badge[1]), RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
-                ) { Text(id, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = if (i % 6 == 4) Color(0xFF4B2800) else Color.White) }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(name, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box {
-                    Row(
-                        modifier = Modifier.height(32.dp).clip(RoundedCornerShape(10.dp))
-                            .background(cssLinear(135f, 0f to status.pill[0], 1f to status.pill[1]))
-                            .border(1.dp, status.pillBorder, RoundedCornerShape(10.dp))
-                            .clickable { menuOpen = true }.padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) { Text(status.label, fontSize = 8.5.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
-                    if (menuOpen) OptionPickerSheet(
-                        "Select Status",
-                        StaffStatus.values().map { PickerOption(it.label, it.opt, it.optBorder, it.optText) },
-                        { opt -> vm.status[i] = StaffStatus.values().first { it.label == opt.label }; menuOpen = false },
-                        { menuOpen = false }
-                    )
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Top accent stripe — har card ke upar.
+            Box(modifier = Modifier.fillMaxWidth().height(5.dp).background(accent))
+            Column(modifier = Modifier.weight(1f).padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)) {
+                // Line 1: ID (left) + duty pill (right, dropdown trigger).
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier.size(46.dp, 30.dp).background(cssLinear(135f, 0f to accent, 1f to accent.darker(0.12f)), RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center
+                    ) { Text(id, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = badgeText) }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Box {
+                        Row(
+                            modifier = Modifier.height(34.dp).clip(RoundedCornerShape(10.dp))
+                                .background(cssLinear(135f, 0f to status.pill[0], 1f to status.pill[1]))
+                                .border(1.dp, status.pillBorder, RoundedCornerShape(10.dp))
+                                .clickable { menuOpen = true }.padding(horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(status.label, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                        }
+                        // Dropdown: pill ke NEECHE khulta hai, har option apne
+                        // pyare card me (Leave apne card me, Absent apne me...).
+                        DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false },
+                            modifier = Modifier.width(160.dp).background(Color.White, RoundedCornerShape(14.dp))
+                        ) {
+                            StaffStatus.values().forEach { st ->
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(cssLinear(135f, 0f to st.pill[0], 1f to st.pill[1]))
+                                        .clickable { vm.status[i] = st; menuOpen = false }
+                                        .padding(vertical = 9.dp),
+                                    contentAlignment = Alignment.Center
+                                ) { Text(st.label, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                            }
+                        }
+                    }
                 }
+                // Line 2: naam poori chaurai me.
+                Text(name, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                // Line 3: sirf ON DUTY — time + +/- teeno barabar height (34dp), halka shade.
                 if (status == StaffStatus.ON_DUTY) {
-                    Spacer(modifier = Modifier.width(6.dp))
                     val m = vm.dutyMinutes[i]
-                    Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                        SquareStep("−") { vm.dutyMinutes[i] = (vm.dutyMinutes[i] - 10).coerceAtLeast(0) }
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        SquareStep("−", accent) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] - 10).coerceAtLeast(0) }
+                        Spacer(modifier = Modifier.width(6.dp))
                         Box(
-                            modifier = Modifier.weight(1f).height(32.dp).background(Color.White, RoundedCornerShape(10.dp)).border(1.dp, Color(0xFFDCC5F5), RoundedCornerShape(10.dp)),
+                            modifier = Modifier.weight(1f).height(34.dp)
+                                .cssShadow(3.dp, RoundedCornerShape(10.dp), accent.copy(alpha = 0.12f))
+                                .background(Color.White, RoundedCornerShape(10.dp)).border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
                             contentAlignment = Alignment.Center
-                        ) { Text(String.format(Locale.US, "%02d:%02d", m / 60, m % 60), fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1) }
-                        SquareStep("+") { vm.dutyMinutes[i] = (vm.dutyMinutes[i] + 10).coerceAtMost(24 * 60) }
+                        ) { Text(String.format(Locale.US, "%02d:%02d", m / 60, m % 60), fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, maxLines = 1) }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        SquareStep("+", accent) { vm.dutyMinutes[i] = (vm.dutyMinutes[i] + 10).coerceAtMost(24 * 60) }
                     }
                 }
             }
@@ -707,11 +735,14 @@ private fun SquareOperatorCard(vm: OpeningViewModel, i: Int, name: String, id: S
 }
 
 @Composable
-private fun SquareStep(label: String, onClick: () -> Unit) {
+private fun SquareStep(label: String, accent: Color, onClick: () -> Unit) {
     Box(
-        modifier = Modifier.size(24.dp).background(Color.White, RoundedCornerShape(8.dp)).border(1.dp, Color(0xFFDCC5F5), RoundedCornerShape(8.dp)).clickable { onClick() },
+        modifier = Modifier.size(34.dp)
+            .cssShadow(3.dp, RoundedCornerShape(10.dp), accent.copy(alpha = 0.18f))
+            .background(cssLinear(135f, 0f to accent, 1f to accent.darker(0.12f)), RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp)).clickable { onClick() },
         contentAlignment = Alignment.Center
-    ) { Text(label, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black) }
+    ) { Text(label, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
 }
 
 @Composable

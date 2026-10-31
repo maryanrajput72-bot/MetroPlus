@@ -1,4 +1,36 @@
-# Metro+ Native App — Handoff (v1.74 / versionCode 75) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.75 / versionCode 76) — DEBUG build (non-debuggable)
+
+## v1.75 change (31 Oct 2026) — square staff card naya design (uska order, DEBUG)
+- Accent line side ki bajaye har card ke UPAR (top stripe, 5dp, accent rang).
+- Line 1: ID badge (wahi 46x30) left + duty pill RIGHT (dropdown trigger,
+  label + neeche-wala arrow; pill thodi bari 34dp/10sp). Card ka rang =
+  uska accent: ID badge, time box border, +/- buttons sab accent family
+  ke (halke amber par gehra text). Duty pill ka rang STATUS ka hi hai
+  (on duty/off pehchana jaye) — ye judgment call report me bataya gaya.
+- Line 2: naam poori chaurai me (ID ke start se card ke aakhir tak), 16sp.
+- Line 3 (sirf ON DUTY): time + pyare chhote +/- — teeno barabar height
+  34dp, halka shade (buttons accent gradient + safed nishan).
+- Card thoda chaura: aspectRatio 1.12 (pehle 1.0 square), height taqreeban wahi.
+- Status options ab sheet ki bajaye pill ke NEECHE dropdown (DropdownMenu)
+  me khulte hain — har option apne pyare card me (Leave/Absent/... apne
+  status rang me). Purana OperatorCardRow + OptionPickerSheet file me
+  mehfooz (OperatorCardRow ab bhi TimeStep/OptionPickerSheet use karta hai).
+- Updater me KOI change nahi — uska sawaal sirf jawab se hal hua (neeche note).
+- Verify: TODO build ke baad.
+
+## Updater note (31 Oct 2026, uske sawaal ke jawab ke liye verify kiya gaya)
+- Native me update ka KOI dialog/button nahi: har foreground +5s check,
+  update mile to BINA poochhe download (startDownload seedha), upar
+  "Updating… X%" strip (size na mile to MB), 100% pe confetti + toast,
+  2.7s baad FileProvider install screen. 63 ka JS bhi yahi karta tha
+  ("auto popup BILKUL BAND", % bar, 100% pe bar band) — farq sirf ye
+  ke 63 ka download+install shell ke native Java (downloadAndInstall-
+  SilentUpdate) me tha, jiska source workspace me NAHI hai (sirf trial
+  APK hai). Aakhri "Update" wali system screen Android har normal app
+  ko dikhata hai — host (GitHub vs remote-storage) se silent ka koi
+  taalluq nahi. Nayi package (com.metroplus.app) ko "Install unknown
+  apps" ki ijazat EK dafa chahiye — purani app ki ijazat nayi par nahi
+  chalti; yehi sab se mumkin wajah hai ke usko ab popup mehsoos hota hai.
 
 ## v1.74 change (31 Oct 2026) — hub-style cards + square staff trial (uska order, DEBUG)
 - Opening menu ke 4 cards (Opening Data, Staff Attendance, Leave Form,
@@ -15,7 +47,11 @@
   hataya). State wiring wahi (vm.status/dutyMinutes). PURANA design
   OperatorCardRow ke naam se file me MEHFOOZ hai — restore ke liye
   sirf grid ki jagah wapas uska forEach lagana hai.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~20:28 PKT): APK 12,547,099 bytes, SHA df38f641;
+  cert apksigner se b13501ef MATCH; dex "Version 1.74", 1.73 gayab.
+  (Pehli koshish aspectRatio import ki wajah se fail hui thi — theek
+  karke dobara build chalayi.) GitHub code head 33db3125, MANIFEST
+  LIVE vc75 JSON verify (RAW JSON).
 
 ## v1.73 change (31 Oct 2026) — minis tartib (uska order, DEBUG)
 - More with Metro ke 4 cards ki tartib: pehla Tom Data, doosra
