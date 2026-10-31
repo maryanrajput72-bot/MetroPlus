@@ -47,7 +47,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
@@ -301,18 +300,29 @@ private fun AuthChoice(options: List<String>, selected: String, onPick: (String)
 @Composable
 fun LoginScreen(onBack: () -> Unit, onSignUp: () -> Unit, onGuiNote: (String) -> Unit) {
     BackHandler { onBack() }
-    var user by pageState("login_user", "")
-    var pass by pageState("login_pass", "")
+    // v1.67 (uska order): Login = Number + Your ID. Employee ID/Gmail wala
+    // field aur Password wala field dono hata diye; ID saaf nazar aati hai
+    // (password jaisi chhupi nahi). Koi field khaali ho to login NAHI hoga
+    // (validation function abhi; asli login baad me).
+    var number by pageState("login_number", "")
+    var yourId by pageState("login_id", "")
     var remember by pageState("login_remember", true)
-    AuthShell(onBack, "Welcome back", "Log in with your Employee ID or Gmail to start your shift.") {
-        AuthField("Employee ID / Gmail", Icons.Filled.Person, user, { user = it }, "e.g. 2022 or name@gmail.com")
-        AuthField("Password", Icons.Filled.Lock, pass, { pass = it }, "Your password", password = true)
+    var loginError by remember { mutableStateOf(false) }
+    val loginIncomplete = number.isBlank() || yourId.isBlank()
+    AuthShell(onBack, "Welcome back", "Log in with your number and ID to start your shift.") {
+        AuthField("Number", Icons.Filled.Phone, number, { number = it }, "03xx xxxxxxx")
+        AuthField("Your ID", Icons.Filled.Badge, yourId, { yourId = it }, "e.g. 2022")
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.weight(1f)) { AuthCheck(remember, "Remember me") { remember = it } }
             Text("Forgot ID?", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFE11D48), modifier = Modifier.clickable { onGuiNote("Forgot ID") })
         }
         Spacer(modifier = Modifier.height(18.dp))
-        AuthButton("Log In", Icons.Filled.Login) { onGuiNote("Log In") }
+        if (loginError && loginIncomplete) {
+            Text("Please fill in all fields", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFE11D48), modifier = Modifier.padding(bottom = 10.dp))
+        }
+        AuthButton("Log In", Icons.Filled.Login) {
+            if (loginIncomplete) loginError = true else { loginError = false; onGuiNote("Log In") }
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.weight(1f).height(1.dp).background(AuthInk.copy(alpha = 0.08f)))
@@ -342,18 +352,25 @@ fun LoginScreen(onBack: () -> Unit, onSignUp: () -> Unit, onGuiNote: (String) ->
 fun SignUpScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     BackHandler { onBack() }
     var name by pageState("signup_name", "")
+    var tlName by pageState("signup_tlName", "")
     var empId by pageState("signup_empId", "")
     var phone by pageState("signup_phone", "")
     var gmail by pageState("signup_gmail", "")
     var station by pageState("signup_station", "")
     var shift by pageState("signup_shift", "Morning")
     var role by pageState("signup_role", "Operator")
-    var pass by pageState("signup_pass", "")
-    var pass2 by pageState("signup_pass2", "")
     var agree by pageState("signup_agree", false)
     var stationOpen by remember { mutableStateOf(false) }
-    AuthShell(onBack, "Create account", "Fill your details once — they appear on all your reports.") {
+    var signupError by remember { mutableStateOf(false) }
+    // v1.67 (uska order): subtitle sirf "Fill in your details"; Full name ke
+    // neeche TL Name ka naya section; Password + Confirm password dono hata
+    // diye (role Operator/TL/RP wahi rahenge); koi field khaali ho ya
+    // confirm na ho to sign up NAHI hoga (validation function abhi).
+    val signupIncomplete = name.isBlank() || tlName.isBlank() || empId.isBlank() ||
+        phone.isBlank() || gmail.isBlank() || station.isBlank() || !agree
+    AuthShell(onBack, "Create account", "Fill in your details") {
         AuthField("Full name", Icons.Filled.Person, name, { name = it }, "Your full name")
+        AuthField("TL Name", Icons.Filled.Person, tlName, { tlName = it }, "Your TL's name")
         AuthField("Employee ID", Icons.Filled.Badge, empId, { empId = it }, "e.g. 2022")
         AuthField("Mobile number", Icons.Filled.Phone, phone, { phone = it }, "03xx xxxxxxx")
         AuthField("Gmail", Icons.Filled.Email, gmail, { gmail = it }, "name@gmail.com")
@@ -377,14 +394,14 @@ fun SignUpScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
         AuthChoice(listOf("Morning", "Evening"), shift) { shift = it }
         Text("Role", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = AuthGray, modifier = Modifier.padding(bottom = 6.dp))
         AuthChoice(listOf("Operator", "TL", "RP"), role) { role = it }
-        AuthField("Password", Icons.Filled.Lock, pass, { pass = it }, "Create a password", password = true)
-        AuthField("Confirm password", Icons.Filled.Lock, pass2, { pass2 = it }, "Type it again", password = true)
-        if (pass2.isNotEmpty() && pass != pass2) {
-            Text("Passwords do not match", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFE11D48), modifier = Modifier.padding(bottom = 10.dp).offset(y = (-6).dp))
-        }
-        AuthCheck(agree, "I confirm these details are correct") { agree = it }
+        AuthCheck(agree, "I confirm this detail") { agree = it }
         Spacer(modifier = Modifier.height(18.dp))
-        AuthButton("Sign Up", Icons.Filled.PersonAdd) { onGuiNote("Sign Up") }
+        if (signupError && signupIncomplete) {
+            Text("Please fill in all fields", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFE11D48), modifier = Modifier.padding(bottom = 10.dp))
+        }
+        AuthButton("Sign Up", Icons.Filled.PersonAdd) {
+            if (signupIncomplete) signupError = true else { signupError = false; onGuiNote("Sign Up") }
+        }
         Spacer(modifier = Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Text("Already have an account? ", fontSize = 13.sp, color = AuthGray)

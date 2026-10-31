@@ -1,4 +1,45 @@
-# Metro+ Native App — Handoff (v1.66 / versionCode 67) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.67 / versionCode 68) — DEBUG build (non-debuggable)
+
+## v1.67 change (31 Oct 2026) — Login/SignUp form update (uska order, DEBUG)
+- Login: Employee ID/Gmail field + Password field hata diye. Ab do fields:
+  Number (mobile, Phone icon, placeholder 03xx xxxxxxx) + Your ID (saaf
+  nazar aane wala text, Badge icon, placeholder e.g. 2022 — password jaisa
+  chhupa nahi). Subtitle: "Log in with your number and ID to start your
+  shift." Remember me / Forgot ID? / Create new account wahi hain.
+- Sign Up: subtitle sirf "Fill in your details" (pehle wala "— they
+  appear on all your reports" wala hissa hata diya). Full name ke neeche
+  TL Name ka naya section. Password + Confirm password dono hata diye
+  (mismatch note bhi unke sath gaya); Role Operator/TL/RP wahi; Shift
+  Morning/Evening wahi; Mobile number / Gmail / Station wahi. Checkbox ka
+  text ab "I confirm this detail". Employee ID field rakha hai (login ki
+  Your ID isi se banti hai — user ne hatane ko nahi kaha tha).
+- Validation function (donon pages, asli login baad me): koi field khaali
+  ho (Sign Up me confirm checkbox bhi) to button dabane par laal note
+  "Please fill in all fields" aur login/sign up NAHI hoga; sab bhara ho to
+  pehle wala GUI note. Shift/Role ke default (Morning/Operator) hain is
+  liye wo hamesha selected rehte hain.
+- Verify: TODO build ke baad (dex strings + cert b13501ef + size).
+
+## v1.66 push record (31 Oct 2026, is session) — Muse check + GitHub + manifest
+- User ki bheji zip (MetroPlus-v1.66-source_3_kg6y.zip) check ki: build.gradle
+  vc67/1.66, CURRENT_VERSION_CODE 67, drawer "Version 1.66" — teeno ek.
+  Keystore hash eed11f7e project keystore jaisa (same key). Bundled APK
+  12,492,043 bytes, SHA 03b65907…, cert b13501ef EXACT match, dex me
+  "Version 1.66" + "Create new account" + "Installing update" + "MB".
+  v1.63 cheezein maujood: dock me SETTINGS entry nahi (4 tabs), updater MB
+  code maujood. Res me koi nayi binary nahi — 10 text files push hui.
+- GitHub code head: e12841d7 (HANDOFF, build.gradle, MainActivity,
+  UpdateCheck, DrawerPages, ExtraGuiScreens, HomeScreen, MoneyCalculator,
+  Settings, SplashLogin naya). ZIP-README.txt / local.properties /
+  keystore / apk GitHub par NAHI bheje (repo abhi public hai).
+- Manifest note: push se pehle manifest par vc65/1.64 live tha (doosri
+  taraf se update hua tha, apkUrl v1.64-debug wali) — uske upar vc67/1.66
+  likha (RAW JSON, base64 wali ghalti nahi), get_file_contents se live
+  verify: {"versionCode": 67, "versionName": "1.66", apkUrl v1.66 wali}.
+- FLAG: Login/SignUp GUI is version me aa gaya hai jabke 2026-10-31 11:45
+  ko user ne kaha tha auth wo khud baad me advance tareeqe se banayega —
+  uski is file bhejne + upload order par push kiya hai; agar nahi chahiye
+  to revert karna hoga (manifest wapas vc64 + code se SplashLogin hata).
 
 ## v1.66 change (31 Oct 2026) — back tarteeb, 5s intro, Login + Sign Up GUI (DEBUG, phone pe NAHI gayi)
 - BACK STACK (MainActivity): go(X) = khule page ko stack me daal ke X kholo;
