@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -64,12 +66,14 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))
         // FIX (v1.42): khaali jagah ke tap Opening tab tak na pahunchein.
         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { }) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        // v1.72: status bar ke neeche se shuru (pehle hero status bar ke
+        // upar/andar ja raha tha) + neeche gesture bar ke upar khatam.
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).statusBarsPadding().navigationBarsPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             // Hero: purple gradient, back + pen tile + title + sub.
             val hShape = RoundedCornerShape(22.dp)
             Row(
                 modifier = Modifier.fillMaxWidth().cssShadow(10.dp, hShape, Color(0xFF7B20D4).copy(alpha = 0.25f)).clip(hShape)
-                    .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 0.55f to Color(0xFF7B20D4), 1f to Color(0xFFD82EDC))).padding(18.dp),
+                    .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 0.55f to Color(0xFF7B20D4), 1f to Color(0xFFD82EDC))).padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -78,13 +82,13 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                 ) { Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = ink, modifier = Modifier.size(18.dp)) }
                 Spacer(modifier = Modifier.width(13.dp))
                 Box(
-                    modifier = Modifier.size(48.dp).cssShadow(7.dp, RoundedCornerShape(14.dp), Color(0xFF3C006E).copy(alpha = 0.3f))
+                    modifier = Modifier.size(44.dp).cssShadow(7.dp, RoundedCornerShape(14.dp), Color(0xFF3C006E).copy(alpha = 0.3f))
                         .background(cssLinear(145f, 0f to Color(0xFFD8A5FF), 1f to Color(0xFF7B20D4)), RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
-                ) { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp)) }
+                ) { Icon(Icons.Filled.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp)) }
                 Spacer(modifier = Modifier.width(13.dp))
                 Column {
-                    Text("Edit Staff List", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = (-0.4).sp)
+                    Text("Edit Staff List", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = (-0.4).sp)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Manage the operator list for your station", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = 0.96f))
                 }
@@ -109,19 +113,31 @@ fun StaffEditScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
                     Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(18.dp))
                 }
             }
-            // Staff list rows (delete sirf is page ki list se hatata hai, GUI phase).
+            // Staff list cards (v1.72: pehle saadhi safed patti + nanga delete
+            // icon tha — ab naam ka harf jamni tile me, aur delete asli button
+            // hai: halki laal gol tile, poori tile tap hoti hai. Delete sirf
+            // is page ki list se hatata hai, GUI phase).
             staff.forEach { (name, id) ->
                 val rShape = RoundedCornerShape(16.dp)
                 Row(
                     modifier = Modifier.fillMaxWidth().cssShadow(3.dp, rShape, ink.copy(alpha = 0.05f))
-                        .background(Color.White, rShape).border(1.dp, ink.copy(alpha = 0.06f), rShape).padding(horizontal = 14.dp, vertical = 12.dp),
+                        .background(Color.White, rShape).border(1.dp, ink.copy(alpha = 0.06f), rShape).padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Box(
+                        modifier = Modifier.size(38.dp).clip(RoundedCornerShape(11.dp))
+                            .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 1f to Color(0xFFD82EDC))),
+                        contentAlignment = Alignment.Center
+                    ) { Text(name.take(1).uppercase(), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White) }
+                    Spacer(modifier = Modifier.width(11.dp))
                     Text(name, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = ink, modifier = Modifier.weight(1f))
                     Text(id, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF9AA1AB),
                         modifier = Modifier.background(Color(0xFFF0F3F5), RoundedCornerShape(8.dp)).padding(horizontal = 9.dp, vertical = 4.dp))
                     Spacer(modifier = Modifier.width(10.dp))
-                    Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = BrandRed, modifier = Modifier.size(20.dp).clickable { staff.remove(name to id) })
+                    Box(
+                        modifier = Modifier.size(34.dp).clip(CircleShape).background(BrandRed.copy(alpha = 0.10f)).clickable { staff.remove(name to id) },
+                        contentAlignment = Alignment.Center
+                    ) { Icon(Icons.Filled.Delete, contentDescription = "Remove", tint = BrandRed, modifier = Modifier.size(18.dp)) }
                 }
             }
             // Add Member form.

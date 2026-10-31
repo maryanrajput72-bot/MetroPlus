@@ -1,4 +1,19 @@
-# Metro+ Native App — Handoff (v1.71 / versionCode 72) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.72 / versionCode 73) — DEBUG build (non-debuggable)
+
+## v1.72 change (31 Oct 2026) — Staff Edit theek + week strip naya (uska order, DEBUG)
+- Staff Edit: hero status bar ke upar/andar ja raha tha (statusBarsPadding
+  nahi tha) — ab page status bar ke neeche se shuru + neeche gesture bar
+  ke upar khatam hota hai. Hero thora chhota (title 20sp, pen tile 44dp).
+  Staff rows ab asli cards: naam ka pehla harf jamni gradient tile me,
+  ID pill wahi, delete ab asli button (halki laal gol tile 34dp, poori
+  tile tap hoti hai — pehle nanga 20dp icon tha). Overlay pehle se Box
+  ka full-screen child tha (line 180-189 check kiya) — andar jaane ki
+  wajah status-bar overlap thi, nesting nahi.
+- Week strip: dots + date numbers KHATAM. Ab har din: upar weekday naam
+  (Mon/Tue... 3 harf — 7 poore naam ek line me nahi aate), neeche us din
+  hazir bande ki ginti (person icon + number; 5 sabz, 4 peela, 3 ya kam
+  laal; demo counts, aaj = 5). Aaj ka din halki laal pill me.
+- Verify: TODO build ke baad.
 
 ## v1.71 change (31 Oct 2026) — supervisor card + TL login ek + 2-rang cards (uska order, DEBUG)
 - Supervisor: Settings ACCOUNT me "Supervisor Name" row + pencil ab chhota
@@ -21,7 +36,10 @@
 - OPEN: uska "create new" wala jumla poora samajh nahi aaya (usne kaha wo
   aur check karke batayega) — is liye us par kuch nahi banaya; uske
   agle message ka intezar hai.
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~19:08 PKT): APK 12,539,463 bytes, SHA b4f69ccd;
+  cert apksigner se b13501ef MATCH; dex "Version 1.71" + "supervisor_name"
+  key maujood, 1.70 gayab. GitHub code head 04bd4073, MANIFEST LIVE
+  vc72 JSON verify (RAW JSON). Updater se update aani chahiye.
 
 ## v1.70 change (31 Oct 2026) — icon M yellow + drawer reset + splash 6.5s, no white (uska order, DEBUG)
 - Icon: M ka rang YELLOW kar diya (dark + light yellow) — HSV hue shift

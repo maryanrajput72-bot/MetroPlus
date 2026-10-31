@@ -48,6 +48,7 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.WbSunny
@@ -411,15 +412,18 @@ private val OperatorAccents = listOf(
     Triple(Color(0xFFD92E91), Color(0xFFFFE2F2), listOf(Color(0xFFF65AA7), Color(0xFFC92B79)))
 )
 
-// v1.62: week strip (63 ke attendance week view ki GUI — demo statuses).
+// v1.72 (uska order): dots + date khatam — sirf weekday naam, aur uske
+// neeche us din hazir bande ki ginti (demo: aaj sab 5, pichhle din thore
+// kam). Dots ka matlab kisi ko samajh nahi aata tha; aaj ka din halki
+// laal pill me.
 @Composable
 private fun StaffWeekStrip() {
     val days = (6 downTo 0).map { back ->
         val c = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -back) }
         Triple(
-            SimpleDateFormat("EEE", Locale.ENGLISH).format(c.time).take(1),
-            c.get(Calendar.DAY_OF_MONTH),
-            when (back) { 2 -> Color(0xFF9CA3AF); 5 -> Color(0xFFE53935); else -> Color(0xFF22C55E) }
+            SimpleDateFormat("EEE", Locale.ENGLISH).format(c.time),
+            when (back) { 6 -> 4; 4 -> 3; 2 -> 4; else -> 5 },
+            back == 0
         )
     }
     val shape = RoundedCornerShape(18.dp)
@@ -430,13 +434,21 @@ private fun StaffWeekStrip() {
         Text("This Week", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430))
         Spacer(modifier = Modifier.height(10.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            days.forEach { (initial, num, dot) ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                    Text(initial, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6B7280))
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("$num", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430))
+            days.forEach { (name, present, isToday) ->
+                val countColor = when { present >= 5 -> Color(0xFF22C55E); present == 4 -> Color(0xFFD9A400); else -> Color(0xFFE53935) }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                        .background(if (isToday) BrandRed.copy(alpha = 0.08f) else Color.Transparent, RoundedCornerShape(12.dp))
+                        .padding(vertical = 6.dp)
+                ) {
+                    Text(name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = if (isToday) BrandRed else Color(0xFF6B7280))
                     Spacer(modifier = Modifier.height(5.dp))
-                    Box(modifier = Modifier.size(9.dp).background(dot, CircleShape))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.Person, contentDescription = null, tint = countColor, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text("$present", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = countColor)
+                    }
                 }
             }
         }
