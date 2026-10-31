@@ -130,7 +130,7 @@ internal class OpeningViewModel : ViewModel() {
 private fun demoShift(): String = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning" else "Evening"
 
 @Composable
-fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit) {
+fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit, onOpenViewer: () -> Unit = {}) {
     val vm: OpeningViewModel = viewModel()
     var tab by vm.tab
     // Item 4: Staff Edit page (trial staffEditScreen) — Staff tab ke upar slide hoke aata hai.
@@ -174,7 +174,7 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
                 OpTab.DATA -> OpeningDataTab(vm, onGuiNote)
                 OpTab.STAFF -> OpeningStaffTab(vm, onGuiNote) { staffEditOpen = true }
                 OpTab.LEAVE -> OpeningLeaveTab(vm, onGuiNote)
-                OpTab.GPS -> OpeningGpsTab(onGuiNote, onOpenCamera)
+                OpTab.GPS -> OpeningGpsTab(onGuiNote, onOpenCamera, onOpenViewer)
             }
         }
         }
@@ -411,6 +411,38 @@ private val OperatorAccents = listOf(
     Triple(Color(0xFFD92E91), Color(0xFFFFE2F2), listOf(Color(0xFFF65AA7), Color(0xFFC92B79)))
 )
 
+// v1.62: week strip (63 ke attendance week view ki GUI — demo statuses).
+@Composable
+private fun StaffWeekStrip() {
+    val days = (6 downTo 0).map { back ->
+        val c = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -back) }
+        Triple(
+            SimpleDateFormat("EEE", Locale.ENGLISH).format(c.time).take(1),
+            c.get(Calendar.DAY_OF_MONTH),
+            when (back) { 2 -> Color(0xFF9CA3AF); 5 -> Color(0xFFE53935); else -> Color(0xFF22C55E) }
+        )
+    }
+    val shape = RoundedCornerShape(18.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth().cssShadow(6.dp, shape, Color(0xFF281415).copy(alpha = 0.07f))
+            .background(Color.White, shape).padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Text("This Week", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430))
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            days.forEach { (initial, num, dot) ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    Text(initial, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF6B7280))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("$num", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430))
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Box(modifier = Modifier.size(9.dp).background(dot, CircleShape))
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, onOpenStaffEdit: () -> Unit) {
     val total = demoStaff.size
@@ -468,6 +500,8 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, o
                 }
             }
         }
+        Spacer(modifier = Modifier.height(10.dp))
+        StaffWeekStrip()
         // Staff List heading: 20sp title | "N Operators" laal 18sp | purple Edit button.
         Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp).padding(horizontal = 3.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Staff List", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1E1430), modifier = Modifier.weight(1f))
@@ -816,11 +850,12 @@ private fun StaffPicker(picked: String?, onPick: (String, String) -> Unit) {
 
 // ---------------- GPS PICTURE ----------------
 @Composable
-private fun OpeningGpsTab(onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit) {
+private fun OpeningGpsTab(onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit, onOpenViewer: () -> Unit) {
     val shape = RoundedCornerShape(24.dp)
     Column(modifier = Modifier.padding(16.dp)) {
         Box(
             modifier = Modifier.fillMaxWidth().height(300.dp).cssShadow(8.dp, shape, Color(0xFF281415).copy(alpha = 0.08f)).clip(shape)
+                .clickable { onOpenViewer() }
                 .background(cssLinear(135f, 0f to Color(0xFFE8F2FF), 1f to Color(0xFFCFE3FF))).border(1.dp, OpInk.copy(alpha = 0.06f), shape),
             contentAlignment = Alignment.Center
         ) {
