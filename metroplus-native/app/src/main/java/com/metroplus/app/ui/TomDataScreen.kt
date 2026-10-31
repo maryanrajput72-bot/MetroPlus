@@ -89,7 +89,7 @@ class TomDataViewModel : ViewModel() {
 }
 
 @Composable
-fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
+fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenTomCount: () -> Unit = {}) {
     // History page (trial 63 ka Shift History) — Tom Data ke upar slide hoke aata hai.
     var historyOpen by remember { mutableStateOf(false) }
     BackHandler {
@@ -114,7 +114,7 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
             TdCircle(Icons.Filled.History, "History") { historyOpen = true }
         }
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-            StationHero(closing, onGuiNote)
+            StationHero(closing, onGuiNote, onOpenTomCount)
             Spacer(modifier = Modifier.height(12.dp))
             ModeSwitch(closing) { closing = it }
             Spacer(modifier = Modifier.height(16.dp))
@@ -138,9 +138,10 @@ private fun TdCircle(icon: ImageVector, desc: String, onClick: () -> Unit) {
 // kona 24, watermark, bus avatar + "Daily Shift Register", save/WhatsApp
 // chhote gol buttons, shift + date chips, revenue.
 @Composable
-private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
+private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit, onOpenTomCount: () -> Unit) {
     var tomDmy by remember { mutableStateOf(SimpleDateFormat("dd-MM-yyyy", Locale.US).format(Date())) }
     var tomDateOpen by remember { mutableStateOf(false) }
+    var shiftOpen by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(24.dp)
     // Pehle wala card DONO modes me dark (uska order): Closing halka pink
     // #F2BDC0→#E69A9E tha, Opening halka neela #DCECFF→#B9D4FB tha.
@@ -148,7 +149,7 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
     else arrayOf(0f to Color(0xFFA9C7F7), 0.55f to Color(0xFF86A9EF), 1f to Color(0xFF86A9EF))
     val shadow = if (closing) BrandRedDark.copy(alpha = 0.16f) else Color(0xFF2563EB).copy(alpha = 0.14f)
     val border = if (closing) BrandRedDark.copy(alpha = 0.3f) else Color(0xFF2563EB).copy(alpha = 0.22f)
-    val shift = if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift"
+    var shift by remember { mutableStateOf(if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift") }
     Box(
         modifier = Modifier.fillMaxWidth().cssShadow(8.dp, shape, shadow).clip(shape).background(cssLinear(125f, *stops)).border(1.dp, border, shape)
     ) {
@@ -172,7 +173,7 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.clip(RoundedCornerShape(18.dp)).background(Section.Tom.copy(alpha = 0.1f))
-                        .border(1.dp, Section.Tom.copy(alpha = 0.3f), RoundedCornerShape(18.dp)).clickable { onGuiNote("Shift") }
+                        .border(1.dp, Section.Tom.copy(alpha = 0.3f), RoundedCornerShape(18.dp)).clickable { shiftOpen = true }
                         .padding(horizontal = 9.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -194,9 +195,31 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit) {
                 }
             }
             if (tomDateOpen) DatePickerSheet(tomDmy, { tomDmy = it }, { tomDateOpen = false })
+            if (shiftOpen) OptionPickerSheet(
+                "Select Shift",
+                listOf(
+                    PickerOption("Morning Shift", listOf(Color.White, Color(0xFFF6F2F2)), Section.Tom, TdInk),
+                    PickerOption("Evening Shift", listOf(Color.White, Color(0xFFF6F2F2)), Section.Tom, TdInk)
+                ),
+                { shift = it.label; shiftOpen = false },
+                { shiftOpen = false }
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Text("Total Shift Revenue", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold, color = TdMuted, letterSpacing = 0.3.sp)
             Text("Rs. 0", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = TdInk, letterSpacing = (-0.8).sp)
+            Spacer(modifier = Modifier.height(10.dp))
+            // v1.62: TOM Machines row — 63 ke tomCountScreen ka rasta.
+            Row(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color.White.copy(alpha = 0.65f))
+                    .border(1.dp, Color.White.copy(alpha = 0.9f), RoundedCornerShape(14.dp)).clickable { onOpenTomCount() }
+                    .padding(horizontal = 12.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("TOM Machines", fontSize = 12.5.sp, fontWeight = FontWeight.Bold, color = TdInk, modifier = Modifier.weight(1f))
+                Text("3 machines", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TdMuted)
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = TdMuted, modifier = Modifier.size(16.dp))
+            }
         }
     }
 }
