@@ -1,4 +1,34 @@
-# Metro+ Native App — Handoff (v1.75 / versionCode 76) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.76 / versionCode 77) — DEBUG build (non-debuggable)
+
+## v1.76 change (31 Oct 2026) — 63 wala SILENT install + GitHub APK host (uska order, DEBUG)
+- CORRECTION (pehle wale jawab ki): maine kaha tha aakhri Update wali
+  screen koi app khatam nahi kar sakta — ye GHALAT tha. 63 ki shell APK
+  (trial263.apk) ka dex khol ke verify kiya: WebAppBridge.
+  downloadAndInstallSilentUpdate -> UpdateManager.startSilent ->
+  DownloadManager download + PackageInstaller session (SessionParams,
+  setRequireUserAction, createSession/openSession) + manifest me
+  UPDATE_PACKAGES_WITHOUT_USER_ACTION + REQUEST_INSTALL_PACKAGES.
+  Android ka official rule: self-update + REQUEST_INSTALL_PACKAGES +
+  ye permission declare + USER_ACTION_NOT_REQUIRED = bina popup install
+  (target API floor: Android 14 par 31+, native target 34 — poora hota hai).
+- Native me wahi rasta lagaya: UpdateCheck.installUpdateSilent()
+  (PackageInstaller session, MODE_FULL_INSTALL, setAppPackageName,
+  USER_ACTION_NOT_REQUIRED; API <31 par false -> purana rasta) +
+  UpdateInstallReceiver (SUCCESS pe pending saaf; PENDING_USER_ACTION pe
+  system ki installer screen kholo; failure pe ACTION_VIEW fallback) +
+  installInFlight guard (dobara session na bane). Manifest me
+  UPDATE_PACKAGES_WITHOUT_USER_ACTION + receiver entry.
+  MainActivity ke dono install points (100% ke baad + onResume pending)
+  pehle silent, na chale to ACTION_VIEW.
+- GitHub APK host: push-files sirf TEXT leta hai (binary pe "not UTF-8"
+  error) — is liye v1.75 APK browser se GitHub web upload karwayi ja
+  rahi hai (task browser-task:97895f3b); v1.76 ki APK bhi usi raste
+  GitHub par jayegi, manifest apkUrl = GitHub raw (size milne se %
+  dikhega). Manifest vc77 us upload ke verify ke BAAD update hogi.
+- Shart saaf: silent sirf SELF-update pe chalta hai; "Install unknown
+  apps" ijazat ek dafa on hona lazmi hai, warna system phir bhi
+  installer screen dikha dega (receiver fallback).
+- Verify: TODO build ke baad.
 
 ## v1.75 change (31 Oct 2026) — square staff card naya design (uska order, DEBUG)
 - Accent line side ki bajaye har card ke UPAR (top stripe, 5dp, accent rang).
@@ -16,7 +46,9 @@
   status rang me). Purana OperatorCardRow + OptionPickerSheet file me
   mehfooz (OperatorCardRow ab bhi TimeStep/OptionPickerSheet use karta hai).
 - Updater me KOI change nahi — uska sawaal sirf jawab se hal hua (neeche note).
-- Verify: TODO build ke baad.
+- Verify (2026-10-31 ~20:57 PKT): APK 12,549,007 bytes, SHA ea1866d9;
+  cert apksigner se b13501ef MATCH; dex "Version 1.75", 1.74 gayab.
+  GitHub code push ok, MANIFEST LIVE vc76 JSON verify (RAW JSON).
 
 ## Updater note (31 Oct 2026, uske sawaal ke jawab ke liye verify kiya gaya)
 - Native me update ka KOI dialog/button nahi: har foreground +5s check,

@@ -192,9 +192,12 @@ class MainActivity : ComponentActivity() {
         ForegroundTicker.resumeCount.value++
         // Unknown sources on karke wapas aaye to pending update foran install ho.
         UpdateManager.pendingInstallFile?.let { file ->
-            if (UpdateManager.canInstall(this)) {
+            if (UpdateManager.canInstall(this) && !UpdateManager.installInFlight) {
                 UpdateManager.pendingInstallFile = null
-                UpdateManager.installUpdate(this, file)
+                if (!UpdateManager.installUpdateSilent(this, file)) {
+                    UpdateManager.pendingInstallFile = null
+                    UpdateManager.installUpdate(this, file)
+                }
             }
         }
     }
@@ -204,8 +207,9 @@ class MainActivity : ComponentActivity() {
 fun MetroPlusApp() {
     val context = LocalContext.current
     // Sticky rule: har app open pe 5 second baad update check.
-    // Update mile to khud download shuru, progress upar pill me, 100% pe khud install
-    // screen — app ke andar koi dialog, koi button nahi (trial 63 ka silent system).
+    // Update mile to khud download shuru, progress upar pill me, 100% pe khud
+    // SILENT install (PackageInstaller session, trial 63 ka system) — app ke
+    // andar koi dialog, koi button nahi.
     var downloadProgress by remember { mutableStateOf<Int?>(null) }
     // v1.63: 63 jaisa nazar aane wala progress — % na mile to downloaded MB.
     var downloadBytes by remember { mutableStateOf(0L) }
@@ -236,7 +240,11 @@ fun MetroPlusApp() {
                     downloadProgress = null
                     showConfetti = false
                     if (UpdateManager.canInstall(context.applicationContext)) {
-                        UpdateManager.installUpdate(context.applicationContext, file)
+                        // v1.76: pehle 63 wala silent session; na chale to purana rasta.
+                        if (!UpdateManager.installUpdateSilent(context.applicationContext, file)) {
+                            UpdateManager.pendingInstallFile = null
+                            UpdateManager.installUpdate(context.applicationContext, file)
+                        }
                     } else {
                         // Nayi app ke liye "Install unknown apps" ijazat EK dafa darkar hai
                         // (purani app ki ijazat nayi app par nahi chalti) — settings seedha
@@ -790,7 +798,7 @@ private fun ProfileDrawer(
             ) {
                 Icon(Icons.Filled.Info, contentDescription = null, tint = Color(0xFF9AA1AB), modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(5.dp))
-                Text("Version 1.75", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
+                Text("Version 1.76", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF6B7280))
             }
             Row(
                 modifier = Modifier.shadow(6.dp, RoundedCornerShape(999.dp), ambientColor = Color(0xFFB02A31), spotColor = Color(0xFFB02A31))

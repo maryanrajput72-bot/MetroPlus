@@ -1,7 +1,10 @@
 package com.metroplus.app
 
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -10,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.FileProvider
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -33,13 +37,16 @@ object ForegroundTicker {
 // Format: {"versionCode": 12, "versionName": "1.11", "apkUrl": "https://.../MetroPlus-v1.11.apk"}
 object UpdateManager {
     const val MANIFEST_URL = "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-app-version.json"
-    const val CURRENT_VERSION_CODE = 76
+    const val CURRENT_VERSION_CODE = 77
 
     private val mainHandler = Handler(Looper.getMainLooper())
     @Volatile private var cancelled = false
     // Unknown sources on karne ke liye settings gaye waqt download shuda file yahan rakhi jati hai,
     // taake wapas aate hi install khul jaye (dobara download nahi karni parti).
     var pendingInstallFile: File? = null
+    // Silent session commit ho chuka ho to dobara session na bane (onResume
+    // dobara chalne pe) — receiver terminal status pe isko false karta hai.
+    @Volatile var installInFlight = false
 
     fun cancelDownload() { cancelled = true }
 
@@ -131,6 +138,47 @@ object UpdateManager {
         return context.packageManager.canRequestPackageInstalls()
     }
 
+    // v1.76: 63 wala SILENT install — PackageInstaller session, ACTION_VIEW
+    // intent ki bajaye. Android ka rule: self-update + REQUEST_INSTALL_PACKAGES
+    // (user ki ek dafa ijazat) + manifest me UPDATE_PACKAGES_WITHOUT_USER_ACTION
+    // + USER_ACTION_NOT_REQUIRED = install bina popup ke. Koi shart poori na ho
+    // to system STATUS_PENDING_USER_ACTION bhejta hai — receiver us surat me
+    // installer screen khud khol deta hai (fallback, update phir bhi hogi).
+    // Session fail ho to false — caller purana ACTION_VIEW rasta use kare.
+    fun installUpdateSilent(context: Context, file: File): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return false
+        if (installInFlight) return true
+        return try {
+            installInFlight = true
+            pendingInstallFile = file
+            val installer = context.packageManager.packageInstaller
+            val params = PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL
+            ).apply {
+                setAppPackageName(context.packageName)
+                setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+            }
+            val sessionId = installer.createSession(params)
+            val session = installer.openSession(sessionId)
+            session.openWrite("apk", 0, file.length()).use { out ->
+                FileInputStream(file).use { input -> input.copyTo(out) }
+            }
+            val statusIntent = Intent(context, UpdateInstallReceiver::class.java).apply {
+                action = UpdateInstallReceiver.ACTION_STATUS
+            }
+            val statusPending = PendingIntent.getBroadcast(
+                context, sessionId, statusIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            session.commit(statusPending.intentSender)
+            session.close()
+            true
+        } catch (_: Exception) {
+            installInFlight = false
+            false
+        }
+    }
+
     fun installUpdate(context: Context, file: File) {
         try {
             val uri = FileProvider.getUriForFile(
@@ -154,6 +202,43 @@ object UpdateManager {
             ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
             context.startActivity(intent)
         } catch (_: Exception) {
+        }
+    }
+}
+
+// v1.76: silent install session ka status receiver. SUCCESS pe pending file
+// saaf; PENDING_USER_ACTION pe system ki di hui installer screen kholo
+// (shart poori na hone ka fallback); kisi aur failure pe purana ACTION_VIEW
+// rasta (file pendingInstallFile me mehfooz hai).
+class UpdateInstallReceiver : BroadcastReceiver() {
+    companion object {
+        const val ACTION_STATUS = "com.metroplus.app.INSTALL_STATUS"
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != ACTION_STATUS) return
+        val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)
+        UpdateManager.installInFlight = false
+        when (status) {
+            PackageInstaller.STATUS_SUCCESS -> {
+                UpdateManager.pendingInstallFile = null
+            }
+            PackageInstaller.STATUS_PENDING_USER_ACTION -> {
+                try {
+                    @Suppress("DEPRECATION")
+                    val pending = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+                    pending?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    if (pending != null) context.startActivity(pending)
+                } catch (_: Exception) {
+                }
+            }
+            else -> {
+                val file = UpdateManager.pendingInstallFile
+                if (file != null) {
+                    UpdateManager.pendingInstallFile = null
+                    UpdateManager.installUpdate(context, file)
+                }
+            }
         }
     }
 }
