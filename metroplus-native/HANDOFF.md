@@ -1,4 +1,35 @@
-# Metro+ Native App — Handoff (v1.61 / versionCode 62) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.62 / versionCode 63) — DEBUG build (non-debuggable)
+
+## v1.62 change (31 Oct 2026) — 63 ke reh gaye GUI pages, SIRF GUI (DEBUG, phone pe NAHI gayi)
+- Uska order (11:40 + 11:45 PKT): comparison SIRF GUI ka ho, asli kaam baad me;
+  Login/Signup/Onboarding abhi NAHI banana (wo wo khud baad me naye advance
+  tareeqe se banayega). Baaki GUI gaps abhi bane — nayi file ui/ExtraGuiScreens.kt.
+- Naye pages (63 ke raste wahi): TL PIN Lock (Settings ki TL/RP Login row se —
+  blurred home, safed card, img_tl_padlock, "Enter Your 5 Digit PIN" + 5 boxes +
+  keypad; 5 digit par sirf GUI note), Chat Settings (Bubble size/color/background
+  + WhatsApp Format row), App Info (asal installed version + package + Check
+  Update jo maujooda updater chalata hai + System & Storage row), System &
+  Storage (demo stats + Sync/Clear/Export/Import/Delete rows), WhatsApp Format
+  (paste box + Opening/Closing format fields + Save note), TOM Machines
+  (1–5 options, 63 ka text wahi), GPS Photo Viewer (crop frame toggle + Share
+  note), Splash (cold open pe 1.5s, phir Home).
+- Maujooda screens me: Settings APP group me System & Storage + WhatsApp Format
+  rows wapas (63 ki rows; v1.54 ki "bas" katoti sirf in dono rows tak khatam —
+  warna naye pages ka rasta hi na hota), Tom Data hero shift chip ab
+  OptionPickerSheet kholti hai (Morning/Evening, GUI state), hero ke neeche
+  "TOM Machines: 3 machines" row (TOM Count page ka rasta), Opening Staff tab
+  me week strip (aakhri 7 din, demo dots), Opening GPS tab ki photo tap par
+  viewer, GPS Camera par "View Attendance" pill + attendance popup (demo staff
+  + Share note), drawer TL/RP page par "Request Premium Access" button +
+  premium request modal (naam/Gmail + Send note).
+- Asli kaam NAHI hua (GUI phase): koi save/share/Firebase/camera/login wiring
+  nahi; toggles/chips sirf GUI state; App Info version/package asal hain.
+- Verify (build 12:01 PKT): BUILD SUCCESSFUL, APK 12,451,651 bytes, SHA
+  4561f84c…, cert b13501ef EXACT match (wahi keystore — in-place update
+  hoga), dex me "Version 1.62" + saare naye labels mile (TL PIN, System &
+  Storage, WhatsApp Format, TOM Machines, Premium Request, View Attendance,
+  This Week, Crop frame, Staff Attendance, splash text). GitHub push ke
+  baad manifest NAHI chheda — phone abhi v1.54 par hai.
 
 > **PRIVATE:** `keystore/debug.keystore` is the app's signing key. Keep this zip private.
 > Without this exact key, new builds will NOT install over the app on the phone.
