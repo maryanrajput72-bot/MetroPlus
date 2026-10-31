@@ -98,7 +98,8 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenTomCoun
     }
     val vm: TomDataViewModel = viewModel()
     var closing by vm.closingMode
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    // v1.89 (uska order): register ka rang mode ke hisab se — Opening: Cream bg + Olive, Closing: Chiffon bg + Milano Red.
+    Box(modifier = Modifier.fillMaxSize().background(if (closing) Color(0xFFFACD) else Color(0xFFFDD0))) {
     Column(modifier = Modifier.fillMaxSize()) {
         // Header: back | laal invoice icon + "Tom Data Register" | history.
         Row(
@@ -107,9 +108,9 @@ fun TomDataScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenTomCoun
         ) {
             TdCircle(Icons.Filled.ArrowBack, "Back", onBack)
             Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.ReceiptLong, contentDescription = null, tint = Section.Tom, modifier = Modifier.size(18.dp))
+                Icon(Icons.Filled.ReceiptLong, contentDescription = null, tint = if (closing) Color(0xFFB81104) else Color(0xFF556B2F), modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Tom Data Register", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TdInk)
+                Text("Tom Data Register", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = if (closing) Color(0xFFB81104) else Color(0xFF556B2F))
             }
             TdCircle(Icons.Filled.History, "History") { historyOpen = true }
         }
@@ -145,10 +146,10 @@ private fun StationHero(closing: Boolean, onGuiNote: (String) -> Unit, onOpenTom
     val shape = RoundedCornerShape(24.dp)
     // Pehle wala card DONO modes me dark (uska order): Closing halka pink
     // #F2BDC0→#E69A9E tha, Opening halka neela #DCECFF→#B9D4FB tha.
-    val stops = if (closing) arrayOf(0f to Color(0xFFE88F97), 0.55f to Color(0xFFD46970), 1f to Color(0xFFD46970))
-    else arrayOf(0f to Color(0xFFA9C7F7), 0.55f to Color(0xFF86A9EF), 1f to Color(0xFF86A9EF))
-    val shadow = if (closing) BrandRedDark.copy(alpha = 0.16f) else Color(0xFF2563EB).copy(alpha = 0.14f)
-    val border = if (closing) BrandRedDark.copy(alpha = 0.3f) else Color(0xFF2563EB).copy(alpha = 0.22f)
+    val stops = if (closing) arrayOf(0f to Color(0xFFFACD), 0.55f to Color(0xFFFFB4A6), 1f to Color(0xFFE85D44))
+    else arrayOf(0f to Color(0xFFE9EFD0), 0.55f to Color(0xFFB7CB8A), 1f to Color(0xFF8FAE6B))
+    val shadow = if (closing) Color(0xFFB81104).copy(alpha = 0.16f) else Color(0xFF556B2F).copy(alpha = 0.14f)
+    val border = if (closing) Color(0xFFB81104).copy(alpha = 0.3f) else Color(0xFF556B2F).copy(alpha = 0.22f)
     var shift by remember { mutableStateOf(if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 12) "Morning Shift" else "Evening Shift") }
     Box(
         modifier = Modifier.fillMaxWidth().cssShadow(8.dp, shape, shadow).clip(shape).background(cssLinear(125f, *stops)).border(1.dp, border, shape)
@@ -234,8 +235,8 @@ private fun ModeSwitch(closing: Boolean, onChange: (Boolean) -> Unit) {
             .border(1.3.dp, TdInk.copy(alpha = 0.1f), shape).padding(5.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        SwitchButton("Opening Data", Icons.Filled.MeetingRoom, !closing, listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), Color.White) { onChange(false) }
-        SwitchButton("Closing Data", Icons.Filled.DoorFront, closing, listOf(Color(0xFFE6353E), BrandRedDark), Color(0xFF230607)) { onChange(true) }
+        SwitchButton("Opening Data", Icons.Filled.MeetingRoom, !closing, listOf(Color(0xFF8FAE6B), Color(0xFF556B2F)), Color.White) { onChange(false) }
+        SwitchButton("Closing Data", Icons.Filled.DoorFront, closing, listOf(Color(0xFFE85D44), Color(0xFFB81104)), Color.White) { onChange(true) }
     }
 }
 

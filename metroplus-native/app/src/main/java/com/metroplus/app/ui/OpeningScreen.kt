@@ -152,13 +152,14 @@ fun OpeningScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit, onOpenCamera:
     }
 
     val (titleIcon, titleTint, title) = when (tab) {
-        OpTab.MENU -> Triple(Icons.Filled.WbSunny, Color(0xFFF59E0B), "Opening")
-        OpTab.DATA -> Triple(Icons.Filled.FolderOpen, Color(0xFFF59E0B), "Opening Data")
-        OpTab.STAFF -> Triple(Icons.Filled.Groups, BrandRedDark, "Staff Attendance")
-        OpTab.LEAVE -> Triple(Icons.Filled.CalendarMonth, Color(0xFF0F766E), "Leave Form")
-        OpTab.GPS -> Triple(Icons.Filled.PhotoCamera, Color(0xFF1A6FD8), "GPS Picture")
+        OpTab.MENU -> Triple(Icons.Filled.WbSunny, Color(0xFF16A34A), "Opening")
+        OpTab.DATA -> Triple(Icons.Filled.FolderOpen, Color(0xFF22C55E), "Opening Data")
+        OpTab.STAFF -> Triple(Icons.Filled.Groups, Color(0xFF15803D), "Staff Attendance")
+        OpTab.LEAVE -> Triple(Icons.Filled.CalendarMonth, Color(0xFF22C55E), "Leave Form")
+        OpTab.GPS -> Triple(Icons.Filled.PhotoCamera, Color(0xFF16A34A), "GPS Picture")
     }
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    // v1.89 (uska order): Opening theme GREEN (dark + light) — hero, tabs, tiles, GPS, staff hero, leave header.
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF0FDF4))) {
     Column(modifier = Modifier.fillMaxSize()) {
         // Header: white 94%, padding 16/20, 44dp gol back (halki border), beech me icon + 17sp title.
         Row(
@@ -207,9 +208,9 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
         // Hero: 135° #FFB547→#FF8A1E→#F2641A, kona 24, padding 18, sab likhai baein.
         val heroShape = RoundedCornerShape(24.dp)
         Box(
-            modifier = Modifier.fillMaxWidth().cssShadow(12.dp, heroShape, Color(0xFFF2641A).copy(alpha = 0.28f)).clip(heroShape)
-                // v1.61: kai-rang (sunehra → narangi → gulabi-laal) + chamak.
-                .background(cssLinear(135f, 0f to Color(0xFFFFD166), 0.5f to Color(0xFFFF8A1E), 1f to Color(0xFFF43F5E)))
+            modifier = Modifier.fillMaxWidth().cssShadow(12.dp, heroShape, Color(0xFF16A34A).copy(alpha = 0.28f)).clip(heroShape)
+                // v1.89: green gradient (halka → darmiyani → gehra sabz) + chamak.
+                .background(cssLinear(135f, 0f to Color(0xFFBBF7D0), 0.5f to Color(0xFF4ADE80), 1f to Color(0xFF16A34A)))
         ) {
             // matchParentSize: chamak card ko lamba na kare (sirf content jitna rahe).
             Box(Modifier.matchParentSize()) {
@@ -226,12 +227,12 @@ private fun OpeningMenu(open: (OpTab) -> Unit) {
         }
         // v1.74 (uska order): menu cards ab hub style — poora 2-rang
         // gradient background + safed border (pehle safed card + halki tint).
-        PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFFFF1C2), Color(0xFFFFA94D)), listOf(Color(0xFFFFF3B0), Color(0xFFFFC93C)), { open(OpTab.DATA) }) {
+        PlainTile("Opening Data", "Roll counts & TOM opening balances", listOf(Color(0xFFDCFCE7), Color(0xFF22C55E)), listOf(Color(0xFFF0FDF4), Color(0xFFBBF7D0)), { open(OpTab.DATA) }) {
             Image(painterResource(id = R.drawable.ic_dock_opening), contentDescription = null, modifier = Modifier.size(46.dp))
         }
-        FancyTile("Staff Attendance", "Who is on duty today", listOf(BrandRedLight, BrandRedDark), listOf(Color(0xFFFFE4E6), Color(0xFFFB7185)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
-        FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFF7EF0C1), Color(0xFF0F766E)), listOf(Color(0xFFCCFBF1), Color(0xFF2DD4BF)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
-        PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF4CB4FF), Color(0xFF1A6FD8)), listOf(Color(0xFFE0F2FE), Color(0xFF38BDF8)), { open(OpTab.GPS) }) {
+        FancyTile("Staff Attendance", "Who is on duty today", listOf(Color(0xFF4ADE80), Color(0xFF16A34A)), listOf(Color(0xFFDCFCE7), Color(0xFF86EFAC)), R.drawable.staff_attendance_3d) { open(OpTab.STAFF) }
+        FancyTile("Leave Form", "Leave and overtime notes", listOf(Color(0xFFBBF7D0), Color(0xFF15803D)), listOf(Color(0xFFF0FDF4), Color(0xFF4ADE80)), R.drawable.leave_form_3d) { open(OpTab.LEAVE) }
+        PlainTile("GPS Picture", "Latest GPS photo + staff attendance", listOf(Color(0xFF86EFAC), Color(0xFF16A34A)), listOf(Color(0xFFDCFCE7), Color(0xFF4ADE80)), { open(OpTab.GPS) }) {
             Icon(Icons.Filled.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
         }
     }
@@ -314,7 +315,7 @@ private fun OpeningDataTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
             }
         }
         Spacer(modifier = Modifier.height(18.dp))
-        BigButton("Save Opening", Icons.Filled.Save, listOf(Color(0xFFF59E0B), Color(0xFFD97706)), Color.White) { onGuiNote("Save Opening") }
+        BigButton("Save Opening", Icons.Filled.Save, listOf(Color(0xFF4ADE80), Color(0xFF16A34A)), Color.White) { onGuiNote("Save Opening") }
         Spacer(modifier = Modifier.height(10.dp))
         // Item 4: Save pehle apni line me; uske neeche ek hi line me
         // chhota WhatsApp + Copy (sirf "WhatsApp" / "Copy" labels).
@@ -464,7 +465,7 @@ private fun StaffWeekStrip() {
                     modifier = Modifier.weight(1f).height(64.dp)
                         .clip(capShape)
                         .then(
-                            if (isToday) Modifier.background(cssLinear(135f, 0f to Color(0xFFFF2E52), 1f to Color(0xFFC81036)))
+                            if (isToday) Modifier.background(cssLinear(135f, 0f to Color(0xFF22C55E), 1f to Color(0xFF16A34A)))
                             else Modifier.background(Color.White).border(1.dp, Color(0xFFE2E8F0), capShape)
                         )
                         .padding(vertical = 6.dp)
@@ -475,7 +476,7 @@ private fun StaffWeekStrip() {
                         Box(
                             modifier = Modifier.background(Color.White, RoundedCornerShape(999.dp)).padding(horizontal = 8.dp, vertical = 2.dp),
                             contentAlignment = Alignment.Center
-                        ) { Text("$present", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFC81036)) }
+                        ) { Text("$present", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF16A34A)) }
                     } else {
                         Text("$present", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = countColor)
                     }
@@ -490,14 +491,14 @@ private fun OpeningStaffTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit, o
     val total = demoStaff.size
     val onDuty = vm.status.count { it == StaffStatus.ON_DUTY }
     val off = vm.status.count { it == StaffStatus.OFF }
-    Column(modifier = Modifier.fillMaxWidth().background(Color(0xFFFDF1F3)).padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().background(Color(0xFFF0FDF4)).padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 16.dp)) {
         // v1.78 COLORFUL (uska order: style wahi, rang pehle/home jaisay):
         // hero wapas laal gradient + safed stats bar (dark obsidian khatam).
         // Layout naya hi hai (bus image wapas nahi lagayi).
         val heroShape = RoundedCornerShape(24.dp)
         Box(
-            modifier = Modifier.fillMaxWidth().cssShadow(12.dp, heroShape, Color(0xFFBF1137).copy(alpha = 0.28f)).clip(heroShape)
-                .background(cssLinear(135f, 0f to Color(0xFFFF2E52), 0.55f to Color(0xFFE31837), 1f to Color(0xFFC81036)))
+            modifier = Modifier.fillMaxWidth().cssShadow(12.dp, heroShape, Color(0xFF16A34A).copy(alpha = 0.28f)).clip(heroShape)
+                .background(cssLinear(135f, 0f to Color(0xFF4ADE80), 0.55f to Color(0xFF22C55E), 1f to Color(0xFF16A34A)))
         ) {
             Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 14.dp)) {
                 Text("Shaheed-e-Millat", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1)
@@ -876,13 +877,13 @@ private fun OpeningLeaveTab(vm: OpeningViewModel, onGuiNote: (String) -> Unit) {
         // Purple header: 135° #9B35F2→#7B20D4→#D82EDC, kona 22, 64dp logo tile.
         val hShape = RoundedCornerShape(22.dp)
         Row(
-            modifier = Modifier.fillMaxWidth().cssShadow(10.dp, hShape, Color(0xFF7B20D4).copy(alpha = 0.25f)).clip(hShape)
-                .background(cssLinear(135f, 0f to Color(0xFF9B35F2), 0.55f to Color(0xFF7B20D4), 1f to Color(0xFFD82EDC))).padding(18.dp),
+            modifier = Modifier.fillMaxWidth().cssShadow(10.dp, hShape, Color(0xFF16A34A).copy(alpha = 0.25f)).clip(hShape)
+                .background(cssLinear(135f, 0f to Color(0xFF4ADE80), 0.55f to Color(0xFF16A34A), 1f to Color(0xFF15803D))).padding(18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(64.dp).cssShadow(7.dp, RoundedCornerShape(19.dp), Color(0xFF3C006E).copy(alpha = 0.3f))
-                    .background(cssLinear(145f, 0f to Color(0xFFD8A5FF), 1f to Color(0xFF7B20D4)), RoundedCornerShape(19.dp)).clip(RoundedCornerShape(19.dp))
+                modifier = Modifier.size(64.dp).cssShadow(7.dp, RoundedCornerShape(19.dp), Color(0xFF14532D).copy(alpha = 0.3f))
+                    .background(cssLinear(145f, 0f to Color(0xFFBBF7D0), 1f to Color(0xFF16A34A)), RoundedCornerShape(19.dp)).clip(RoundedCornerShape(19.dp))
             ) { Image(painterResource(id = R.drawable.leave_form_3d), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize()) }
             Spacer(modifier = Modifier.width(13.dp))
             Column {
@@ -1091,7 +1092,7 @@ private fun OpeningGpsTab(onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit,
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Filled.Image, contentDescription = null, tint = Color(0xFF5B7AA8), modifier = Modifier.size(38.dp))
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("No GPS photo yet — take one with the GPS Camera", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF5B7AA8), textAlign = TextAlign.Center)
+                Text("No GPS photo yet — take one with the GPS Camera", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF527A5B), textAlign = TextAlign.Center)
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
@@ -1099,7 +1100,7 @@ private fun OpeningGpsTab(onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit,
             modifier = Modifier.fillMaxWidth().cssShadow(8.dp, shape, Color(0xFF281415).copy(alpha = 0.08f)).background(Color.White, shape)
                 .border(1.dp, OpInk.copy(alpha = 0.06f), shape).padding(16.dp)
         ) {
-            Text("GPS CAMERA", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1A6FD8), letterSpacing = 1.sp)
+            Text("GPS CAMERA", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A), letterSpacing = 1.sp)
             Spacer(modifier = Modifier.height(2.dp))
             Text("GPS Picture", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = OpInk)
             Spacer(modifier = Modifier.height(4.dp))
@@ -1107,7 +1108,7 @@ private fun OpeningGpsTab(onGuiNote: (String) -> Unit, onOpenCamera: () -> Unit,
             Spacer(modifier = Modifier.height(14.dp))
             GpsButton("Share on WhatsApp", Icons.Filled.Chat, true) { onGuiNote("Share on WhatsApp") }
             Spacer(modifier = Modifier.height(10.dp))
-            GpsButton("Open GPS Camera", Icons.Filled.PhotoCamera, false) { onOpenCamera() }
+            GpsButton("Open GPS Camera", Icons.Filled.PhotoCamera, true) { onOpenCamera() }
             Spacer(modifier = Modifier.height(10.dp))
             GpsButton("Remove Photo", Icons.Filled.Delete, false) { onGuiNote("Remove Photo") }
         }

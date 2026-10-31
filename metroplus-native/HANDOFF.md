@@ -1,4 +1,38 @@
-# Metro+ Native App — Handoff (v1.88 / versionCode 89) — DEBUG build (non-debuggable)
+# Metro+ Native App — Handoff (v1.89 / versionCode 90) — DEBUG build (non-debuggable)
+
+## v1.89 change (1 Nov 2026) — notes batch: Complaints gradient + TOM register palettes + Opening green (uska "build start sab" order, DEBUG)
+- Complaints list: background orange-peach gradient (#FFF8F0 →
+  #FED7B8, uski picture #FD9E5E + #FED7B8 se halka version taake
+  cards parhne me aasan rahen). Type cards ke apne rang wahi;
+  header safed wahi (readability).
+- Tom Data Register (ModeSwitch Opening/Closing): bg mode ke
+  hisab se — Opening Cream #FFFDD0, Closing Lemon Chiffon
+  #FFFACD; header icon + title Opening Olive #556B2F, Closing
+  Milano Red #B81104; StationHero gradient Opening halka olive
+  (#E9EFD0→#B7CB8A→#8FAE6B), Closing chiffon→halka laal→milano
+  (#FFFACD→#FFB4A6→#E85D44); ModeSwitch pills Opening olive
+  (#8FAE6B→#556B2F), Closing milano (#E85D44→#B81104, text
+  safed). Andar wale data cards safed wahi (readability).
+- Opening green theme: screen bg halka sabz #F0FDF4; MENU hero
+  green gradient (#BBF7D0→#4ADE80→#16A34A); tab icons MENU
+  #16A34A, DATA #22C55E, STAFF #15803D, LEAVE #22C55E, GPS
+  #16A34A; menu tiles (Data/Staff/Leave/GPS) sab green gradients;
+  Save Opening green; GPS tab texts + Open GPS Camera button
+  green; Staff hero green gradient + week today pill green;
+  Leave header green gradient. NAHI chheda: staff status rang
+  (ON DUTY/OFF/WAITING/LEAVE/ABSENT — meaning wale), data field
+  accents, count rang (present>=5/4 else — meaning wale).
+- GitHub APK RULE: is release me v1.89 upload + v1.87 delete (1.88 +
+  1.89 rahengi); manifest apkUrl = GitHub raw v1.89. (v1.88 ship
+  pehle: manifest vc89, phir v1.89 ka vc90.)
+- Verify v1.88 (2026-11-01 ~02:25 PKT): APK 12,572,791 bytes, SHA
+  e8f8dfae, cert b13501ef; dex me "Version 1.88" + "Askari
+  Auto-Fill" + "Voucher Slip Number" + "BOP Deposit Slip Number"
+  maujood, "Version 1.87" ghayab. Code head dcaecbbf, APK commit
+  e4c8bde, v1.86 delete OK (read = does not exist), MANIFEST LIVE
+  vc89 (JSON verify, blob sha 8e24643b). GitHub latest-2: 1.87 +
+  1.88.
+- Verify v1.89: TODO build ke baad.
 
 ## v1.88 change (1 Nov 2026) — ASKARI Auto-Fill dialog (uska order, DEBUG)
 - ASKARI dialog (63 ke stlFillModal se — "3 slip numbers"): title

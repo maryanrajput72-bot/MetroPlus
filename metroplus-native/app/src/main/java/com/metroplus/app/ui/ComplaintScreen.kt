@@ -84,7 +84,8 @@ internal enum class CmpType(val title: String) {
 fun ComplaintScreen(onBack: () -> Unit, onGuiNote: (String) -> Unit) {
     var formType by remember { mutableStateOf<CmpType?>(null) }
     BackHandler { if (formType != null) formType = null else onBack() }
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF3EDED))) {
+    // v1.89 (uska order): Complaints list par orange-peach gradient bg.
+    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFFFF8F0), Color(0xFFFED7B8))))) {
         ComplaintListScreen(onBack = onBack, onOpen = { formType = it })
         AnimatedVisibility(
             visible = formType != null,
