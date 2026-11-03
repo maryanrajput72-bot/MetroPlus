@@ -1,1 +1,1 @@
-{"versionCode": 143, "versionName": "2.0.1", "apkUrl": "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-native/apk/MetroPlus-v2.0.1-42.apk", "notes": "Build 42: GPS Camera fix - Esri tile Y/X order + Geocoder listener API + address prefetch"}
+{"versionCode": 144, "versionName": "2.0.1", "apkUrl": "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-native/apk/MetroPlus-v2.0.1-43.apk", "notes": "Build 43: GPS Camera guide batch 1 - steps 1-5 (permissions, models+prefs, tracker, GpsLive, address)"}
