@@ -1,6 +1,1 @@
-{
-  "versionCode": 141,
-  "versionName": "2.0.1",
-  "apkUrl": "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-native/apk/MetroPlus-v2.0.1-40.apk",
-  "notes": "Build 40: GPS Camera lite 64 audit - Esri satellite snapshot, map type setting, WhatsApp attendance dialog, flash 3-state, GPS Camera bucket"
-}
+{"versionCode": 142, "versionName": "2.0.1", "apkUrl": "https://raw.githubusercontent.com/maryanrajput72-bot/MetroPlus/main/metroplus-native/apk/MetroPlus-v2.0.1-41.apk", "notes": "Build 41: GPS Camera lite 64 copy - Fused location + app-launch tracking + exact WhatsApp format"}
