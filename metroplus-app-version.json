@@ -1,1 +1,6 @@
-{"versionCode": 229, "versionName": "2.0.2(25)", "apkUrl": "https://github.com/maryanrajput72-bot/MetroPlus/releases/download/v2.0.2-25/MetroPlus-v2.0.2-25.apk", "notes": "- Staff tab: Copy aur WhatsApp ab asal report bhejte hain; GPS photos — Remove aur Viewer bhi asal ho gaye.\n- Chat Settings, Storage, Export/Import aur Delete All Data ab asal kaam karte hain."}
+{
+  "versionCode": 230,
+  "versionName": "2.0.2(26)",
+  "apkUrl": "https://github.com/maryanrajput72-bot/MetroPlus/releases/download/v2.0.2-26/MetroPlus-v2.0.2-26.apk",
+  "notes": "1 Sign Up pehle — apna saara data daalo, wo online store me save hoga; phir wahi number aur Employee ID se Login hoga. Number ya ID database me na mile to login nahi hoga.\n2 Forgot ID? — apna number daalo, wo seedha WhatsApp par admin ko chala jayega taake wo aapki Employee ID bata sakein.\n3 TL Login ab Gmail aur Password se — PIN lock khatam; access admin dega.\n4 Portal se SLIPS card hata diya — baad me dobara add hoga.\n5 Sync Now — internet par ek tap me saara data online sync hoga, percentage aur MB ke saath; aakhir me \"Synced Now\".\n6 Premium Request — aapki sign-up wali saari detail WhatsApp par admin ko send hogi, phir access milega.\n7 Share Attendance wala purana popup hata diya.\n8 Home: Welcome card ab TOM wale neele rang me, aur upar wala TOM Data banner Welcome wale purple rang me."
+}
